@@ -1,0 +1,81 @@
+2025-05-03 08:52:00 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 09:34:24 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 09:39:24 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 09:43:26 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 09:47:32 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 09:56:28 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 10:05:34 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-03 10:09:16 error: MongoDB 연결 실패: {
+  "0": "c",
+  "1": "o",
+  "2": "n",
+  "3": "n",
+  "4": "e",
+  "5": "c",
+  "6": "t",
+  "7": " ",
+  "8": "E",
+  "9": "C",
+  "10": "O",
+  "11": "N",
+  "12": "N",
+  "13": "R",
+  "14": "E",
+  "15": "F",
+  "16": "U",
+  "17": "S",
+  "18": "E",
+  "19": "D",
+  "20": " ",
+  "21": ":",
+  "22": ":",
+  "23": "1",
+  "24": ":",
+  "25": "2",
+  "26": "7",
+  "27": "0",
+  "28": "1",
+  "29": "7",
+  "service": "hospital-management"
+}
+2025-05-03 10:13:38 info: MongoDB 연결 성공 {
+  "service": "hospital-management"
+}
+2025-05-03 10:13:38 info: 서버가 포트 3000에서 실행 중입니다. (development 모드) {
+  "service": "hospital-management"
+}

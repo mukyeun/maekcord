@@ -1,0 +1,155 @@
+paths:
+  /patients:
+    get:
+      tags:
+        - 환자
+      summary: 환자 목록 조회
+      description: 등록된 모든 환자의 목록을 조회합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: 페이지 번호
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: 페이지당 환자 수
+      responses:
+        200:
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Patient'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      pages:
+                        type: integer
+                      current:
+                        type: integer
+                      hasNext:
+                        type: boolean
+                      hasPrev:
+                        type: boolean
+    post:
+      tags:
+        - 환자
+      summary: 새 환자 등록
+      description: 새로운 환자를 시스템에 등록합니다.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientInput'
+      responses:
+        201:
+          description: 환자 등록 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Patient'
+
+components:
+  schemas:
+    Patient:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "60d5ecb8b5c9c62b3c7c1b5e"
+        patientId:
+          type: string
+          example: "P20230615001"
+        name:
+          type: string
+          example: "홍길동"
+        birthDate:
+          type: string
+          format: date
+          example: "1990-01-01"
+        gender:
+          type: string
+          enum: [male, female, other]
+          example: "male"
+        contact:
+          type: object
+          properties:
+            phone:
+              type: string
+              example: "010-1234-5678"
+            email:
+              type: string
+              example: "patient@example.com"
+            address:
+              type: string
+              example: "서울시 강남구"
+        status:
+          type: string
+          enum: [active, inactive]
+          example: "active"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PatientInput:
+      type: object
+      required:
+        - name
+        - birthDate
+        - gender
+        - contact
+      properties:
+        name:
+          type: string
+          example: "홍길동"
+        birthDate:
+          type: string
+          format: date
+          example: "1990-01-01"
+        gender:
+          type: string
+          enum: [male, female, other]
+          example: "male"
+        contact:
+          type: object
+          required:
+            - phone
+          properties:
+            phone:
+              type: string
+              example: "010-1234-5678"
+            email:
+              type: string
+              example: "patient@example.com"
+            address:
+              type: string
+              example: "서울시 강남구" 

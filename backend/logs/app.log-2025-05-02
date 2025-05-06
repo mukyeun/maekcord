@@ -1,0 +1,186 @@
+2025-05-02 16:15:24 error: 이메일 서비스 설정 오류: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30a3471f323sm5475545a91.7 - gsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30a3471f323sm5475545a91.7 - gsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30a3471f323sm5475545a91.7 - gsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:21:36 error: 이메일 서비스 설정 오류: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to
+535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30a4745fab6sm2187245a91.10 - gsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30a4745fab6sm2187245a91.10 - gsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials 98e67ed59e1d1-30a4745fab6sm2187245a91.10 - gsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:22:52 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted 4L9Ktn7RScaBUJzKetOBLA - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted 4L9Ktn7RScaBUJzKetOBLA - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted 4L9Ktn7RScaBUJzKetOBLA - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:29:24 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted k8xRuoiPSjK2SUL9EjT56A - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted k8xRuoiPSjK2SUL9EjT56A - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted k8xRuoiPSjK2SUL9EjT56A - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:30:41 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted H5uWwn5TQJqn9gYaXz14Vg - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted H5uWwn5TQJqn9gYaXz14Vg - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted H5uWwn5TQJqn9gYaXz14Vg - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:31:43 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted DLtUKun3SqiyRpqFPrRYfA - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted DLtUKun3SqiyRpqFPrRYfA - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted DLtUKun3SqiyRpqFPrRYfA - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:33:23 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted 7D7PlS2xSgKr643-FU6j4Q - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted 7D7PlS2xSgKr643-FU6j4Q - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted 7D7PlS2xSgKr643-FU6j4Q - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:34:29 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted Es6d3oe-SsiPQPUnzV2kGw - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted Es6d3oe-SsiPQPUnzV2kGw - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted Es6d3oe-SsiPQPUnzV2kGw - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:35:26 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted FqECH4rhTNm-bajrlSiM1g - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted FqECH4rhTNm-bajrlSiM1g - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted FqECH4rhTNm-bajrlSiM1g - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:37:19 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted 4yYPPC8lSICWq58uozFrEw - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted 4yYPPC8lSICWq58uozFrEw - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted 4yYPPC8lSICWq58uozFrEw - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:38:13 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted EJ-zA6dPS+GcjcxEuuvXuA - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted EJ-zA6dPS+GcjcxEuuvXuA - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted EJ-zA6dPS+GcjcxEuuvXuA - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:39:27 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted RTVMC1C+QG2EGW9VaveUaw - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted RTVMC1C+QG2EGW9VaveUaw - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted RTVMC1C+QG2EGW9VaveUaw - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:40:10 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted DHZ+aGdgQuC8Q5bgE4xh2g - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted DHZ+aGdgQuC8Q5bgE4xh2g - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted DHZ+aGdgQuC8Q5bgE4xh2g - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:40:57 error: 이메일 서비스 설정 오류: Invalid login: 535 5.7.1 Username and Password not accepted lKUcPSaDTNejHmDy89ZzdA - nsmtp {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "response": "535 5.7.1 Username and Password not accepted lKUcPSaDTNejHmDy89ZzdA - nsmtp",
+  "responseCode": 535,
+  "command": "AUTH PLAIN",
+  "stack": "Error: Invalid login: 535 5.7.1 Username and Password not accepted lKUcPSaDTNejHmDy89ZzdA - nsmtp\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection._actionAUTHComplete (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1588:34)\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:556:26)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)\n    at TLSSocket.emit (node:events:517:28)\n    at addChunk (node:internal/streams/readable:335:12)\n    at readableAddChunk (node:internal/streams/readable:308:9)\n    at Readable.push (node:internal/streams/readable:245:10)"
+}
+2025-05-02 16:42:05 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:43:32 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:44:35 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:48:10 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:49:16 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:51:25 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:52:42 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:55:42 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:57:31 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 16:59:22 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 17:39:31 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}
+2025-05-02 17:48:02 error: 이메일 서비스 설정 오류: Missing credentials for "PLAIN" {
+  "service": "hospital-management",
+  "code": "EAUTH",
+  "command": "API",
+  "stack": "Error: Missing credentials for \"PLAIN\"\n    at SMTPConnection._formatError (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:809:19)\n    at SMTPConnection.login (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:454:38)\n    at D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-transport\\index.js:375:32\n    at SMTPConnection.<anonymous> (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:215:17)\n    at Object.onceWrapper (node:events:631:28)\n    at SMTPConnection.emit (node:events:517:28)\n    at SMTPConnection._actionEHLO (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:1371:14)\n    at SMTPConnection._processResponse (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:993:20)\n    at SMTPConnection._onData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:774:14)\n    at SMTPConnection._onSocketData (D:\\Maekstation\\backend\\node_modules\\nodemailer\\lib\\smtp-connection\\index.js:195:44)"
+}

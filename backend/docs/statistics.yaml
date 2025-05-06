@@ -1,0 +1,121 @@
+paths:
+  /statistics/daily:
+    get:
+      tags:
+        - 통계
+      summary: 일일 통계 조회
+      description: 특정 날짜의 진료 통계를 조회합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: 조회할 날짜 (YYYY-MM-DD)
+          required: true
+      responses:
+        200:
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyStats'
+
+  /statistics/monthly:
+    get:
+      tags:
+        - 통계
+      summary: 월간 통계 조회
+      description: 특정 월의 진료 통계를 조회합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: year
+          schema:
+            type: integer
+          description: 연도
+          required: true
+        - in: query
+          name: month
+          schema:
+            type: integer
+          description: 월
+          required: true
+      responses:
+        200:
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyStats'
+
+components:
+  schemas:
+    DailyStats:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2023-06-15"
+        totalPatients:
+          type: integer
+          example: 45
+        newPatients:
+          type: integer
+          example: 12
+        completedAppointments:
+          type: integer
+          example: 38
+        cancelledAppointments:
+          type: integer
+          example: 3
+        averageWaitTime:
+          type: integer
+          example: 15
+          description: "평균 대기 시간(분)"
+        peakHours:
+          type: array
+          items:
+            type: object
+            properties:
+              hour:
+                type: integer
+                example: 14
+              count:
+                type: integer
+                example: 8
+
+    MonthlyStats:
+      type: object
+      properties:
+        year:
+          type: integer
+          example: 2023
+        month:
+          type: integer
+          example: 6
+        totalPatients:
+          type: integer
+          example: 850
+        newPatients:
+          type: integer
+          example: 220
+        completedAppointments:
+          type: integer
+          example: 780
+        cancelledAppointments:
+          type: integer
+          example: 45
+        dailyAverages:
+          type: object
+          properties:
+            patients:
+              type: number
+              example: 42.5
+            waitTime:
+              type: number
+              example: 18.3 

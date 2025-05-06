@@ -1,0 +1,97 @@
+paths:
+  /auth/login:
+    post:
+      tags:
+        - 인증
+      summary: 로그인
+      description: 사용자 로그인을 수행합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  example: "doctor@hospital.com"
+                password:
+                  type: string
+                  example: "password123"
+      responses:
+        200:
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      user:
+                        $ref: '#/components/schemas/User'
+
+  /auth/refresh:
+    post:
+      tags:
+        - 인증
+      summary: 토큰 갱신
+      description: JWT 토큰을 갱신합니다.
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: 토큰 갱신 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "60d5ecb8b5c9c62b3c7c1b5e"
+        email:
+          type: string
+          example: "doctor@hospital.com"
+        name:
+          type: string
+          example: "김의사"
+        role:
+          type: string
+          enum: [admin, doctor, staff]
+          example: "doctor"
+        status:
+          type: string
+          enum: [active, inactive]
+          example: "active"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time 

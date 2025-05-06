@@ -1,0 +1,6 @@
+2025-05-04 22:17:13 info: MongoDB 연결 성공 {
+  "service": "hospital-management"
+}
+2025-05-04 22:17:13 info: 서버가 포트 3000에서 실행 중입니다. (development 모드) {
+  "service": "hospital-management"
+}

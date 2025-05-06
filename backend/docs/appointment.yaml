@@ -1,0 +1,170 @@
+paths:
+  /appointments:
+    get:
+      tags:
+        - 예약
+      summary: 예약 목록 조회
+      description: 등록된 모든 예약 목록을 조회합니다.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date
+          description: 예약 날짜로 필터링 (YYYY-MM-DD)
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [scheduled, completed, cancelled]
+          description: 예약 상태로 필터링
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: 페이지 번호
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: 페이지당 예약 수
+      responses:
+        200:
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Appointment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - 예약
+      summary: 새 예약 등록
+      description: 새로운 예약을 시스템에 등록합니다.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentInput'
+      responses:
+        201:
+          description: 예약 등록 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Appointment'
+
+components:
+  schemas:
+    Appointment:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "60d5ecb8b5c9c62b3c7c1b5e"
+        appointmentId:
+          type: string
+          example: "A20230615001"
+        patientId:
+          type: string
+          example: "P20230615001"
+        doctorId:
+          type: string
+          example: "D001"
+        dateTime:
+          type: string
+          format: date-time
+          example: "2023-06-15T09:00:00Z"
+        duration:
+          type: integer
+          example: 30
+          description: 예약 시간(분)
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled]
+          example: "scheduled"
+        type:
+          type: string
+          enum: [initial, follow_up, emergency]
+          example: "initial"
+        notes:
+          type: string
+          example: "초진 예약"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    AppointmentInput:
+      type: object
+      required:
+        - patientId
+        - doctorId
+        - dateTime
+        - type
+      properties:
+        patientId:
+          type: string
+          example: "P20230615001"
+        doctorId:
+          type: string
+          example: "D001"
+        dateTime:
+          type: string
+          format: date-time
+          example: "2023-06-15T09:00:00Z"
+        duration:
+          type: integer
+          example: 30
+          description: 예약 시간(분)
+        type:
+          type: string
+          enum: [initial, follow_up, emergency]
+          example: "initial"
+        notes:
+          type: string
+          example: "초진 예약"
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 100
+        pages:
+          type: integer
+          example: 10
+        current:
+          type: integer
+          example: 1
+        hasNext:
+          type: boolean
+          example: true
+        hasPrev:
+          type: boolean
+          example: false 
