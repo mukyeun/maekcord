@@ -1,5 +1,4 @@
-// src/api/patientApi.js
-import api from './axiosInstance';
+import { api } from '../api/axiosInstance';
 
 export const savePatientInfo = async (patientData) => {
   try {
@@ -9,4 +8,4 @@ export const savePatientInfo = async (patientData) => {
     console.error('환자 정보 저장 실패:', error);
     throw error;
   }
-};
+}; 
