@@ -57,15 +57,15 @@ const initialFormData = {
   }
 };
 
-const PatientFormWrapper = ({ visible, onClose }) => {
+const PatientFormWrapper = ({ visible, onClose, onSuccess }) => {
   const [formData, setFormData] = useState(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (visible) {
       setCurrentStep(0);
       setFormData(initialFormData);
-      console.log('🌀 Modal opened, form reset');
     }
   }, [visible]);
 
@@ -89,22 +89,42 @@ const PatientFormWrapper = ({ visible, onClose }) => {
 
   const handleSave = async () => {
     try {
-      const cleanedData = {
-        ...formData,
-        stress: undefined // 중복 제거
+      setSaving(true);
+      
+      // ✅ 1. 데이터 정제
+      const { basicInfo, ...rest } = formData;
+      const flatSymptoms = Array.isArray(formData.symptoms)
+        ? formData.symptoms.flatMap(s => 
+            typeof s === 'string' ? [s] : Array.isArray(s?.symptoms) ? s.symptoms : []
+          )
+        : [];
+
+      // ✅ 2. patientId 제거하고 저장용 데이터 구성
+      const sanitizedFormData = {
+        ...rest,
+        basicInfo: {
+          ...basicInfo,
+          visitType: basicInfo.visitType || '초진'
+        },
+        symptoms: flatSymptoms
       };
-      console.log('💾 저장 시도:', cleanedData);
-      alert('✅ 저장 요청 전송 중...');
-      debugger;
-      const response = await savePatientInfo(cleanedData);
-      console.log('📦 저장 응답:', response);
+
+      // ✅ 3. patientId 명시적 제거
+      delete sanitizedFormData.basicInfo.patientId;
+
+      const response = await savePatientInfo(sanitizedFormData);
+      console.log('✅ 환자 정보 저장 완료:', response);
+      
       message.success('환자 정보가 저장되었습니다.');
-      alert('🎉 저장 성공!');
+      if (typeof onSuccess === 'function') {
+        await onSuccess();
+      }
       onClose();
     } catch (error) {
-      console.error('❌ 저장 오류:', error);
-      alert('🚨 저장 실패: 콘솔 확인');
-      message.error('저장 중 오류가 발생했습니다.');
+      console.error('❌ 저장 실패:', error);
+      message.error('저장에 실패했습니다: ' + error.message);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -194,13 +214,22 @@ const PatientFormWrapper = ({ visible, onClose }) => {
         {sections[currentStep].content}
 
         <ActionButtons>
-          {currentStep > 0 && <Button onClick={handlePrev}>이전</Button>}
+          {currentStep > 0 && (
+            <Button onClick={handlePrev} disabled={saving}>
+              이전
+            </Button>
+          )}
           {currentStep < sections.length - 1 ? (
-            <Button type="primary" onClick={handleNext}>
+            <Button type="primary" onClick={handleNext} disabled={saving}>
               다음
             </Button>
           ) : (
-            <Button type="primary" onClick={handleSave}>
+            <Button 
+              type="primary" 
+              onClick={handleSave} 
+              loading={saving}
+              disabled={!formData.basicInfo.name}
+            >
               저장
             </Button>
           )}

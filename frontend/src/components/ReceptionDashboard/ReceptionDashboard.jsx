@@ -12,73 +12,38 @@ import {
   DrawerContent,
   VisitTypeBadge
 } from './styles';
+import { queueApi } from '../../api/queueApi';
 
 const ReceptionDashboard = ({ visible, onClose }) => {
-  const [patients, setPatients] = useState([
-    // 테스트용 더미 데이터
-    {
-      id: 1,
-      queueNumber: 'Q001',
-      name: '김환자',
-      visitType: '초진',
-      status: 'waiting',
-      registeredAt: new Date().toISOString(),
-      birthDate: '1990-01-01',
-      phone: '010-1234-5678',
-      symptoms: '두통, 어지러움',
-      stressLevel: '중간',
-    },
-    {
-      id: 2,
-      queueNumber: 'Q002',
-      name: '이환자',
-      visitType: '재진',
-      status: 'called',
-      registeredAt: new Date().toISOString(),
-      birthDate: '1985-05-05',
-      phone: '010-5678-1234',
-      symptoms: '허리 통증',
-      stressLevel: '높음',
-    },
-  ]);
+  const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
 
-  useEffect(() => {
-    let interval;
-    if (visible) {
-      // fetchQueue(); // 실제 API 연동 시 주석 해제
-      interval = setInterval(() => {
-        // fetchQueue(); // 실제 API 연동 시 주석 해제
-      }, 5000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [visible]);
-
   const fetchQueue = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/queue');
-      const data = await response.json();
-      setPatients(data);
+      const response = await queueApi.getQueue();
+      setQueue(response.data);
     } catch (error) {
-      message.error('대기자 목록을 불러오는데 실패했습니다.');
+      message.error('대기 목록을 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchQueue();
+    // 30초마다 자동 새로고침
+    const interval = setInterval(fetchQueue, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleCall = async (patientId) => {
     try {
-      // await fetch(`/api/queue/${patientId}/call`, { method: 'PUT' }); // 실제 API 연동 시 주석 해제
+      await queueApi.callPatient(patientId);
       message.success('환자를 호출했습니다.');
-      // 임시로 상태 업데이트
-      setPatients(patients.map(p => 
-        p.id === patientId ? { ...p, status: 'called' } : p
-      ));
+      fetchQueue(); // 목록 새로고침
     } catch (error) {
       message.error('환자 호출에 실패했습니다.');
     }
@@ -96,45 +61,40 @@ const ReceptionDashboard = ({ visible, onClose }) => {
 
   const columns = [
     {
+      title: '대기번호',
+      dataIndex: 'queueNumber',
+      key: 'queueNumber',
+    },
+    {
+      title: '환자명',
+      dataIndex: ['patientId', 'basicInfo', 'name'],
+      key: 'name',
+    },
+    {
+      title: '증상',
+      dataIndex: 'symptoms',
+      key: 'symptoms',
+      render: (symptoms) => (
+        <>
+          {symptoms.map((symptom) => (
+            <Tag key={symptom}>{symptom}</Tag>
+          ))}
+        </>
+      ),
+    },
+    {
       title: '상태',
       dataIndex: 'status',
       key: 'status',
       render: (status) => {
         const statusMap = {
-          waiting: { color: 'gold', text: '대기중' },
-          called: { color: 'blue', text: '호출됨' },
-          consulting: { color: 'green', text: '진료중' },
-          completed: { color: 'gray', text: '완료' }
+          waiting: { text: '대기중', color: 'blue' },
+          in_progress: { text: '진료중', color: 'green' },
+          done: { text: '완료', color: 'gray' }
         };
-        const { color, text } = statusMap[status] || statusMap.waiting;
-        return <StatusBadge $status={status}>{text}</StatusBadge>;
+        const { text, color } = statusMap[status] || {};
+        return <Tag color={color}>{text}</Tag>;
       }
-    },
-    {
-      title: '구분',
-      dataIndex: 'visitType',
-      key: 'visitType',
-      render: (type) => (
-        <VisitTypeBadge className={type === '초진' ? 'first' : 'repeat'}>
-          {type}
-        </VisitTypeBadge>
-      )
-    },
-    {
-      title: '접수번호',
-      dataIndex: 'queueNumber',
-      key: 'queueNumber'
-    },
-    {
-      title: '이름',
-      dataIndex: 'name',
-      key: 'name'
-    },
-    {
-      title: '접수시간',
-      dataIndex: 'registeredAt',
-      key: 'registeredAt',
-      render: (time) => new Date(time).toLocaleTimeString()
     },
     {
       title: '액션',
@@ -153,7 +113,7 @@ const ReceptionDashboard = ({ visible, onClose }) => {
             <ActionButton 
               className="call-button"
               icon={<BellOutlined />}
-              onClick={() => handleCall(record.id)}
+              onClick={() => handleCall(record.patientId)}
             >
               호출
             </ActionButton>
@@ -173,21 +133,20 @@ const ReceptionDashboard = ({ visible, onClose }) => {
       footer={null}
     >
       <DashboardWrapper>
-        <Space style={{ marginBottom: 16 }}>
-          <RefreshButton 
-            icon={<ReloadOutlined />} 
-            onClick={fetchQueue}
-            loading={loading}
-          >
-            새로고침
-          </RefreshButton>
-        </Space>
-
-        <StyledTable 
-          columns={columns}
-          dataSource={patients}
-          rowKey="id"
+        <Button 
+          icon={<ReloadOutlined />}
+          onClick={fetchQueue}
           loading={loading}
+          style={{ marginBottom: 16 }}
+        >
+          새로고침
+        </Button>
+        <StyledTable
+          columns={columns}
+          dataSource={queue}
+          loading={loading}
+          rowKey="queueNumber"
+          pagination={false}
         />
 
         <Drawer
