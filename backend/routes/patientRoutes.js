@@ -6,6 +6,7 @@ const { validatePatient } = require('../middlewares/validators');
 const Patient = require('../models/Patient');
 const Queue = require('../models/Queue');
 const moment = require('moment-timezone');
+const mongoose = require('mongoose');
 
 /**
  * @swagger
@@ -154,147 +155,136 @@ router.get('/:id', auth, patientController.getPatient);
 // 대기번호 생성 함수
 const generateQueueNumber = async () => {
   try {
-    let queueNumber;
-    let isUnique = false;
-    let attempts = 0;
-    const MAX_ATTEMPTS = 10;
-
-    while (!isUnique && attempts < MAX_ATTEMPTS) {
-      const today = moment().startOf('day').toDate();
-      const count = await Queue.countDocuments({ createdAt: { $gte: today } });
-      queueNumber = `Q${(count + 1).toString().padStart(3, '0')}`;
-      
-      const exists = await Queue.findOne({ queueNumber });
-      if (!exists) {
-        isUnique = true;
-        console.log('✅ 대기번호 생성됨:', queueNumber);
-      } else {
-        attempts++;
+    const today = moment().format('YYYY-MM-DD');  // ✅ 날짜 형식 명확히 지정
+    const todayStart = moment(today).startOf('day').toDate();
+    const todayEnd = moment(today).endOf('day').toDate();
+    
+    const todayCount = await Queue.countDocuments({
+      createdAt: { 
+        $gte: todayStart,
+        $lt: todayEnd
       }
-    }
+    });
 
-    if (!isUnique) {
-      throw new Error('유효한 대기번호를 생성할 수 없습니다.');
-    }
-
-    return queueNumber;
+    const number = `Q${(todayCount + 1).toString().padStart(3, '0')}`;
+    console.log('✅ 대기번호/날짜 생성:', { number, date: today });
+    return { number, date: today };  // ✅ date 반드시 반환
   } catch (error) {
     console.error('❌ 대기번호 생성 실패:', error);
-    throw error;
+    throw new Error('대기번호 생성 실패');
   }
 };
 
-// 환자 ID 생성 함수
-const generatePatientId = (residentNumber = '') => {
-  const cleaned = residentNumber.replace(/[^0-9]/g, '');
-  const timestamp = Date.now().toString().slice(-5);
-  return cleaned.length >= 7
-    ? `P${cleaned.slice(0, 7)}`
-    : `P${timestamp}`;
-};
-
-/**
- * @swagger
- * /api/patients:
- *   post:
- *     summary: 새 환자 등록
- *     tags: [Patients]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Patient'
- *     responses:
- *       201:
- *         description: 환자 등록 성공
- *       400:
- *         description: 잘못된 요청
- */
+// 환자 등록 및 대기목록 추가
 router.post('/', async (req, res) => {
+  let savedPatient = null;
+  let savedQueue = null;
+
   try {
-    const { basicInfo = {}, medication = {}, symptoms = [], records = {}, memo = '' } = req.body;
+    const {
+      basicInfo = {},
+      medication = {},
+      symptoms = [],
+      records = {},
+      memo = ''
+    } = req.body;
 
-    // ✅ patientId는 서버에서 자동 생성되므로 제거
-    if (req.body.patientId) {
-      delete req.body.patientId;
-      console.log('ℹ️ patientId 필드 제거됨 (서버에서 자동 생성)');
-    }
-
-    // ✅ 2. 필수 필드 검증
-    const requiredFields = {
-      name: '환자 이름',
-      gender: '성별',
-      phone: '전화번호'
-    };
-
-    for (const [field, label] of Object.entries(requiredFields)) {
-      if (!basicInfo[field]?.trim()) {
-        throw new Error(`${label}은(는) 필수입니다.`);
-      }
-    }
-
-    // ✅ 3. symptoms 정제
-    const flatSymptoms = Array.isArray(symptoms)
-      ? symptoms.flatMap(item => {
-          if (typeof item === 'string') return [item];
-          if (Array.isArray(item?.symptoms)) return item.symptoms;
-          return [];
-        })
-      : [];
-
-    // ✅ 4. Patient 인스턴스 생성
+    // 1. 환자 정보 저장
     const patient = new Patient({
       basicInfo: {
         ...basicInfo,
+        name: basicInfo.name?.trim(),
         visitType: basicInfo.visitType || '초진'
       },
       medication: {
         medications: Array.isArray(medication.medications) ? medication.medications : [],
         preferences: Array.isArray(medication.preferences) ? medication.preferences : []
       },
-      symptoms: flatSymptoms,
-      memo: memo?.trim() || '',
-      records
+      symptoms: Array.isArray(symptoms) 
+        ? symptoms.flatMap(item => 
+            typeof item === 'string' ? item.trim() 
+            : Array.isArray(item?.symptoms) ? item.symptoms.map(s => s.trim())
+            : []
+          )
+        : [],
+      records,
+      memo: memo?.trim() || ''
     });
 
-    const savedPatient = await patient.save();
+    savedPatient = await patient.save();
     console.log('✅ 환자 저장 완료:', {
-      name: savedPatient.basicInfo.name,
-      patientId: savedPatient.patientId
+      patientId: savedPatient._id,
+      name: savedPatient.basicInfo?.name
     });
 
-    // ✅ 5. Queue 생성
-    const queueNumber = await generateQueueNumber();
+    // 2. 대기번호 및 날짜 생성
+    const { number: queueNumber, date: queueDate } = await generateQueueNumber();
+    console.log('✅ 생성된 queueDate:', queueDate);  // ✅ 값 검증
+
+    if (!queueDate) {
+      throw new Error('queueDate가 undefined입니다!');
+    }
+
+    // 3. Queue 생성
     const queueItem = new Queue({
       queueNumber,
+      date: queueDate,  // ✅ 필수 필드
       patientId: savedPatient._id,
       name: savedPatient.basicInfo.name,
-      visitType: savedPatient.basicInfo.visitType,
-      birthDate: savedPatient.basicInfo.birthDate,
-      phone: savedPatient.basicInfo.phone,
-      symptoms: flatSymptoms,
+      visitType: savedPatient.basicInfo.visitType || '초진',
+      birthDate: savedPatient.basicInfo.birthDate || null,
+      phone: savedPatient.basicInfo.phone || '',
+      symptoms: savedPatient.symptoms || [],
       status: 'waiting'
     });
 
-    const savedQueue = await queueItem.save();
-    console.log('✅ 대기 목록 추가 완료:', {
+    console.log('📌 Queue 생성 시도:', {
+      queueNumber,
+      date: queueDate,  // ✅ 로그에 반드시 포함
+      name: queueItem.name,
+      visitType: queueItem.visitType
+    });
+
+    savedQueue = await queueItem.save();
+    console.log('✅ Queue 저장 완료:', {
       queueNumber: savedQueue.queueNumber,
+      date: savedQueue.date,
       name: savedQueue.name
     });
 
     res.status(201).json({
       success: true,
-      patient: savedPatient,
-      queue: savedQueue
+      data: {
+        patient: savedPatient,
+        queue: savedQueue
+      }
     });
+
   } catch (error) {
-    console.error('❌ 저장 중 오류:', error);
+    console.error('❌ 처리 중 오류 발생:', error);
+    
+    // 롤백 처리
+    if (savedPatient) {
+      try {
+        await Patient.findByIdAndDelete(savedPatient._id);
+        console.log('🔄 환자 정보 롤백 완료');
+      } catch (rollbackError) {
+        console.error('❌ 환자 정보 롤백 실패:', rollbackError);
+      }
+    }
+
+    if (savedQueue) {
+      try {
+        await Queue.findByIdAndDelete(savedQueue._id);
+        console.log('🔄 대기목록 롤백 완료');
+      } catch (rollbackError) {
+        console.error('❌ 대기목록 롤백 실패:', rollbackError);
+      }
+    }
+
     res.status(500).json({
       success: false,
-      message: error.message || '저장 중 알 수 없는 오류가 발생했습니다.',
+      message: error.message || '환자 등록 실패',
       error: error.toString()
     });
   }
