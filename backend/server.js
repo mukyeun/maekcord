@@ -19,8 +19,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 라우트 등록
-app.use('/api/queue', queueRoutes);
 app.use('/api/patients', patientRoutes);
+app.use('/api/queues', queueRoutes);
 
 // 디버깅을 위한 로깅 미들웨어
 app.use((req, res, next) => {
@@ -30,8 +30,8 @@ app.use((req, res, next) => {
 
 // MongoDB 연결
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/maekstation')
-  .then(() => console.log('MongoDB 연결 성공'))
-  .catch(err => console.error('MongoDB 연결 실패:', err));
+  .then(() => console.log('✅ MongoDB 연결 성공'))
+  .catch(err => console.error('❌ MongoDB 연결 실패:', err));
 
 // 에러 핸들링
 app.use((err, req, res, next) => {
@@ -45,5 +45,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
+  console.log(`✅ 서버가 포트 ${PORT}에서 실행 중입니다.`);
+  console.log('📌 대기목록 조회: GET http://localhost:5000/api/queues');
 });

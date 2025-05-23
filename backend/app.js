@@ -6,6 +6,7 @@ const swaggerOptions = require('./config/swagger');
 const errorHandler = require('./middlewares/errorHandler');
 const logger = require('./utils/logger');
 const swaggerSpecs = require('./swagger/swagger');
+const queueRoutes = require('./routes/queueRoutes');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/waitlist', waitlistRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/statistics', statisticsRoutes);
+app.use('/api/queue', queueRoutes);
 
 // Swagger UI 설정
 if (process.env.NODE_ENV === 'development') {

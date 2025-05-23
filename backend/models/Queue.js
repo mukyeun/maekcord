@@ -1,35 +1,27 @@
 const mongoose = require('mongoose');
 
 const queueSchema = new mongoose.Schema({
-  queueNumber: {
-    type: String,
-    required: true,
-    unique: true
-  },
   date: {
     type: String,
-    required: true
+    required: [true, '날짜는 필수입니다.']
+  },
+  queueNumber: {
+    type: String,
+    required: [true, '대기번호는 필수입니다.']
   },
   patientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Patient',
-    required: true
+    required: [true, '환자 ID는 필수입니다.']
   },
   name: {
     type: String,
-    required: true
+    required: [true, '환자 이름은 필수입니다.']
   },
   visitType: {
     type: String,
     enum: ['초진', '재진'],
-    required: true,
     default: '초진'
-  },
-  birthDate: {
-    type: Date
-  },
-  phone: {
-    type: String
   },
   symptoms: {
     type: [String],
@@ -37,8 +29,12 @@ const queueSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['waiting', 'called', 'consulting', 'completed'],
+    enum: ['waiting', 'inProgress', 'done'],
     default: 'waiting'
+  },
+  memo: {
+    type: String,
+    default: ''
   },
   createdAt: {
     type: Date,
@@ -48,9 +44,17 @@ const queueSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// 인덱스 설정
-queueSchema.index({ queueNumber: 1, date: 1 }, { unique: true });
-queueSchema.index({ status: 1 });
-queueSchema.index({ createdAt: -1 });
+// 인덱스 추가
+queueSchema.index({ date: 1, queueNumber: 1 }, { unique: true });
+queueSchema.index({ date: 1, status: 1 });
+
+// 저장 전 검증
+queueSchema.pre('save', function(next) {
+  if (!this.date || !this.queueNumber || !this.name) {
+    next(new Error('날짜, 대기번호, 환자 이름은 필수입니다.'));
+    return;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Queue', queueSchema);

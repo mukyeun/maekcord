@@ -59,8 +59,24 @@ const SectionHeader = styled.div`
 const PERSONALITY_OPTIONS = ['매우급함', '급함', '보통', '느긋', '매우 느긋'];
 const WORK_INTENSITY_OPTIONS = ['매우 심함', '심함', '보통', '적음', '매우 적음'];
 
+// 성별 판단 함수
+const determineGender = (residentNumber) => {
+  const code = residentNumber?.split('-')[1]?.[0];
+  if (['1', '3', '5'].includes(code)) return 'male';
+  if (['2', '4', '6'].includes(code)) return 'female';
+  return '';
+};
+
+// 성별 표시 매핑
+const GENDER_DISPLAY = {
+  male: '남성',
+  female: '여성',
+  '': ''
+};
+
 const BasicInfoSection = ({ data, onChange }) => {
   const handleInputChange = (field, value) => {
+    console.log(`✏️ ${field} 변경:`, value);
     onChange({
       ...data,
       [field]: value
@@ -76,21 +92,15 @@ const BasicInfoSection = ({ data, onChange }) => {
       formatted = `${cleaned.slice(0, 6)}-${cleaned.slice(6)}`;
     }
 
-    let gender = '';
-    if (formatted.length >= 8) {
-      const genderDigit = formatted.charAt(7);
-      gender = ['1', '3', '5'].includes(genderDigit) ? '남' : '여';
-    }
-
-    const patientId = formatted.length >= 7 
-      ? `${formatted.slice(0, 6)}${formatted.charAt(7)}`
-      : '';
+    // 성별 자동 판단 (영문 코드로 저장)
+    const gender = determineGender(formatted);
+    console.log('🔍 성별 판단:', { formatted, gender });
 
     onChange({
       ...data,
       residentNumber: formatted,
       gender,
-      patientId
+      patientId: formatted.length >= 7 ? `${formatted.slice(0, 6)}${formatted.charAt(7)}` : ''
     });
   };
 
@@ -124,9 +134,10 @@ const BasicInfoSection = ({ data, onChange }) => {
           <Col span={8}>
             <FormItem>
               <FieldLabel>이름</FieldLabel>
-              <StyledTextInput 
-                value={data.name || ''} 
-                onChange={(e) => handleInputChange('name', e.target.value)} 
+              <StyledTextInput
+                value={data.name || ''}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="환자 이름"
               />
             </FormItem>
           </Col>
@@ -137,19 +148,24 @@ const BasicInfoSection = ({ data, onChange }) => {
                 value={data.residentNumber || ''}
                 onChange={handleResidentNumberChange}
                 placeholder="000000-0000000"
-                maxLength={14}
               />
-              <HelpText>숫자만 입력하세요 (최대 14자리, 하이픈 자동 삽입)</HelpText>
             </FormItem>
           </Col>
           <Col span={8}>
             <FormItem>
               <FieldLabel>성별</FieldLabel>
-              <StyledTextInput
-                value={data.gender || ''}
-                readOnly
+              <StyledSelect
+                value={data.gender}
+                onChange={(value) => handleInputChange('gender', value)}
                 placeholder="주민번호 입력 시 자동 입력"
-              />
+                disabled={!!data.residentNumber}
+              >
+                <Option value="male">남성</Option>
+                <Option value="female">여성</Option>
+              </StyledSelect>
+              <HelpText>
+                {data.gender ? GENDER_DISPLAY[data.gender] : '주민번호 입력 시 자동으로 설정됩니다'}
+              </HelpText>
             </FormItem>
           </Col>
           <Col span={8}>
