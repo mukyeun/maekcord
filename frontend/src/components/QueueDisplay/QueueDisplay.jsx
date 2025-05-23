@@ -1,57 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Typography, Button, message } from 'antd';
+import { Modal, Typography, message, Button, Spin } from 'antd';
 import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
+import { queueApi } from '../../api/queueApi';
 import {
-  DisplayContainer,
+  ControlBar,
   QueueList,
-  QueueItem,
-  QueueNumber,
-  PatientName,
+  QueueCard,
+  QueueNumberText,
+  PatientNameText,
   CallStatus,
-  ControlBar
+  FullscreenButton
 } from './styles';
 
 const { Title } = Typography;
 
 const QueueDisplay = ({ visible, onClose }) => {
-  const [queue, setQueue] = useState([
-    // 테스트용 더미 데이터
-    { queueNumber: 'Q001', name: '김', status: 'waiting' },
-    { queueNumber: 'Q002', name: '이', status: 'called' },
-    { queueNumber: 'Q003', name: '박', status: 'consulting' },
-  ]);
+  const [loading, setLoading] = useState(false);
+  const [queueItems, setQueueItems] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  useEffect(() => {
-    let interval;
-    if (visible) {
-      // fetchQueue(); // 실제 API 연동 시 주석 해제
-      interval = setInterval(() => {
-        // fetchQueue(); // 실제 API 연동 시 주석 해제
-      }, 5000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [visible]);
-
-  const fetchQueue = async () => {
+  const loadQueueList = async () => {
     try {
-      const response = await fetch('/api/queue');
-      const data = await response.json();
-      setQueue(data);
+      setLoading(true);
+      const response = await queueApi.getQueue();
+      if (response.success) {
+        setQueueItems(response.data);
+      }
     } catch (error) {
-      console.error('대기열 조회 실패:', error);
-      message.error('대기열 정보를 불러오는데 실패했습니다.');
+      message.error('대기목록을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCallPatient = async (queueItem) => {
+    try {
+      await queueApi.callPatient(queueItem._id);
+      message.success(`${queueItem.patientInfo?.name || queueItem.queueNumber}님을 호출했습니다.`);
+      loadQueueList();
+    } catch (error) {
+      message.error('환자 호출에 실패했습니다.');
     }
   };
 
   const toggleFullscreen = () => {
-    const element = document.documentElement;
     if (!document.fullscreenElement) {
-      element.requestFullscreen().catch(err => {
-        console.error(`전체화면 전환 오류: ${err.message}`);
-      });
+      document.documentElement.requestFullscreen();
       setIsFullscreen(true);
     } else {
       document.exitFullscreen();
@@ -59,19 +53,28 @@ const QueueDisplay = ({ visible, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    if (visible) {
+      loadQueueList();
+      const interval = setInterval(loadQueueList, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [visible]);
+
   return (
     <Modal
-      title="대기 순번 현황"
+      title="대기 환자 목록"
       open={visible}
       onCancel={onClose}
-      width="80%"
-      style={{ top: 20 }}
       footer={null}
+      width={1000}
+      bodyStyle={{ padding: 0 }}
     >
-      <DisplayContainer>
+      <div style={{ padding: 20 }}>
         <ControlBar>
-          <Title level={3}>현재 대기 환자</Title>
+          <Title level={4}>현재 대기 인원: {queueItems.length}명</Title>
           <Button
+            type="primary"
             icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
             onClick={toggleFullscreen}
           >
@@ -79,26 +82,49 @@ const QueueDisplay = ({ visible, onClose }) => {
           </Button>
         </ControlBar>
 
-        <QueueList>
-          {queue.map((patient) => (
-            <QueueItem key={patient.queueNumber} $isCalled={patient.status === 'called'}>
-              <QueueNumber>
-                {patient.queueNumber}
-              </QueueNumber>
-              <PatientName>
-                {patient.name}** 님
-              </PatientName>
-              <CallStatus $status={patient.status}>
-                {patient.status === 'waiting' && '대기중'}
-                {patient.status === 'called' && '입장하세요'}
-                {patient.status === 'consulting' && '진료중'}
-              </CallStatus>
-            </QueueItem>
-          ))}
-        </QueueList>
-      </DisplayContainer>
+        {loading ? (
+          <Spin size="large" style={{ display: 'flex', justifyContent: 'center' }} />
+        ) : (
+          <QueueList>
+            {queueItems.map(item => (
+              <QueueCard key={item._id} $status={item.status}>
+                <QueueNumberText>
+                  {item.patientInfo?.name
+                    ? `${item.patientInfo.name} (${item.queueNumber})`
+                    : item.queueNumber}
+                </QueueNumberText>
+
+                <CallStatus $status={item.status}>
+                  {item.status === 'waiting' ? '대기중' :
+                  item.status === 'called' ? '호출됨' :
+                  item.status === 'consulting' ? '진료중' : '완료'}
+                </CallStatus>
+
+                {item.status === 'waiting' && (
+                  <Button
+                    type="primary"
+                    onClick={() => handleCallPatient(item)}
+                    style={{ marginLeft: '16px' }}
+                  >
+                    호출
+                  </Button>
+                )}
+              </QueueCard>
+            ))}
+          </QueueList>
+        )}
+
+        <FullscreenButton>
+          <Button
+            type="primary"
+            icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+            onClick={toggleFullscreen}
+            size="large"
+          />
+        </FullscreenButton>
+      </div>
     </Modal>
   );
 };
 
-export default QueueDisplay; 
+export default QueueDisplay;
