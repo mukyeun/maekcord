@@ -14,10 +14,6 @@ const queueSchema = new mongoose.Schema({
     ref: 'Patient',
     required: [true, '환자 ID는 필수입니다.']
   },
-  name: {
-    type: String,
-    required: [true, '환자 이름은 필수입니다.']
-  },
   visitType: {
     type: String,
     enum: ['초진', '재진'],
@@ -29,7 +25,7 @@ const queueSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['waiting', 'inProgress', 'done'],
+    enum: ['waiting', 'called', 'consulting', 'done'],
     default: 'waiting'
   },
   memo: {
@@ -41,7 +37,9 @@ const queueSchema = new mongoose.Schema({
     default: Date.now
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // 인덱스 추가
@@ -50,11 +48,19 @@ queueSchema.index({ date: 1, status: 1 });
 
 // 저장 전 검증
 queueSchema.pre('save', function(next) {
-  if (!this.date || !this.queueNumber || !this.name) {
-    next(new Error('날짜, 대기번호, 환자 이름은 필수입니다.'));
+  if (!this.date || !this.queueNumber) {
+    next(new Error('날짜와 대기번호는 필수입니다.'));
     return;
   }
   next();
+});
+
+// Virtual populate를 위한 설정
+queueSchema.virtual('patientInfo', {
+  ref: 'Patient',
+  localField: 'patientId',
+  foreignField: '_id',
+  justOne: true
 });
 
 module.exports = mongoose.model('Queue', queueSchema);

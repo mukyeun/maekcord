@@ -14,6 +14,21 @@
             "date": 1747787781138,
             "name": "logs\\exceptions-2025-05-21.log",
             "hash": "9bc05fbf8ea61997a9ba32bb6fd6e15dfd51990d8f90863dd8c725fd89b2eab5"
+        },
+        {
+            "date": 1747877066095,
+            "name": "logs\\exceptions-2025-05-22.log",
+            "hash": "e779f0777e913729bd867911de0e41e3825635505e8524a462c69d2de4db7f15"
+        },
+        {
+            "date": 1747960774387,
+            "name": "logs\\exceptions-2025-05-23.log",
+            "hash": "1f00b9ea24c39254aab67cb8cb68c25491bf52dd7fcc00617c94afc0ada043d5"
+        },
+        {
+            "date": 1748044950112,
+            "name": "logs\\exceptions-2025-05-24.log",
+            "hash": "e66b5ac7f6d985d96fcc7b1a24749f55b8e8fa1d7485bcff1bbb517c36970a47"
         }
     ],
     "hashType": "sha256"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Tabs, Card, Tag, Progress, Space, Input, Checkbox, DatePicker, Button, message } from 'antd';
+import { Modal, Tabs, Card, Tag, Progress, Space, Input, Checkbox, DatePicker, Button, message, Row, Col, Typography, Divider } from 'antd';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import {
   DoctorViewContainer,
@@ -15,9 +15,27 @@ import {
   GaugeContainer,
   TagContainer
 } from './styles';
+import { PulseChart } from './PulseChart';
+import { PulseAnalysis } from './PulseAnalysis';
+import { PatientSummary } from './PatientSummary';
+import { FinalOpinionMemo } from './FinalOpinionMemo';
+import styled from 'styled-components';
 
 const { TextArea } = Input;
 const { TabPane } = Tabs;
+const { Title, Text } = Typography;
+
+const SummaryCard = styled(Card)`
+  margin-bottom: 24px;
+  .ant-card-head-title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+`;
+
+const Section = styled.div`
+  margin-bottom: 20px;
+`;
 
 const DoctorView = ({ visible, onClose }) => {
   const [patientData, setPatientData] = useState({

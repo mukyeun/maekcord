@@ -2,42 +2,27 @@ const express = require('express');
 const router = express.Router();
 const Queue = require('../models/Queue');
 const { generateQueueNumber } = require('../utils/queueUtils');
-const moment = require('moment-timezone');
+const moment = require('moment');
 
-// GET /api/queues?date=YYYY-MM-DD
+// GET /api/queues - 대기 목록 조회
 router.get('/', async (req, res) => {
   try {
-    const today = moment().format('YYYY-MM-DD');
-    
-    const queues = await Queue.find({ date: today })
-      .sort({ createdAt: 1 })
-      .populate('patientId', 'basicInfo.name basicInfo.phone basicInfo.visitType')
-      .lean();
+    const queues = await Queue.find({ date: moment().format('YYYY-MM-DD') })
+      .populate({
+        path: 'patientId',
+        select: 'basicInfo.name basicInfo.phone basicInfo.birthDate basicInfo.visitType'
+      })
+      .sort({ createdAt: 1 });
 
-    // 디버깅 로그
-    console.log('✅ 대기 목록 조회:', {
-      날짜: today,
-      총인원: queues.length,
-      '첫번째 환자이름': queues[0]?.patientId?.basicInfo?.name || '없음',
-      '대기중': queues.filter(q => q.status === 'waiting').length,
-      '진료중': queues.filter(q => q.status === 'in-progress').length,
-      '완료': queues.filter(q => q.status === 'done').length
-    });
-
-    // 전체 객체 그대로 반환 (populate된 상태)
-    res.status(200).json({
+    res.json({
       success: true,
-      date: today,
-      count: queues.length,
       data: queues
     });
-
   } catch (error) {
     console.error('❌ 대기 목록 조회 실패:', error);
     res.status(500).json({
       success: false,
-      message: '대기 목록 조회 중 오류가 발생했습니다.',
-      error: error.message
+      message: '대기 목록 조회 중 오류가 발생했습니다.'
     });
   }
 });
@@ -122,42 +107,84 @@ router.post('/', async (req, res) => {
 router.put('/:id/call', async (req, res) => {
   try {
     const { id } = req.params;
-    console.log('📞 환자 호출 요청:', id);
+    console.log('📞 환자 호출 요청 ID:', id);
+
+    // ID 유효성 검사
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({
+        success: false,
+        message: '유효하지 않은 대기번호 ID입니다.'
+      });
+    }
 
     const queueItem = await Queue.findById(id)
-      .populate('patientId', 'basicInfo.name');
-      
+      .populate('patientId', 'basicInfo.name basicInfo.phone basicInfo.visitType')
+      .lean();
+
+    console.log('▶️ 조회된 queueItem:', queueItem);
+
     if (!queueItem) {
+      console.warn('⚠️ 대기 항목 없음:', id);
       return res.status(404).json({
         success: false,
         message: '대기 항목을 찾을 수 없습니다.'
       });
     }
 
-    // 이전 호출 상태 초기화
+    // 환자 정보 유효성 검사
+    if (!queueItem.patientId || !queueItem.patientId.basicInfo) {
+      console.error('❌ 환자 정보 누락:', queueItem);
+      return res.status(400).json({
+        success: false,
+        message: '환자 정보가 누락되어 호출할 수 없습니다.'
+      });
+    }
+
+    // 이미 호출된 상태인지 확인
+    if (queueItem.status === 'called') {
+      return res.status(400).json({
+        success: false,
+        message: '이미 호출된 환자입니다.'
+      });
+    }
+
+    // 이전 called 상태 환자들 초기화
     await Queue.updateMany(
-      { status: 'called' },
+      { 
+        date: moment().format('YYYY-MM-DD'),
+        status: 'called' 
+      }, 
       { status: 'waiting' }
     );
 
-    // 현재 환자 호출
-    queueItem.status = 'called';
-    await queueItem.save();
+    // 현재 환자 호출 상태로 변경
+    const updatedQueue = await Queue.findByIdAndUpdate(
+      id,
+      { status: 'called' },
+      { 
+        new: true,
+        runValidators: true 
+      }
+    ).populate('patientId', 'basicInfo.name basicInfo.phone basicInfo.visitType');
 
-    console.log('✅ 환자 호출 완료:', {
-      queueNumber: queueItem.queueNumber,
-      patientName: queueItem.patientId?.basicInfo?.name
+    console.log('✅ 호출 완료:', {
+      queueNumber: updatedQueue.queueNumber,
+      name: updatedQueue.patientId?.basicInfo?.name,
+      status: updatedQueue.status
     });
 
-    res.json({
+    return res.json({
       success: true,
-      data: queueItem
+      message: '환자 호출이 완료되었습니다.',
+      data: updatedQueue
     });
+
   } catch (error) {
-    console.error('❌ 환자 호출 실패:', error);
+    console.error('❌ 환자 호출 처리 실패:', error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: '환자 호출 처리 중 오류가 발생했습니다.',
+      error: error.message
     });
   }
 });

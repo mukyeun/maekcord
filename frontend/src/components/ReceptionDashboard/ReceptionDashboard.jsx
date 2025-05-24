@@ -41,7 +41,7 @@ const ReceptionDashboard = ({ visible, onClose }) => {
   const handleCallPatient = async (record) => {
     try {
       await queueApi.callPatient(record._id);
-      message.success(`${record.patientInfo?.name || '환자'} 호출 완료`);
+      message.success(`${record.patientId?.basicInfo?.name || '환자'} 호출 완료`);
       fetchQueueList();
     } catch (error) {
       console.error('❌ 환자 호출 실패:', error);
@@ -78,27 +78,26 @@ const ReceptionDashboard = ({ visible, onClose }) => {
 
   const columns = [
     {
-      title: '대기번호',
-      dataIndex: 'queueNumber',
-      key: 'queueNumber',
-      width: 150,
-    },
-    {
       title: '환자명',
       key: 'name',
-      width: 120,
-      render: (record) => record.patientInfo?.name || '이름 없음',
+      width: 200,
+      render: (_, record) => {
+        const name = record.patientId?.basicInfo?.name || '이름 없음';
+        const queueNumber = record.queueNumber || '';
+        return `${name} (${queueNumber})`;
+      },
     },
     {
       title: '방문유형',
+      dataIndex: ['patientId', 'basicInfo', 'visitType'],
       key: 'visitType',
       width: 100,
-      render: (record) => record.patientInfo?.visitType || '-',
+      render: (visitType) => visitType || '-',
     },
     {
       title: '증상',
       key: 'symptoms',
-      render: (record) => (
+      render: (_, record) => (
         <Space size={[0, 8]} wrap>
           {Array.isArray(record.symptoms) && record.symptoms.map((symptom) => (
             <Tag key={symptom} color="blue">{symptom}</Tag>
@@ -110,7 +109,7 @@ const ReceptionDashboard = ({ visible, onClose }) => {
       title: '상태',
       key: 'status',
       width: 100,
-      render: (record) => {
+      render: (_, record) => {
         const statusMap = {
           waiting: { text: '대기중', color: 'gold' },
           called: { text: '호출됨', color: 'green' },
@@ -128,17 +127,29 @@ const ReceptionDashboard = ({ visible, onClose }) => {
       render: (_, record) => (
         <Space size="small">
           {record.status === 'waiting' && (
-            <Button type="primary" size="small" onClick={() => handleCallPatient(record)}>
+            <Button 
+              type="primary" 
+              size="small" 
+              onClick={() => handleCallPatient(record)}
+            >
               호출
             </Button>
           )}
           {record.status === 'called' && (
-            <Button type="primary" size="small" onClick={() => handleStatusChange(record, 'consulting')}>
+            <Button 
+              type="primary" 
+              size="small" 
+              onClick={() => handleStatusChange(record, 'consulting')}
+            >
               진료시작
             </Button>
           )}
           {record.status === 'consulting' && (
-            <Button type="primary" size="small" onClick={() => handleStatusChange(record, 'done')}>
+            <Button 
+              type="primary" 
+              size="small" 
+              onClick={() => handleStatusChange(record, 'done')}
+            >
               진료완료
             </Button>
           )}

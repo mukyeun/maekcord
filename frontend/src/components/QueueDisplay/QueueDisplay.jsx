@@ -1,12 +1,13 @@
+// src/components/QueueDisplay/QueueDisplay.jsx
 import React, { useState, useEffect } from 'react';
 import { Modal, Typography, message, Button, Spin } from 'antd';
 import { FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
 import { queueApi } from '../../api/queueApi';
 import {
+  Container,
   ControlBar,
   QueueList,
   QueueCard,
-  QueueNumberText,
   PatientNameText,
   CallStatus,
   FullscreenButton
@@ -27,6 +28,7 @@ const QueueDisplay = ({ visible, onClose }) => {
         setQueueItems(response.data);
       }
     } catch (error) {
+      console.error('❌ 대기목록 조회 실패:', error);
       message.error('대기목록을 불러오는데 실패했습니다.');
     } finally {
       setLoading(false);
@@ -36,9 +38,10 @@ const QueueDisplay = ({ visible, onClose }) => {
   const handleCallPatient = async (queueItem) => {
     try {
       await queueApi.callPatient(queueItem._id);
-      message.success(`${queueItem.patientInfo?.name || queueItem.queueNumber}님을 호출했습니다.`);
+      message.success(`${queueItem.patientId?.basicInfo?.name || '환자'}님을 호출했습니다.`);
       loadQueueList();
     } catch (error) {
+      console.error('❌ 환자 호출 실패:', error);
       message.error('환자 호출에 실패했습니다.');
     }
   };
@@ -61,47 +64,43 @@ const QueueDisplay = ({ visible, onClose }) => {
     }
   }, [visible]);
 
+  if (!visible) return null;
+
   return (
     <Modal
-      title="대기 환자 목록"
+      title="대기자 현황"
       open={visible}
       onCancel={onClose}
+      width={800}
       footer={null}
-      width={1000}
-      bodyStyle={{ padding: 0 }}
     >
-      <div style={{ padding: 20 }}>
+      <Container>
         <ControlBar>
           <Title level={4}>현재 대기 인원: {queueItems.length}명</Title>
-          <Button
-            type="primary"
-            icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-            onClick={toggleFullscreen}
-          >
-            {isFullscreen ? '전체화면 종료' : '전체화면'}
-          </Button>
+          <FullscreenButton onClick={toggleFullscreen}>
+            {isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+          </FullscreenButton>
         </ControlBar>
 
         {loading ? (
-          <Spin size="large" style={{ display: 'flex', justifyContent: 'center' }} />
+          <Spin size="large" />
         ) : (
           <QueueList>
             {queueItems.map(item => (
-              <QueueCard key={item._id} $status={item.status}>
-                <QueueNumberText>
-                  {item.patientInfo?.name
-                    ? `${item.patientInfo.name} (${item.queueNumber})`
-                    : item.queueNumber}
-                </QueueNumberText>
-
+              <QueueCard 
+                key={item._id}
+                $isCalled={item.status === 'called'}
+              >
+                <PatientNameText>
+                  {item.patientId?.basicInfo?.name || '이름 없음'} ({item.queueNumber})
+                </PatientNameText>
                 <CallStatus $status={item.status}>
-                  {item.status === 'waiting' ? '대기중' :
-                  item.status === 'called' ? '호출됨' :
-                  item.status === 'consulting' ? '진료중' : '완료'}
+                  {item.status === 'waiting' ? '대기중' : 
+                   item.status === 'called' ? '호출됨' : 
+                   item.status === 'consulting' ? '진료중' : '완료'}
                 </CallStatus>
-
                 {item.status === 'waiting' && (
-                  <Button
+                  <Button 
                     type="primary"
                     onClick={() => handleCallPatient(item)}
                     style={{ marginLeft: '16px' }}
@@ -113,16 +112,7 @@ const QueueDisplay = ({ visible, onClose }) => {
             ))}
           </QueueList>
         )}
-
-        <FullscreenButton>
-          <Button
-            type="primary"
-            icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
-            onClick={toggleFullscreen}
-            size="large"
-          />
-        </FullscreenButton>
-      </div>
+      </Container>
     </Modal>
   );
 };
