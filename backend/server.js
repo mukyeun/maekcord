@@ -7,12 +7,17 @@ const config = require('./config');
 const Patient = require('./models/Patient'); // 반드시 존재해야 함
 const queueRoutes = require('./routes/queueRoutes');
 const patientRoutes = require('./routes/patientRoutes');
+const http = require('http');
+const WebSocket = require('ws');
+const expressWs = require('express-ws');
 
 const app = express();
+expressWs(app);
 
-// 미들웨어 설정
+// CORS 설정
 app.use(cors({
-  origin: 'http://localhost:3000', // 프론트엔드 주소
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   credentials: true
 }));
 app.use(express.json());
@@ -43,8 +48,101 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ 서버가 포트 ${PORT}에서 실행 중입니다.`);
-  console.log('📌 대기목록 조회: GET http://localhost:5000/api/queues');
+// HTTP 서버 생성
+const server = http.createServer(app);
+
+// WebSocket 클라이언트 관리
+const clients = new Set();
+
+// WebSocket 엔드포인트 설정
+app.ws('/ws', (ws, req) => {
+  console.log('✅ 새로운 WebSocket 클라이언트 연결됨');
+  clients.add(ws);
+
+  // 연결 상태 확인
+  ws.isAlive = true;
+  const pingInterval = setInterval(() => {
+    if (ws.isAlive === false) {
+      clients.delete(ws);
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    ws.ping();
+  }, 30000);
+
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
+
+  // 메시지 수신 처리
+  ws.on('message', (msg) => {
+    try {
+      const data = JSON.parse(msg);
+      console.log('📨 수신된 메시지:', data);
+      
+      // 다른 클라이언트들에게 브로드캐스트
+      clients.forEach((client) => {
+        if (client !== ws && client.readyState === 1) { // WebSocket.OPEN = 1
+          client.send(JSON.stringify(data));
+        }
+      });
+    } catch (error) {
+      console.error('메시지 처리 오류:', error);
+    }
+  });
+
+  // 연결 종료 처리
+  ws.on('close', () => {
+    console.log('❌ WebSocket 클라이언트 연결 종료');
+    clearInterval(pingInterval);
+    clients.delete(ws);
+  });
+
+  // 에러 처리
+  ws.on('error', (error) => {
+    console.error('WebSocket 에러:', error);
+    clearInterval(pingInterval);
+    clients.delete(ws);
+  });
 });
+
+// 대기열 업데이트 브로드캐스트 함수
+const broadcastQueueUpdate = (queueData) => {
+  const message = JSON.stringify({
+    type: 'QUEUE_UPDATE',
+    queue: queueData
+  });
+
+  clients.forEach((client) => {
+    if (client.readyState === 1) { // WebSocket.OPEN = 1
+      client.send(message);
+    }
+  });
+};
+
+// 환자 호출 브로드캐스트 함수
+const broadcastPatientCalled = (patientData) => {
+  const message = JSON.stringify({
+    type: 'PATIENT_CALLED',
+    patient: patientData
+  });
+
+  clients.forEach((client) => {
+    if (client.readyState === 1) { // WebSocket.OPEN = 1
+      client.send(message);
+    }
+  });
+};
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`✅ 서버가 포트 ${PORT}에서 실행 중입니다.`);
+  console.log(`✅ WebSocket 서버가 ws://localhost:${PORT}/ws 에서 실행 중입니다.`);
+});
+
+// 브로드캐스트 함수들을 외부에서 사용할 수 있도록 export
+module.exports = {
+  broadcastQueueUpdate,
+  broadcastPatientCalled
+};
+
