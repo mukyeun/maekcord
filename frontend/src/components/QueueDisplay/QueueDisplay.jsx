@@ -12,17 +12,11 @@ import {
   CalendarOutlined,
   MedicineBoxOutlined
 } from '@ant-design/icons';
-import { queueApi } from '../../api/queueApi';
-import { 
-  StyledCard, 
-  QueueItem, 
-  StatusBadge, 
-  WaitingTime,
-  QueueContainer 
-} from './styles';
+import * as queueApi from '../../api/queueApi';
 import { wsClient } from '../../utils/websocket';
-import { speak } from '../../utils/speechUtils';
+import { speak, initSpeech } from '../../utils/speechUtils';
 import { soundManager } from '../../utils/sound';
+import styled from 'styled-components';  // styled-components import 추가
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -58,10 +52,47 @@ const listItemVariants = {
   exit: { opacity: 0, x: 20 }
 };
 
+// ✅ 1. styled-components 먼저 선언
+const StyledCard = styled.div`
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 16px;
+`;
+
+const QueueItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+`;
+
+const WaitingTime = styled.span`
+  color: ${props => props.isLong ? '#ff4d4f' : '#8c8c8c'};
+  font-size: 14px;
+`;
+
+const StatusBadge = styled.span`
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background-color: ${props => {
+    switch (props.status) {
+      case 'waiting': return '#1890ff';
+      case 'called': return '#faad14';
+      case 'consulting': return '#52c41a';
+      default: return '#d9d9d9';
+    }
+  }};
+  color: white;
+`;
+
+// ✅ 2. motion components 선언
 const MotionCard = motion(StyledCard);
 
-const QueueDisplay = ({ visible, onClose, initialQueueList = [] }) => {
-  const [queueList, setQueueList] = useState(initialQueueList);
+const QueueDisplay = ({ visible, onClose }) => {
+  const [queueList, setQueueList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastCalledPatient, setLastCalledPatient] = useState(null);
   const [error, setError] = useState(null);
@@ -71,7 +102,9 @@ const QueueDisplay = ({ visible, onClose, initialQueueList = [] }) => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [isRealtime, setIsRealtime] = useState(true);
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
+    return localStorage.getItem('queueVoiceEnabled') !== 'false';
+  });
   const [activeTab, setActiveTab] = useState('1');
 
   // ReceptionDashboard에서 테스트 데이터로 큐 생성
@@ -106,7 +139,7 @@ const QueueDisplay = ({ visible, onClose, initialQueueList = [] }) => {
     }
   ];
 
-    // localStorage에서 소리 설정 불러오기
+  // localStorage에서 소리 설정 불러오기
   useEffect(() => {
     const savedSoundSetting = localStorage.getItem('queueSoundEnabled');
     if (savedSoundSetting !== null) {
@@ -129,7 +162,13 @@ const QueueDisplay = ({ visible, onClose, initialQueueList = [] }) => {
 
   const handleVoiceToggle = (checked) => {
     setIsVoiceEnabled(checked);
-    localStorage.setItem('queueVoiceEnabled', checked.toString());
+    localStorage.setItem('queueVoiceEnabled', checked);
+    
+    // 음성 테스트
+    if (checked) {
+      speak('음성 안내가 켜졌습니다.')
+        .catch(error => console.error('음성 테스트 실패:', error));
+    }
   };
 
   const calculateWaitingTime = (createdAt) => {
@@ -148,68 +187,74 @@ const QueueDisplay = ({ visible, onClose, initialQueueList = [] }) => {
   const handlePatientCalled = useCallback(async (patient) => {
     try {
       if (!patient?.name) {
-        console.warn('Invalid patient data:', patient);
+        console.error('환자 정보가 없습니다:', patient);
         return;
       }
 
       const message = `${patient.name}님, 진료실로 와주세요`;
-      
-      if (isSoundEnabled) {
-        await soundManager.playDingDong();
-      }
-      
+      console.log('📢 음성 출력 시도:', message);
+
       if (isVoiceEnabled) {
-        console.log('음성 출력 시도:', message);
         await speak(message);
       }
     } catch (error) {
       console.error('음성 출력 오류:', error);
-      message.error('음성 출력 중 오류가 발생했습니다.');
+      message.error('음성 출력에 실패했습니다.');
     }
-  }, [isVoiceEnabled, isSoundEnabled]);
+  }, [isVoiceEnabled]);
 
+  // 대기 목록 조회
   const fetchQueueList = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const data = await queueApi.getQueueList();
-      setQueueList(data);
-    } catch (err) {
-      setError('대기 목록을 불러오는데 실패했습니다.');
+      const response = await queueApi.getQueueList();
+      console.log('대기 목록 응답:', response); // 디버깅용 로그
+
+      // response가 바로 배열인 경우를 처리
+      const queueData = Array.isArray(response) ? response : 
+                       Array.isArray(response?.data) ? response.data :
+                       response?.data?.data || [];
+      
+      console.log('처리된 대기 목록:', queueData);
+      setQueueList(queueData);
+    } catch (error) {
+      console.error('대기 목록 조회 실패:', error);
       message.error('대기 목록을 불러오는데 실패했습니다.');
+      setQueueList([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // WebSocket 메시지 핸들러
+  // WebSocket 메시지 처리
+  const handleWebSocketMessage = useCallback((data) => {
+    console.log('📨 WebSocket 메시지 수신:', data);
+    
+    if (data.type === 'QUEUE_UPDATE' && Array.isArray(data.queue)) {
+      console.log('큐 업데이트:', data.queue);
+      setQueueList(data.queue);
+    } else if (data.type === 'PATIENT_CALLED' && data.patient) {
+      handlePatientCalled(data.patient);
+    }
+  }, []);
+
+  // 초기화 및 WebSocket 연결
   useEffect(() => {
     if (!visible) return;
 
-    const handleWebSocketMessage = (data) => {
-      console.log('WebSocket 메시지 수신:', data);
-      
-      if (data.type === 'PATIENT_CALLED') {
-        const patient = data.patient;
-        setLastCalledPatient(patient);
-        handlePatientCalled(patient);
-      } else if (data.type === 'QUEUE_UPDATE') {
-        setQueueList(data.queue);
-      }
-    };
+    console.log('QueueDisplay 마운트 - 데이터 로드 시작');
+    initSpeech();
+    fetchQueueList();
 
     wsClient.connect();
     const removeListener = wsClient.addListener(handleWebSocketMessage);
 
     return () => {
+      console.log('QueueDisplay 언마운트');
       removeListener();
       wsClient.disconnect();
     };
-  }, [visible, handlePatientCalled]);
-
-  const handleRealtimeToggle = (checked) => {
-    setIsRealtime(checked);
-  };
+  }, [visible, handleWebSocketMessage]);
 
   // 필터링된 목록 계산
   const getFilteredList = () => {

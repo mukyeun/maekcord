@@ -1,10 +1,13 @@
-import styled, { keyframes, css } from 'styled-components';
-import { List } from 'antd';
+import styled, { css } from 'styled-components';
+import { List, Card, Badge } from 'antd';
 
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+// 애니메이션 정의
+const justCalledAnimation = css`
+  @keyframes justCalled {
+    0% { background-color: #e6f7ff; }
+    50% { background-color: #bae7ff; }
+    100% { background-color: #e6f7ff; }
+  }
 `;
 
 export const Container = styled.div`
@@ -13,19 +16,9 @@ export const Container = styled.div`
 `;
 
 export const QueueItem = styled.div`
-  ${css`
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    margin: 8px 0;
-    border: 1px solid #f0f0f0;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: #fafafa;
-    }
-  `}
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 `;
 
 export const QueueNumber = styled.div`
@@ -156,4 +149,40 @@ export const FullscreenButton = styled.button`
   &:hover {
     color: #1890ff;
   }
+`;
+
+export const StyledCard = styled(Card)`
+  margin-bottom: 16px;
+  transition: transform 0.3s;
+
+  ${({ isJustCalled }) =>
+    isJustCalled &&
+    css`
+      animation: justCalled 1.5s ease-in-out;
+      ${justCalledAnimation}
+    `}
+`;
+
+export const StatusBadge = styled.div`
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: ${({ status }) => {
+    switch (status) {
+      case 'green': return '#d9f7be';
+      case 'blue': return '#adc6ff';
+      case 'gold': return '#fff566';
+      default: return '#f0f0f0';
+    }
+  }};
+`;
+
+export const WaitingTime = styled.span`
+  font-size: 12px;
+  color: #888;
+`;
+
+export const QueueContainer = styled.div`
+  max-height: 500px;
+  overflow-y: auto;
 `;

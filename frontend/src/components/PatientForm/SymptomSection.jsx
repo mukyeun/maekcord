@@ -1,3 +1,4 @@
+// ✅ SymptomSection.jsx
 import React, { useState } from 'react';
 import { Select, Tag, Input } from 'antd';
 import styled from 'styled-components';
@@ -18,7 +19,6 @@ const SelectContainer = styled.div`
 const SelectWrapper = styled.div`
   flex: 1;
   min-width: 250px;
-  
   @media (max-width: 768px) {
     min-width: 100%;
   }
@@ -26,23 +26,19 @@ const SelectWrapper = styled.div`
 
 const StyledSelect = styled(Select)`
   width: 100% !important;
-
   .ant-select-selector {
     border-radius: 8px !important;
     height: 40px !important;
     padding: 4px 11px !important;
     display: flex;
     align-items: center;
-
     .ant-select-selection-search-input {
       height: 38px !important;
     }
-
     .ant-select-selection-placeholder {
       line-height: 32px;
     }
   }
-
   &.ant-select-disabled .ant-select-selector {
     background-color: #f5f5f5 !important;
     cursor: not-allowed;
@@ -59,13 +55,11 @@ const StyledTextArea = styled(TextArea)`
   font-size: 14px;
   line-height: 1.5;
   padding: 12px;
-
   &:hover,
   &:focus {
     border-color: #13c2c2;
     box-shadow: 0 0 0 2px rgba(19, 194, 194, 0.1);
   }
-
   &::placeholder {
     color: #bfbfbf;
   }
@@ -78,22 +72,18 @@ const TagContainer = styled.div`
   min-height: 50px;
   margin-bottom: 16px;
   width: 100%;
-
   .ant-tag {
     margin: 4px;
     padding: 6px 12px;
     border-radius: 16px;
     font-size: 14px;
     cursor: pointer;
-    transition: all 0.2s;
     background: white;
     border: 1px solid #d9d9d9;
-
     &:hover {
       border-color: #13c2c2;
       color: #13c2c2;
     }
-
     .anticon-close {
       color: #999;
       &:hover {
@@ -118,7 +108,6 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
 
   const handleSymptomSelect = (value) => {
     if (!value) return;
-    
     const updatedSymptoms = data.symptoms || [];
     if (!updatedSymptoms.includes(value)) {
       onChange({
@@ -139,15 +128,11 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
   return (
     <StyledCard>
       <SectionTitle>
-        <div className="icon-wrapper" style={{ 
-          background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)',
-          boxShadow: '0 4px 12px rgba(255, 77, 79, 0.15)'
-        }}>
+        <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)' }}>
           <img src={symptomIcon} alt="증상" className="icon" />
         </div>
         <div className="title-text">
-          증상
-          <div className="subtitle">현재 겪고 있는 증상을 선택해주세요</div>
+          증상<div className="subtitle">현재 겪고 있는 증상을 선택해주세요</div>
         </div>
       </SectionTitle>
 
@@ -164,14 +149,10 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
               status={errors?.category ? 'error' : ''}
             >
               {Object.keys(증상카테고리).map(category => (
-                <Select.Option key={category} value={category}>
-                  {category}
-                </Select.Option>
+                <Select.Option key={category} value={category}>{category}</Select.Option>
               ))}
             </StyledSelect>
-            {errors?.category && (
-              <div className="error-message">{errors.category}</div>
-            )}
+            {errors?.category && <div className="error-message">{errors.category}</div>}
           </FormItem>
         </SelectWrapper>
 
@@ -189,14 +170,10 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
             >
               {selectedCategory &&
                 Object.keys(증상카테고리[selectedCategory]).map(subCategory => (
-                  <Select.Option key={subCategory} value={subCategory}>
-                    {subCategory}
-                  </Select.Option>
+                  <Select.Option key={subCategory} value={subCategory}>{subCategory}</Select.Option>
                 ))}
             </StyledSelect>
-            {errors?.subCategory && (
-              <div className="error-message">{errors.subCategory}</div>
-            )}
+            {errors?.subCategory && <div className="error-message">{errors.subCategory}</div>}
           </FormItem>
         </SelectWrapper>
 
@@ -213,14 +190,10 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
             >
               {selectedSubCategory &&
                 증상카테고리[selectedCategory][selectedSubCategory].map(symptom => (
-                  <Select.Option key={symptom.name} value={symptom.name}>
-                    {symptom.name}
-                  </Select.Option>
+                  <Select.Option key={symptom.name} value={symptom.name}>{symptom.name}</Select.Option>
                 ))}
             </StyledSelect>
-            {errors?.symptoms && (
-              <div className="error-message">{errors.symptoms}</div>
-            )}
+            {errors?.symptoms && <div className="error-message">{errors.symptoms}</div>}
           </FormItem>
         </SelectWrapper>
       </SelectContainer>
@@ -230,13 +203,7 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
           <div className="label">선택된 증상</div>
           <TagContainer>
             {data.symptoms.map((symptom, index) => (
-              <Tag
-                key={index}
-                closable
-                onClose={() => handleSymptomRemove(symptom)}
-              >
-                {symptom}
-              </Tag>
+              <Tag key={index} closable onClose={() => handleSymptomRemove(symptom)}>{symptom}</Tag>
             ))}
           </TagContainer>
         </FormItem>
@@ -251,9 +218,7 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
           rows={4}
           status={errors?.symptomDetails ? 'error' : ''}
         />
-        {errors?.symptomDetails && (
-          <div className="error-message">{errors.symptomDetails}</div>
-        )}
+        {errors?.symptomDetails && <div className="error-message">{errors.symptomDetails}</div>}
       </FormItem>
     </StyledCard>
   );

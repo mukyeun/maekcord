@@ -1,0 +1,138 @@
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.total-count {
+  font-size: 14px;
+}
+
+.realtime-update {
+  margin-left: 8px;
+  color: #52c41a;
+  font-size: 12px;
+}
+
+.notification-bar {
+  background: #e6f7ff;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.notification-bar .icon {
+  margin-right: 8px;
+}
+
+.notification-bar .close {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+.queue-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.name-section {
+  margin-bottom: 4px;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.queue-number {
+  color: #666;
+  font-size: 13px;
+}
+
+.time-info {
+  color: #999;
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.waiting {
+  background-color: #faad14;
+}
+
+.status-dot.called {
+  background-color: #1890ff;
+}
+
+.status-dot.consulting {
+  background-color: #52c41a;
+}
+
+.pagination {
+  margin-top: 16px;
+  text-align: right;
+  color: #666;
+  font-size: 12px;
+}
+
+.page {
+  margin: 0 8px;
+  color: #1890ff;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.switch-group {
+  display: flex;
+  gap: 8px;
+}
+
+.tab-container {
+  margin-bottom: 16px;
+}
+
+.search-input {
+  margin-top: 12px;
+}
+
+.pagination-info {
+  margin-top: 16px;
+  text-align: right;
+  color: #666;
+  font-size: 12px;
+}
+
+.current-page {
+  color: #1890ff;
+  margin: 0 4px;
+} 

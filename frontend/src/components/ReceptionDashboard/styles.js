@@ -19,28 +19,12 @@ export const StyledTable = styled(Table)`
 
   .ant-table-row {
     cursor: pointer;
-    transition: all 0.3s;
-
-    &:hover {
-      background: #f5f5f5;
-    }
   }
 
-  .waiting-row {
-    background: #fff7e6;
-  }
-
-  .called-row {
-    background: #e6f7ff;
-  }
-
-  .consulting-row {
-    background: #f6ffed;
-  }
-
-  .completed-row {
-    background: #f5f5f5;
-  }
+  .waiting-row { background: #fff7e6; }
+  .called-row { background: #e6f7ff; }
+  .consulting-row { background: #f6ffed; }
+  .completed-row { background: #f5f5f5; }
 `;
 
 export const StatusBadge = styled.span`
@@ -48,30 +32,33 @@ export const StatusBadge = styled.span`
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
-  
-  &.waiting {
-    background: #fff7e6;
-    color: #fa8c16;
-    border: 1px solid #ffd591;
-  }
-
-  &.called {
-    background: #e6f7ff;
-    color: #1890ff;
-    border: 1px solid #91d5ff;
-  }
-
-  &.consulting {
-    background: #f6ffed;
-    color: #52c41a;
-    border: 1px solid #b7eb8f;
-  }
-
-  &.completed {
-    background: #f5f5f5;
-    color: #8c8c8c;
-    border: 1px solid #d9d9d9;
-  }
+  background: ${props => {
+    switch(props.className) {
+      case 'waiting': return '#fff7e6';
+      case 'called': return '#e6f7ff';
+      case 'consulting': return '#f6ffed';
+      case 'completed': return '#f5f5f5';
+      default: return '#fff7e6';
+    }
+  }};
+  color: ${props => {
+    switch(props.className) {
+      case 'waiting': return '#fa8c16';
+      case 'called': return '#1890ff';
+      case 'consulting': return '#52c41a';
+      case 'completed': return '#8c8c8c';
+      default: return '#fa8c16';
+    }
+  }};
+  border: 1px solid ${props => {
+    switch(props.className) {
+      case 'waiting': return '#ffd591';
+      case 'called': return '#91d5ff';
+      case 'consulting': return '#b7eb8f';
+      case 'completed': return '#d9d9d9';
+      default: return '#ffd591';
+    }
+  }};
 `;
 
 export const DetailCard = styled(Card)`
@@ -92,16 +79,11 @@ export const DetailCard = styled(Card)`
 
 export const ActionButton = styled(Button)`
   margin-right: 8px;
-  
+
   &.call-button {
     background: #1890ff;
     border-color: #1890ff;
     color: white;
-    
-    &:hover {
-      background: #40a9ff;
-      border-color: #40a9ff;
-    }
   }
 `;
 
@@ -124,7 +106,6 @@ export const PatientInfo = styled.div`
       font-size: 12px;
       margin-bottom: 4px;
     }
-
     .value {
       font-size: 14px;
       font-weight: 500;
@@ -135,7 +116,7 @@ export const PatientInfo = styled.div`
 export const DrawerContent = styled.div`
   .section {
     margin-bottom: 24px;
-
+    
     .section-title {
       font-size: 16px;
       font-weight: 600;
@@ -150,16 +131,7 @@ export const VisitTypeBadge = styled.span`
   border-radius: 4px;
   font-size: 12px;
   font-weight: 500;
-
-  &.first {
-    background: #f9f0ff;
-    color: #722ed1;
-    border: 1px solid #d3adf7;
-  }
-
-  &.repeat {
-    background: #e6fffb;
-    color: #13c2c2;
-    border: 1px solid #87e8de;
-  }
+  background: ${props => props.className === 'first' ? '#f9f0ff' : '#e6fffb'};
+  color: ${props => props.className === 'first' ? '#722ed1' : '#13c2c2'};
+  border: 1px solid ${props => props.className === 'first' ? '#d3adf7' : '#87e8de'};
 `; 

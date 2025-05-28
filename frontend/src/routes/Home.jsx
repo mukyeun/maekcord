@@ -12,6 +12,7 @@ import ReceptionDashboard from '../components/ReceptionDashboard/ReceptionDashbo
 import QueueDisplay from '../components/QueueDisplay/QueueDisplay';
 import DoctorView from '../components/DoctorView/DoctorView';
 import api from '../api/axiosInstance';
+import * as queueApi from '../api/queueApi';
 
 const { Title, Text } = Typography;
 
@@ -101,6 +102,7 @@ const Home = () => {
   const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [queueData, setQueueData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -126,13 +128,16 @@ const Home = () => {
 
   const fetchQueue = async () => {
     try {
-      console.log('🔄 대기 목록 조회 시작');
-      const response = await api.get('/api/queue');
-      console.log('✅ 대기 목록 조회 완료:', response.data);
-      setQueueData(response.data);
+      setLoading(true);
+      const response = await queueApi.getQueueList();
+      if (response?.data) {
+        setQueueData(response.data);
+      }
     } catch (error) {
       console.error('❌ 대기 목록 조회 실패:', error);
-      message.error('대기 목록 조회에 실패했습니다.');
+      message.error('대기 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,7 +205,7 @@ const Home = () => {
           <PatientFormWrapper 
             visible={isPatientFormVisible}
             onClose={() => setIsPatientFormVisible(false)}
-            onSuccess={fetchQueue}
+            fetchQueue={fetchQueue}
           />
           <ReceptionDashboard
             visible={isReceptionDashboardVisible}

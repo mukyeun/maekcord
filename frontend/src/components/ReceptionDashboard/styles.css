@@ -1,0 +1,111 @@
+.dashboard-wrapper {
+  background: #f0f2f5;
+  min-height: 100%;
+}
+
+.queue-table .ant-table {
+  background: white;
+  border-radius: 8px;
+}
+
+.queue-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.queue-table .ant-table-row {
+  cursor: pointer;
+}
+
+.waiting-row { background: #fff7e6; }
+.called-row { background: #e6f7ff; }
+.consulting-row { background: #f6ffed; }
+.completed-row { background: #f5f5f5; }
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.waiting {
+  background: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.status-badge.called {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: 1px solid #91d5ff;
+}
+
+.status-badge.consulting {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.status-badge.completed {
+  background: #f5f5f5;
+  color: #8c8c8c;
+  border: 1px solid #d9d9d9;
+}
+
+.visit-type-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.visit-type-badge.first {
+  background: #f9f0ff;
+  color: #722ed1;
+  border: 1px solid #d3adf7;
+}
+
+.visit-type-badge.repeat {
+  background: #e6fffb;
+  color: #13c2c2;
+  border: 1px solid #87e8de;
+}
+
+.call-button {
+  margin-right: 8px;
+}
+
+.refresh-button:hover {
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+.drawer-content .detail-card {
+  margin-bottom: 24px;
+}
+
+.drawer-content .detail-card .title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+
+.patient-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.patient-info .info-item .label {
+  color: #8c8c8c;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.patient-info .info-item .value {
+  font-size: 14px;
+  font-weight: 500;
+} 
