@@ -65,4 +65,3 @@ server.listen(PORT, () => {
   console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
   console.log(`📡 WebSocket 서버: ws://localhost:${PORT}/ws`);
 });
-

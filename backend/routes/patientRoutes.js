@@ -318,4 +318,3 @@ router.put('/:id', auth, validatePatient, patientController.updatePatient);
 router.put('/:id/status', auth, patientController.updateStatus);
 
 module.exports = router;
-

@@ -10,8 +10,13 @@ const STATUS_MAP = {
 
 // 대기 목록 전체 조회
 export const getQueueList = async () => {
-  const response = await api.get('/queues');
-  return response.data;
+  try {
+    const response = await api.get('/api/queues');
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch queue list:', error);
+    throw error;
+  }
 };
 
 // 대기 등록 (환자 ID 필수)
@@ -29,8 +34,13 @@ export const callPatient = async (queueId) => {
 
 // 상태 업데이트
 export const updateQueueStatus = async (queueId, status) => {
-  const response = await api.patch(`/queues/${queueId}`, { status });  // 템플릿 리터럴 수정
-  return response.data;
+  try {
+    const response = await api.patch(`/api/queues/${queueId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to update queue status:', error);
+    throw error;
+  }
 };
 
 // 대기 삭제

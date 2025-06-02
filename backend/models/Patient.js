@@ -4,7 +4,39 @@ const moment = require('moment-timezone');
 const patientSchema = new mongoose.Schema({
   patientId: {
     type: String,
+    required: true,
     unique: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  birthDate: {
+    type: Date,
+    required: true
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+    required: true
+  },
+  contact: {
+    phone: String,
+    email: String,
+    address: String
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   },
   basicInfo: {
     name: {
@@ -95,7 +127,16 @@ const patientSchema = new mongoose.Schema({
   memo: {
     type: String,
     default: ''
-  }
+  },
+  activityLog: [{
+    action: String,
+    description: String,
+    userId: String,
+    timestamp: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true,
   versionKey: false
