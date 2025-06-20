@@ -1,29 +1,31 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { Layout } from 'antd';
-import styled from 'styled-components';
+import { ConfigProvider, Layout } from 'antd';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './store/store';
+import koKR from 'antd/lib/locale/ko_KR';
 import Header from './components/Common/Header';
 import AppRoutes from './routes';
+import './App.css';
 
 const { Content } = Layout;
 
-const StyledContent = styled(Content)`
-  margin-top: 64px;
-  min-height: calc(100vh - 64px);
-  background: #fff;
-`;
-
-const App = () => {
-  return (
-    <BrowserRouter>
-      <Layout>
-        <Header />
-        <StyledContent>
-          <AppRoutes />
-        </StyledContent>
-      </Layout>
-    </BrowserRouter>
-  );
-};
+const App = () => (
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <ConfigProvider locale={koKR}>
+        <BrowserRouter>
+          <Layout>
+            <Header />
+            <Content style={{ marginTop: 64 }}>
+              <AppRoutes />
+            </Content>
+          </Layout>
+        </BrowserRouter>
+      </ConfigProvider>
+    </PersistGate>
+  </Provider>
+);
 
 export default App;

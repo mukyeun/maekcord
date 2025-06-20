@@ -6,9 +6,8 @@ import {
   fetchQueueFailure,
   addToQueue,
   removeFromQueue,
-  setCurrentPatient,
-  clearCurrentPatient,
-  updateQueueOrder
+  setCurrentQueuePatient,
+  updateQueueItem
 } from '../slices/queueSlice';
 
 // Mock API 함수들
@@ -84,7 +83,7 @@ export const callNextPatient = () => async (dispatch) => {
   try {
     const data = await mockQueueAPI.callNextPatient();
     if (data) {
-      dispatch(setCurrentPatient(data));
+      dispatch(setCurrentQueuePatient(data));
       dispatch(removeFromQueue(data.id));
     }
     return data;
@@ -93,18 +92,10 @@ export const callNextPatient = () => async (dispatch) => {
   }
 };
 
-export const finishCurrentPatient = () => async (dispatch) => {
-  try {
-    dispatch(clearCurrentPatient());
-  } catch (error) {
-    throw error;
-  }
-};
-
 export const reorderQueue = (newOrder) => async (dispatch) => {
   try {
     await mockQueueAPI.updateQueueOrder(newOrder);
-    dispatch(updateQueueOrder(newOrder));
+    dispatch(updateQueueItem(newOrder));
   } catch (error) {
     throw error;
   }

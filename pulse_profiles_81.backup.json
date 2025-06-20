@@ -1,0 +1,1136 @@
+[
+  {
+    "pulseCode": "부삭활실맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "부맥, 삭맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭활평맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "부맥, 삭맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭활허맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "부맥, 삭맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭평실맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "부맥, 삭맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭평평맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "부맥, 삭맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭평허맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "부맥, 삭맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭허실맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "부맥, 삭맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭허평맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "부맥, 삭맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부삭허허맥",
+    "pvcType": "부맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "부맥, 삭맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평활실맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "부맥, 평맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평활평맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "부맥, 평맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평활허맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "부맥, 평맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평평실맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "부맥, 평맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평평평맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "부맥, 평맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평평허맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "부맥, 평맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평허실맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "부맥, 평맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평허평맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "부맥, 평맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부평허허맥",
+    "pvcType": "부맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "부맥, 평맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지활실맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "부맥, 지맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지활평맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "부맥, 지맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지활허맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "부맥, 지맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지평실맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "부맥, 지맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지평평맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "부맥, 지맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지평허맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "부맥, 지맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지허실맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "부맥, 지맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지허평맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "부맥, 지맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "부지허허맥",
+    "pvcType": "부맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "부맥, 지맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "부맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭활실맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "평맥, 삭맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭활평맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "평맥, 삭맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭활허맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "평맥, 삭맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭평실맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "평맥, 삭맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭평평맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "평맥, 삭맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭평허맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "평맥, 삭맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭허실맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "평맥, 삭맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭허평맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "평맥, 삭맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평삭허허맥",
+    "pvcType": "평맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "평맥, 삭맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평활실맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "평맥, 평맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평활평맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "평맥, 평맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평활허맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "평맥, 평맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평평실맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "평맥, 평맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평평평맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "평맥, 평맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평평허맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "평맥, 평맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평허실맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "평맥, 평맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평허평맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "평맥, 평맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평평허허맥",
+    "pvcType": "평맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "평맥, 평맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지활실맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "평맥, 지맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지활평맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "평맥, 지맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지활허맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "평맥, 지맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지평실맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "평맥, 지맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지평평맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "평맥, 지맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지평허맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "평맥, 지맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지허실맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "평맥, 지맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지허평맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "평맥, 지맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "평지허허맥",
+    "pvcType": "평맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "평맥, 지맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "평맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭활실맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "침맥, 삭맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭활평맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "침맥, 삭맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭활허맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "침맥, 삭맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭평실맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "침맥, 삭맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭평평맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "침맥, 삭맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭평허맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "침맥, 삭맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭허실맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "침맥, 삭맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭허평맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "침맥, 삭맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침삭허허맥",
+    "pvcType": "침맥",
+    "bvType": "삭맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "침맥, 삭맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평활실맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "침맥, 평맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평활평맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "침맥, 평맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평활허맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "침맥, 평맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평평실맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "침맥, 평맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평평평맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "침맥, 평맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평평허맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "침맥, 평맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평허실맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "침맥, 평맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평허평맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "침맥, 평맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침평허허맥",
+    "pvcType": "침맥",
+    "bvType": "평맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "침맥, 평맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지활실맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "실맥",
+    "description": "침맥, 지맥, 활맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지활평맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "평맥",
+    "description": "침맥, 지맥, 활맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지활허맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "활맥",
+    "hrType": "허맥",
+    "description": "침맥, 지맥, 활맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지평실맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "실맥",
+    "description": "침맥, 지맥, 평맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지평평맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "평맥",
+    "description": "침맥, 지맥, 평맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지평허맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "평맥",
+    "hrType": "허맥",
+    "description": "침맥, 지맥, 평맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지허실맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "실맥",
+    "description": "침맥, 지맥, 허맥, 실맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 실맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지허평맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "평맥",
+    "description": "침맥, 지맥, 허맥, 평맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 평맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  },
+  {
+    "pulseCode": "침지허허맥",
+    "pvcType": "침맥",
+    "bvType": "지맥",
+    "svType": "허맥",
+    "hrType": "허맥",
+    "description": "침맥, 지맥, 허맥, 허맥의 생리 상태 조합으로 형성된 맥상입니다.",
+    "precautions": "침맥 또는 허맥 관련된 주의사항을 고려해야 합니다.",
+    "recommendations": [
+      "생활습관 교정",
+      "정기적 측정",
+      "한방 치료 병행"
+    ]
+  }
+]

@@ -7,12 +7,14 @@ import {
   MedicineBoxOutlined 
 } from '@ant-design/icons';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
 import PatientFormWrapper from '../components/PatientForm/PatientFormWrapper';
 import ReceptionDashboard from '../components/ReceptionDashboard/ReceptionDashboard';
 import QueueDisplay from '../components/QueueDisplay/QueueDisplay';
 import DoctorView from '../components/DoctorView/DoctorView';
 import api from '../api/axiosInstance';
 import * as queueApi from '../api/queueApi';
+import CurrentPatientInfo from '../components/CurrentPatientInfo';
 
 const { Title, Text } = Typography;
 
@@ -96,40 +98,50 @@ const InfoCard = styled(Card)`
 `;
 
 const Home = () => {
+  const { isAuthenticated } = useSelector(state => state.auth);
   const [isPatientFormVisible, setIsPatientFormVisible] = useState(false);
   const [isReceptionDashboardVisible, setIsReceptionDashboardVisible] = useState(false);
   const [isQueueDisplayVisible, setIsQueueDisplayVisible] = useState(false);
   const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [queueData, setQueueData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isConsulting, setIsConsulting] = useState(false);
+  const [currentPatient, setCurrentPatient] = useState(null);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    setIsLoggedIn(loggedIn);
-
-    // 로그인 상태 변화 감지
-    const handleStorageChange = () => {
-      const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      setIsLoggedIn(loggedIn);
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    fetchQueue();
   }, []);
 
-  const handleFeatureClick = (feature, setVisible) => {
-    if (!isLoggedIn) {
-      message.warning('로그인이 필요한 서비스입니다.');
+  const handleFeatureClick = (feature) => {
+    if (!isAuthenticated) {
+      message.warning('로그인이 필요한 기능입니다.');
+      setIsLoginModalVisible(true);
       return;
     }
-    setVisible(true);
+
+    switch (feature) {
+      case 'patient':
+        setIsPatientFormVisible(true);
+        break;
+      case 'reception':
+        setIsReceptionDashboardVisible(true);
+        break;
+      case 'waiting':
+        setIsQueueDisplayVisible(true);
+        break;
+      case 'doctor':
+        setIsDoctorViewVisible(true);
+        break;
+      default:
+        break;
+    }
   };
 
   const fetchQueue = async () => {
     try {
       setLoading(true);
-      const response = await queueApi.getQueueList();
+      const response = await queueApi.getTodayQueueList();
       if (response?.data) {
         setQueueData(response.data);
       }
@@ -158,7 +170,7 @@ const Home = () => {
       </HeroSection>
 
       <FeaturesSection>
-        <FeatureCard onClick={() => handleFeatureClick('patient', setIsPatientFormVisible)}>
+        <FeatureCard onClick={() => handleFeatureClick('patient')}>
           <div className="feature-icon">
             <UserOutlined />
           </div>
@@ -168,7 +180,7 @@ const Home = () => {
           </Text>
         </FeatureCard>
 
-        <FeatureCard onClick={() => handleFeatureClick('reception', setIsReceptionDashboardVisible)}>
+        <FeatureCard onClick={() => handleFeatureClick('reception')}>
           <div className="feature-icon">
             <DesktopOutlined />
           </div>
@@ -178,7 +190,7 @@ const Home = () => {
           </Text>
         </FeatureCard>
 
-        <FeatureCard onClick={() => handleFeatureClick('queue', setIsQueueDisplayVisible)}>
+        <FeatureCard onClick={() => handleFeatureClick('waiting')}>
           <div className="feature-icon">
             <OrderedListOutlined />
           </div>
@@ -188,7 +200,9 @@ const Home = () => {
           </Text>
         </FeatureCard>
 
-        <FeatureCard onClick={() => handleFeatureClick('doctor', setIsDoctorViewVisible)}>
+        <FeatureCard onClick={() => { 
+          handleFeatureClick('doctor'); 
+        }}>
           <div className="feature-icon">
             <MedicineBoxOutlined />
           </div>
@@ -200,20 +214,28 @@ const Home = () => {
       </FeaturesSection>
 
       {/* 모달 컴포넌트들은 로그인 상태일 때만 렌더링 */}
-      {isLoggedIn && (
+      {isAuthenticated && (
         <>
-          <PatientFormWrapper 
-            visible={isPatientFormVisible}
-            onClose={() => setIsPatientFormVisible(false)}
-            fetchQueue={fetchQueue}
-          />
+          {currentPatient
+            ? <CurrentPatientInfo patient={currentPatient} />
+            : <PatientFormWrapper 
+                visible={isPatientFormVisible}
+                onClose={() => setIsPatientFormVisible(false)}
+                fetchQueue={fetchQueue}
+              />}
           <ReceptionDashboard
             visible={isReceptionDashboardVisible}
             onClose={() => setIsReceptionDashboardVisible(false)}
+            queueData={queueData}
+            loading={loading}
+            onQueueUpdate={fetchQueue}
           />
           <QueueDisplay
             visible={isQueueDisplayVisible}
             onClose={() => setIsQueueDisplayVisible(false)}
+            queueData={queueData}
+            loading={loading}
+            onQueueUpdate={fetchQueue}
           />
           <DoctorView
             visible={isDoctorViewVisible}

@@ -40,10 +40,6 @@ const patientSlice = createSlice({
     },
     setCurrentPatient: (state, action) => {
       state.currentPatient = action.payload;
-      state.loading = false;
-    },
-    clearCurrentPatient: (state) => {
-      state.currentPatient = null;
     },
     addPatient: (state, action) => {
       state.patients.push(action.payload);
@@ -53,9 +49,15 @@ const patientSlice = createSlice({
       if (index !== -1) {
         state.patients[index] = action.payload;
       }
+      if (state.currentPatient?.id === action.payload.id) {
+        state.currentPatient = action.payload;
+      }
     },
     removePatient: (state, action) => {
       state.patients = state.patients.filter(p => p.id !== action.payload);
+      if (state.currentPatient?.id === action.payload) {
+        state.currentPatient = null;
+      }
     }
   },
   extraReducers: (builder) => {
@@ -80,7 +82,6 @@ export const {
   fetchPatientsSuccess,
   fetchPatientsFailure,
   setCurrentPatient,
-  clearCurrentPatient,
   addPatient,
   updatePatient,
   removePatient

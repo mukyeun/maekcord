@@ -1,0 +1,77 @@
+[
+  {
+    "pulseCode": "부활허지",
+    "pvcType": "부",
+    "bvType": "활",
+    "svType": "허",
+    "hrType": "지",
+    "hanja": "浮滑虛遲",
+    "reference": {
+      "document": "스마트맥진의 탄생 하편(상)",
+      "pages": {
+        "start": 21,
+        "end": 24
+      }
+    },
+    "clinical": {
+      "causes": ["기허", "양허"],
+      "management": ["보기", "온보"],
+      "diseases": ["만성피로", "소화불량"],
+      "organSymptoms": {
+        "heart": "심계항진",
+        "spleen": "식욕부진",
+        "kidney": "요통"
+      }
+    }
+  },
+  {
+    "pulseCode": "부활허삭",
+    "pvcType": "부",
+    "bvType": "활",
+    "svType": "허",
+    "hrType": "삭",
+    "hanja": "浮滑虛數",
+    "reference": {
+      "document": "스마트맥진의 탄생 하편(상)",
+      "pages": {
+        "start": 31,
+        "end": 34
+      }
+    },
+    "clinical": {
+      "causes": ["기허", "열증"],
+      "management": ["보기", "청열"],
+      "diseases": ["발열", "불면"],
+      "organSymptoms": {
+        "heart": "심계항진",
+        "liver": "두통",
+        "kidney": "요통"
+      }
+    }
+  },
+  {
+    "pulseCode": "침활허",
+    "pvcType": "침",
+    "bvType": "활",
+    "svType": "허",
+    "hrType": "평",
+    "hanja": "沈滑虛",
+    "reference": {
+      "document": "스마트맥진의 탄생 하편(상)",
+      "pages": {
+        "start": 41,
+        "end": 44
+      }
+    },
+    "clinical": {
+      "causes": ["음허", "혈허"],
+      "management": ["보음", "보혈"],
+      "diseases": ["빈혈", "어지럼증"],
+      "organSymptoms": {
+        "liver": "현훈",
+        "kidney": "이명",
+        "spleen": "식욕부진"
+      }
+    }
+  }
+] 

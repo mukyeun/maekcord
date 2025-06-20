@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Row, Col, Select, Typography } from 'antd';
+import { Row, Col, Select, Typography, Form, Space, Tag } from 'antd';
 import styled from 'styled-components';
 import medicationIcon from '../../assets/icons/medication.svg';
 import { 약물카테고리, 기호식품카테고리 } from '../../data/medications';
@@ -49,6 +49,8 @@ const ErrorMessage = styled.div`
 `;
 
 const MedicationSection = ({ data, onChange, errors }) => {
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
   const handleMedicationChange = (values) => {
     onChange({
       ...data,
@@ -56,10 +58,30 @@ const MedicationSection = ({ data, onChange, errors }) => {
     });
   };
 
-  const handlePreferenceChange = (values) => {
+  const handlePreferenceSelect = (selected) => {
+    const updatedPreferences = Array.isArray(data.preferences) 
+      ? [...data.preferences, selected]
+      : [selected];
+
     onChange({
       ...data,
-      preferences: values
+      preferences: updatedPreferences
+    });
+
+    setDropdownVisible(false);
+  };
+
+  const handleDropdownVisibleChange = (visible) => {
+    setDropdownVisible(visible);
+  };
+
+  const handlePreferenceRemove = (removedItem) => {
+    const newPreferences = (data.preferences || []).filter(
+      item => item !== removedItem
+    );
+    onChange({
+      ...data,
+      preferences: newPreferences
     });
   };
 
@@ -100,22 +122,32 @@ const MedicationSection = ({ data, onChange, errors }) => {
           <Col xs={24} sm={12}>
             <FormItem>
               <FieldLabel>기호식품</FieldLabel>
-              <StyledSelect
-                mode="multiple"
-                value={data.preferences || []}
-                onChange={handlePreferenceChange}
-                placeholder="기호식품을 선택하세요"
-                status={errors?.preferences ? 'error' : ''}
-                allowClear
-                showSearch
-                optionFilterProp="children"
-              >
-                {기호식품카테고리.map((item, index) => (
-                  <Option key={`preference-${index}`} value={item}>
-                    {item}
-                  </Option>
-                ))}
-              </StyledSelect>
+              <Space direction="vertical" style={{ width: '100%' }}>
+                <Select
+                  mode="multiple"
+                  style={{ width: '100%' }}
+                  placeholder="기호식품 선택"
+                  value={data.preferences || []}
+                  open={dropdownVisible}
+                  onDropdownVisibleChange={handleDropdownVisibleChange}
+                  onSelect={handlePreferenceSelect}
+                  options={[
+                    { value: '커피', label: '커피' },
+                    { value: '술', label: '술' },
+                    { value: '담배', label: '담배' },
+                    { value: '탄산음료', label: '탄산음료' }
+                  ]}
+                  tagRender={(props) => (
+                    <Tag
+                      closable
+                      onClose={() => handlePreferenceRemove(props.value)}
+                      style={{ marginRight: 3 }}
+                    >
+                      {props.label}
+                    </Tag>
+                  )}
+                />
+              </Space>
               {errors?.preferences && (
                 <ErrorMessage>{errors.preferences}</ErrorMessage>
               )}

@@ -1,42 +1,37 @@
 const mongoose = require('mongoose');
 const moment = require('moment-timezone');
 
+const RecordSchema = new mongoose.Schema({
+  date: { type: Date, default: Date.now },
+  symptoms: [String],
+  memo: String,
+  stress: String,
+  pulseAnalysis: String,
+  pulseWave: {
+    systolicBP: Number,
+    diastolicBP: Number,
+    heartRate: Number,
+    pulsePressure: Number,
+    'a-b': Number, 'a-c': Number, 'a-d': Number, 'a-e': Number,
+    'b/a': Number, 'c/a': Number, 'd/a': Number, 'e/a': Number,
+    elasticityScore: Number,
+    PVC: Number,
+    BV: Number,
+    SV: Number,
+  },
+  macSang: {
+    floating: Boolean, sunken: Boolean, slow: Boolean, rapid: Boolean,
+    slippery: Boolean, rough: Boolean, string: Boolean, scattered: Boolean,
+    notes: String
+  }
+});
+
 const patientSchema = new mongoose.Schema({
   patientId: {
     type: String,
-    required: true,
-    unique: true
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  birthDate: {
-    type: Date,
-    required: true
-  },
-  gender: {
-    type: String,
-    enum: ['male', 'female'],
-    required: true
-  },
-  contact: {
-    phone: String,
-    email: String,
-    address: String
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive'],
-    default: 'active'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
+    required: false,
+    unique: true,
+    sparse: true
   },
   basicInfo: {
     name: {
@@ -48,19 +43,19 @@ const patientSchema = new mongoose.Schema({
       type: String,
       default: ''
     },
-    birthDate: {
-      type: String,
-      default: ''
-    },
     gender: {
       type: String,
-      enum: ['male', 'female', ''],  // 빈 문자열도 허용
+      enum: ['male', 'female', ''],
+      required: true,
       default: ''
     },
     residentNumber: {
       type: String,
-      trim: true,
       default: ''
+    },
+    birthDate: {
+      type: Date,
+      default: null
     },
     visitType: {
       type: String,
@@ -88,42 +83,22 @@ const patientSchema = new mongoose.Schema({
       default: ''
     }
   },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active'
+  },
   symptoms: {
     type: [String],
     default: []
   },
   medication: {
-    type: Object,
-    default: {}
+    current: [String],
+    history: [String],
+    medications: [String],
+    preferences: [String]
   },
-  records: {
-    pulseWave: {
-      systolicBP: Number,
-      diastolicBP: Number,
-      heartRate: Number,
-      pulsePressure: Number,
-      'a-b': Number,
-      'a-c': Number,
-      'a-d': Number,
-      'a-e': Number,
-      'b/a': Number,
-      'c/a': Number,
-      'd/a': Number,
-      'e/a': Number,
-      elasticityScore: Number,
-      PVC: String,
-      BV: String,
-      SV: String,
-      lastUpdated: Date
-    },
-    stress: {
-      items: [String],
-      totalScore: Number,
-      level: String,
-      description: String,
-      details: String
-    }
-  },
+  records: [RecordSchema],
   memo: {
     type: String,
     default: ''
@@ -136,73 +111,28 @@ const patientSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 }, {
   timestamps: true,
   versionKey: false
 });
 
-// 환자 ID 자동 생성
-patientSchema.pre('save', async function(next) {
-  if (this.isNew) {
-    const today = new Date();
-    const year = today.getFullYear().toString().slice(-2);
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    
-    // 오늘 등록된 환자 수 조회
-    const count = await this.constructor.countDocuments({
-      createdAt: {
-        $gte: new Date(today.setHours(0, 0, 0, 0)),
-        $lt: new Date(today.setHours(23, 59, 59, 999))
-      }
-    });
-    
-    // P + YYMMDD + 일련번호(3자리)
-    this.patientId = `P${year}${month}${day}${(count + 1).toString().padStart(3, '0')}`;
-  }
-  console.log('🔍 저장 전 데이터 검증:', {
-    'basicInfo 존재': !!this.basicInfo,
-    'name 존재': !!this.basicInfo?.name,
-    'name 값': this.basicInfo?.name,
-    'gender 값': this.basicInfo?.gender,
-    'symptoms 타입': Array.isArray(this.symptoms),
-    'symptoms 길이': this.symptoms?.length
-  });
-
-  // 1. 필수 필드 검증
-  if (!this.basicInfo?.name?.trim()) {
-    next(new Error('환자 이름은 필수입니다.'));
-    return;
-  }
-
-  // 2. gender 값 검증
-  if (this.basicInfo?.gender && !['male', 'female', ''].includes(this.basicInfo.gender)) {
-    next(new Error('성별은 male 또는 female이어야 합니다.'));
-    return;
-  }
-
-  // 3. symptoms 배열 검증
-  if (this.symptoms && !Array.isArray(this.symptoms)) {
-    next(new Error('symptoms는 배열이어야 합니다.'));
-    return;
-  }
-
-  // 4. 데이터 로깅
-  console.log('🔍 저장 전 데이터 검증:', {
-    'basicInfo 존재': !!this.basicInfo,
-    'name 존재': !!this.basicInfo?.name,
-    'name 값': this.basicInfo?.name,
-    'gender 값': this.basicInfo?.gender,
-    'symptoms 타입': Array.isArray(this.symptoms),
-    'symptoms 길이': this.symptoms?.length
-  });
-
+// ✅ updatedAt 자동 갱신
+patientSchema.pre('save', function (next) {
+  this.updatedAt = new Date();
   next();
 });
 
-// ✅ 활동 로그 추가 메서드
-patientSchema.methods.addActivityLog = function(action, description, userId) {
+// ✅ 활동 로그 메서드
+patientSchema.methods.addActivityLog = function (action, description, userId) {
   this.activityLog.push({
     action,
     description,
@@ -210,15 +140,37 @@ patientSchema.methods.addActivityLog = function(action, description, userId) {
   });
 };
 
-// ✅ 필요한 인덱스 설정
+// ✅ 나이 계산
+patientSchema.virtual('age').get(function () {
+  if (!this.basicInfo.birthDate) return null;
+  return moment().diff(this.basicInfo.birthDate, 'years');
+});
+
+// ✅ 인덱스
 patientSchema.index({ patientId: 1 }, { unique: true });
 patientSchema.index({ 'basicInfo.name': 1 });
 patientSchema.index({ createdAt: -1 });
 
-// ✅ 가상 필드: 나이 계산
-patientSchema.virtual('age').get(function() {
-  return moment().diff(this.basicInfo.birthDate, 'years');
-});
+// ✅ 고유 ID 생성 메서드
+patientSchema.statics.generateUniqueId = async function () {
+  let attempts = 0;
+  const maxAttempts = 5;
+
+  while (attempts < maxAttempts) {
+    const now = new Date();
+    const ymd = now.toISOString().slice(2, 10).replace(/-/g, '');
+    const millis = now.getMilliseconds().toString().padStart(3, '0');
+    const rand = Math.floor(1000 + Math.random() * 9000);
+    const candidateId = `P${ymd}${millis}${rand}`;
+
+    const exists = await this.exists({ patientId: candidateId });
+    if (!exists) return candidateId;
+
+    attempts++;
+  }
+
+  throw new Error('고유한 환자 ID 생성 실패');
+};
 
 const Patient = mongoose.model('Patient', patientSchema);
 module.exports = Patient;

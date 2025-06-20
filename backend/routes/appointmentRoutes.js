@@ -183,7 +183,7 @@ router.post('/', auth, validateAppointment, appointmentController.createAppointm
  *       409:
  *         description: 시간 중복
  */
-router.put('/:id', auth, validateAppointment, appointmentController.updateAppointment);
+router.put('/:id', auth, appointmentController.updateAppointment);
 
 /**
  * @swagger
@@ -221,7 +221,7 @@ router.put('/:id', auth, validateAppointment, appointmentController.updateAppoin
  *       404:
  *         description: 예약을 찾을 수 없음
  */
-router.put('/:id/status', auth, appointmentController.updateStatus);
+router.put('/:id/status', auth, appointmentController.updateAppointmentStatus);
 
 // 예약 취소
 router.delete('/:id', appointmentController.cancelAppointment);

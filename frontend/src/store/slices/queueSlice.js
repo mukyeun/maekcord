@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { fetchQueueData } from '../thunks/queueThunks';
 
 const initialState = {
-  waitingList: [],
+  queue: [],
   currentPatient: null,
   loading: false,
   error: null
@@ -18,26 +18,29 @@ const queueSlice = createSlice({
     },
     fetchQueueSuccess: (state, action) => {
       state.loading = false;
-      state.waitingList = action.payload;
+      state.queue = action.payload;
     },
     fetchQueueFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
-    addToQueue: (state, action) => {
-      state.waitingList.push(action.payload);
-    },
-    removeFromQueue: (state, action) => {
-      state.waitingList = state.waitingList.filter(p => p.id !== action.payload);
-    },
-    setCurrentPatient: (state, action) => {
+    setCurrentQueuePatient: (state, action) => {
       state.currentPatient = action.payload;
     },
-    clearCurrentPatient: (state) => {
-      state.currentPatient = null;
+    addToQueue: (state, action) => {
+      state.queue.push(action.payload);
     },
-    updateQueueOrder: (state, action) => {
-      state.waitingList = action.payload;
+    updateQueueItem: (state, action) => {
+      const index = state.queue.findIndex(item => item.id === action.payload.id);
+      if (index !== -1) {
+        state.queue[index] = action.payload;
+      }
+    },
+    removeFromQueue: (state, action) => {
+      state.queue = state.queue.filter(item => item.id !== action.payload);
+      if (state.currentPatient?.id === action.payload) {
+        state.currentPatient = null;
+      }
     }
   },
   extraReducers: (builder) => {
@@ -48,7 +51,7 @@ const queueSlice = createSlice({
       })
       .addCase(fetchQueueData.fulfilled, (state, action) => {
         state.loading = false;
-        state.waitingList = action.payload;
+        state.queue = action.payload;
       })
       .addCase(fetchQueueData.rejected, (state, action) => {
         state.loading = false;
@@ -61,11 +64,10 @@ export const {
   fetchQueueStart,
   fetchQueueSuccess,
   fetchQueueFailure,
+  setCurrentQueuePatient,
   addToQueue,
-  removeFromQueue,
-  setCurrentPatient,
-  clearCurrentPatient,
-  updateQueueOrder
+  updateQueueItem,
+  removeFromQueue
 } = queueSlice.actions;
 
 export default queueSlice.reducer; 

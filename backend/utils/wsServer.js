@@ -1,71 +1,103 @@
 const WebSocket = require('ws');
+const logger = require('./logger');
 
-let wss;
-const clients = new Set();
+let wss = null;
 
-function initWebSocket(server) {
-  wss = new WebSocket.Server({ server, path: '/ws' });
+const initWebSocket = (server) => {
+  wss = new WebSocket.Server({ server });
 
   wss.on('connection', (ws) => {
-    console.log('✅ WebSocket 클라이언트 연결됨');
-    clients.add(ws);
+    logger.info('🔌 새로운 WebSocket 클라이언트 연결');
 
-    // 연결 성공 메시지 전송
-    ws.send(JSON.stringify({ 
-      type: 'CONNECTED', 
-      message: 'WebSocket 연결 성공' 
-    }));
+    ws.isAlive = true;
 
-    // 클라이언트 메시지 처리
+    ws.on('pong', () => {
+      ws.isAlive = true;
+    });
+
     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message);
-        console.log('📨 클라이언트 메시지:', data);
-        
-        if (data.type === 'ping') {
-          ws.send(JSON.stringify({ type: 'pong' }));
+        logger.info('📨 WebSocket 메시지 수신:', data);
+
+        // PING 메시지 처리
+        if (data.type === 'PING') {
+          ws.send(JSON.stringify({ type: 'PONG', timestamp: new Date().toISOString() }));
+          return;
         }
+
+        // 다른 메시지 처리
+        broadcastMessage(data);
       } catch (error) {
-        console.error('메시지 파싱 오류:', error);
+        logger.error('❌ WebSocket 메시지 처리 오류:', error);
       }
     });
 
-    // 연결 종료 처리
+    ws.on('error', (error) => {
+      logger.error('❌ WebSocket 오류:', error);
+    });
+
     ws.on('close', () => {
-      console.log('❌ WebSocket 클라이언트 연결 종료');
-      clients.delete(ws);
+      logger.info('🔌 WebSocket 클라이언트 연결 종료');
     });
   });
-}
 
-function broadcastQueueUpdate(queue) {
-  const message = JSON.stringify({
+  // 연결 상태 확인
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if (ws.isAlive === false) {
+        logger.warn('⚠️ 비활성 WebSocket 연결 종료');
+        return ws.terminate();
+      }
+
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', () => {
+    clearInterval(interval);
+  });
+
+  logger.info('✅ WebSocket 서버 초기화 완료');
+};
+
+const broadcastMessage = (data) => {
+  if (!wss) {
+    logger.error('❌ WebSocket 서버가 초기화되지 않았습니다.');
+    return;
+  }
+
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      try {
+        client.send(JSON.stringify(data));
+      } catch (error) {
+        logger.error('❌ WebSocket 메시지 전송 실패:', error);
+      }
+    }
+  });
+};
+
+const broadcastQueueUpdate = (queueList) => {
+  broadcastMessage({
     type: 'QUEUE_UPDATE',
-    queue: queue
+    queue: queueList,
+    timestamp: new Date().toISOString()
   });
+};
 
-  clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
-}
-
-function broadcastPatientCalled(patient) {
-  const message = JSON.stringify({
+const broadcastPatientCalled = (data) => {
+  broadcastMessage({
     type: 'PATIENT_CALLED',
-    patient: patient
+    ...data,
+    timestamp: new Date().toISOString()
   });
-
-  clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(message);
-    }
-  });
-}
+};
 
 module.exports = {
   initWebSocket,
+  broadcastMessage,
   broadcastQueueUpdate,
   broadcastPatientCalled
 }; 

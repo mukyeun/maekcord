@@ -1,222 +1,299 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const router = express.Router();
 const Queue = require('../models/Queue');
-const { generateQueueNumber } = require('../utils/queueUtils');
+const Patient = require('../models/Patient');
+const generateQueueNumber = require('../utils/generateQueueNumber');
 const moment = require('moment');
 const { broadcastQueueUpdate, broadcastPatientCalled } = require('../utils/wsServer');
-const mongoose = require('mongoose');
+const logger = require('../utils/logger');
+const QueueHistory = require('../models/QueueHistory');
+const { 
+  registerQueue, 
+  updateQueueStatus,
+  getTodayQueueList,
+  getQueueStatus,
+  checkPatientStatus,
+  getCurrentPatient,
+  callQueue,
+  callNextPatient
+} = require('../controllers/queueController');
+const { validateObjectId } = require('../middleware/validation');
 
-// GET / - 대기 목록 조회 (전체 경로: /api/queues)
-router.get('/', async (req, res) => {
-  try {
-    const queues = await Queue.find({
-      createdAt: { $gte: new Date().setHours(0, 0, 0, 0) }
-    })
-    .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms')
-    .sort({ createdAt: 1 })
-    .lean();
-    
-    res.json(queues);
-  } catch (error) {
-    console.error('대기 목록 조회 실패:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
+// 필요한 환자 정보 필드 정의
+const PATIENT_FIELDS = [
+  'basicInfo.name',
+  'basicInfo.gender',
+  'basicInfo.phone',
+  'basicInfo.birthDate',
+  'symptoms',
+  'status'
+].join(' ');
+
+// 활성 상태 정의
+const ACTIVE_STATUSES = ['waiting', 'called', 'consulting'];
+
+// 미들웨어: 요청/응답 로깅
+router.use((req, res, next) => {
+  const startTime = Date.now();
+  const requestId = Math.random().toString(36).substring(7);
+
+  // 요청 로깅
+  logger.info('📥 Queue API 요청:', {
+    requestId,
+    method: req.method,
+    path: req.originalUrl,
+    body: ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : undefined,
+    query: Object.keys(req.query).length ? req.query : undefined
+  });
+
+  // 응답 인터셉터
+  const originalJson = res.json;
+  res.json = function(data) {
+    const responseTime = Date.now() - startTime;
+    logger.info('📤 Queue API 응답:', {
+      requestId,
+      statusCode: res.statusCode,
+      responseTime: `${responseTime}ms`,
+      timestamp: new Date().toISOString()
+    });
+    return originalJson.call(this, data);
+  };
+
+  next();
 });
 
-// GET /api/queues/status - 대기 현황 통계
-router.get('/status', async (req, res) => {
-  try {
-    const today = moment().format('YYYY-MM-DD');
-    
-    const stats = await Queue.aggregate([
-      { $match: { date: today } },
-      { $group: {
-        _id: '$status',
-        count: { $sum: 1 }
-      }}
-    ]);
+// 환자 호출 API - 다른 라우트보다 먼저 정의
+router.put('/:id/call', callQueue);
 
-    const statusCount = {
-      waiting: 0,
-      'in-progress': 0,
-      completed: 0,
-      cancelled: 0,
-      ...Object.fromEntries(stats.map(s => [s._id, s.count]))
-    };
+// ✅ 기본 라우트
+router.get('/', getTodayQueueList);                    // 대기열 목록 조회
+router.post('/', registerQueue);                       // 대기열 등록
+router.get('/today', getTodayQueueList);              // 오늘 대기 목록 조회
+router.get('/status', getQueueStatus);                // 대기 현황 통계
 
-    console.log('✅ 대기현황 조회:', statusCount);
+// POST /api/queues/status - 환자별 대기 상태 조회 (POST 방식)
+router.post('/status', async (req, res) => {
+  const { patientId, date } = req.body;
 
-    res.status(200).json({
-      success: true,
-      date: today,
-      stats: statusCount
-    });
-
-  } catch (error) {
-    console.error('❌ 대기현황 조회 실패:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: '대기현황 조회 실패',
-      error: error.message 
+  // 필수 파라미터 검증
+  if (!patientId || !date) {
+    return res.status(400).json({
+      success: false,
+      message: 'patientId와 date는 필수입니다.'
     });
   }
-});
 
-// POST /api/queues - 대기 등록
-router.post('/', async (req, res) => {
-  try {
-    console.log('대기 등록 요청 데이터:', req.body);  // 디버깅용 로그 추가
-
-    const newQueue = await Queue.create(req.body);
-    const populatedQueue = await newQueue
-      .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms');
-
-    // 전체 큐 목록 조회 후 브로드캐스트
-    const updatedQueueList = await Queue.find()
-      .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms')
-      .sort({ createdAt: 1 })
-      .lean();
-
-    broadcastQueueUpdate(updatedQueueList);
-
-    res.status(201).json({
-      success: true,
-      data: populatedQueue
+  // ObjectId 유효성 검사
+  if (!mongoose.Types.ObjectId.isValid(patientId)) {
+    return res.status(400).json({
+      success: false,
+      message: '유효하지 않은 환자 ID입니다.'
     });
-  } catch (error) {
-    console.error('대기 등록 오류:', error);
+  }
+
+  try {
+    logger.info('🔍 환자 대기상태 조회 (POST):', {
+      patientId,
+      date,
+      timestamp: new Date().toISOString()
+    });
+
+    // 여기서 날짜 정규화 및 중복 체크
+    const normalizedDate = moment(date).startOf('day').toDate();
+    const existing = await Queue.findOne({ 
+      patientId, 
+      date: normalizedDate,
+      status: { $in: ['waiting', 'called', 'consulting'] },
+      isArchived: false
+    }).lean();
+
+    logger.info('✅ 환자 대기상태 조회 완료:', {
+      exists: !!existing,
+      status: existing?.status,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({ 
+      success: true, 
+      exists: !!existing,
+      data: existing,
+      message: existing ? '대기열 조회 성공' : '대기열 없음'
+    });
+  } catch (err) {
+    logger.error('❌ 환자 대기상태 조회 오류:', {
+      error: err.message,
+      stack: err.stack,
+      timestamp: new Date().toISOString()
+    });
     res.status(500).json({
       success: false,
-      message: error.message
+      message: '서버 오류',
+      error: err.message
     });
   }
 });
 
-// PATCH /:id/call - 환자 호출
-router.patch('/:id/call', async (req, res) => {
+router.get('/status/patient', async (req, res) => {   // 환자별 대기 상태 조회 (GET 방식)
+  const { patientId, date } = req.query;
+
+  // 필수 파라미터 검증
+  if (!patientId || !date) {
+    return res.status(400).json({
+      success: false,
+      message: 'patientId와 date는 필수입니다.'
+    });
+  }
+
+  // ObjectId 유효성 검사
+  if (!mongoose.Types.ObjectId.isValid(patientId)) {
+    return res.status(400).json({
+      success: false,
+      message: '유효하지 않은 환자 ID입니다.'
+    });
+  }
+
+  try {
+    logger.info('🔍 환자 대기상태 조회:', {
+      patientId,
+      date,
+      timestamp: new Date().toISOString()
+    });
+
+    const existing = await Queue.findOne({ 
+      patientId, 
+      date,
+      status: { $in: ['waiting', 'called', 'consulting'] },
+      isArchived: false
+    }).lean();
+
+    logger.info('✅ 환자 대기상태 조회 완료:', {
+      exists: !!existing,
+      status: existing?.status,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({ 
+      success: true, 
+      exists: !!existing,
+      data: existing,
+      message: existing ? '대기열 조회 성공' : '대기열 없음'
+    });
+  } catch (err) {
+    logger.error('❌ 환자 대기상태 조회 오류:', {
+      error: err.message,
+      stack: err.stack,
+      timestamp: new Date().toISOString()
+    });
+    res.status(500).json({
+      success: false,
+      message: '서버 오류',
+      error: err.message
+    });
+  }
+});
+
+// ✅ 대기열 상세 라우트
+router.get('/:id/history', async (req, res) => {      // 대기 이력 조회
   try {
     const { id } = req.params;
-    console.log('📞 환자 호출 요청:', { id });
+    
+    const history = await QueueHistory.find({ queueId: id })
+      .sort('-changedAt')
+      .populate('patientId', 'basicInfo.name');
 
-    // ID 유효성 검사
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      console.log('❌ 잘못된 ID 형식:', id);
+    res.json({
+      success: true,
+      data: history
+    });
+  } catch (error) {
+    logger.error('대기 이력 조회 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '이력 조회 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// PUT /api/queues/:queueId/status - 상태 변경
+router.put('/:queueId/status', async (req, res) => {
+  try {
+    const { queueId } = req.params;
+    const { status } = req.body;
+    const userId = req.user?.id || 'SYSTEM';
+
+    if (!['waiting', 'called', 'consulting', 'done', 'cancelled'].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: '유효하지 않은 ID 형식입니다.'
+        message: '유효하지 않은 상태값입니다.'
       });
     }
 
-    // 대기 정보 존재 여부 확인
-    const queue = await Queue.findById(id);
+    const queue = await Queue.findById(queueId);
     if (!queue) {
-      console.log('❌ 대기 정보 없음:', id);
       return res.status(404).json({
         success: false,
-        message: '해당 대기 정보를 찾을 수 없습니다.'
+        message: '해당 대기열을 찾을 수 없습니다.'
       });
     }
 
-    // 상태 업데이트
-    const updatedQueue = await Queue.findByIdAndUpdate(
-      id,
-      { status: 'called' },
-      { new: true }
-    ).populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms');
+    // 이전 상태 저장
+    const previousStatus = queue.status;
 
-    console.log('✅ 환자 호출 성공:', {
-      id: updatedQueue._id,
-      name: updatedQueue.patientId?.basicInfo?.name,
-      status: updatedQueue.status
+    // 상태 변경
+    queue.status = status;
+    queue.date = queue.date || new Date();
+    queue.sequenceNumber = queue.sequenceNumber || 1;
+    await queue.save();
+
+    // 이력 저장
+    await QueueHistory.create({
+      queueId: queue._id,
+      patientId: queue.patientId,
+      previousStatus,
+      newStatus: status,
+      changedBy: userId,
+      timestamp: new Date()
     });
 
-    // WebSocket 브로드캐스트
-    const updatedQueueList = await Queue.find()
-      .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms')
-      .sort({ createdAt: 1 })
+    // 전체 큐 목록 업데이트 브로드캐스트
+    const updatedQueueList = await Queue.find({ 
+      status: { $in: ACTIVE_STATUSES },
+      isArchived: false 
+    })
+      .populate('patientId', 'basicInfo')
+      .sort({ sequenceNumber: 1 })
       .lean();
 
     broadcastQueueUpdate(updatedQueueList);
 
     res.json({
       success: true,
-      data: updatedQueue
+      data: queue,
+      message: '상태가 변경되었습니다.'
     });
 
   } catch (error) {
-    console.error('❌ 환자 호출 실패:', error);
+    logger.error('상태 변경 실패:', error);
     res.status(500).json({
       success: false,
-      message: error.message
+      message: '상태 변경 중 오류가 발생했습니다.',
+      error: error.message
     });
   }
 });
 
-// 상태 업데이트 라우트 수정
-router.patch('/:id', async (req, res) => {
+// DELETE /api/queues/:queueId - 대기열 삭제
+router.delete('/:queueId', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status } = req.body;
-    console.log('🔄 상태 업데이트 요청:', { id, status });
-
-    // 진료중으로 변경 시 기존 진료중 환자 상태 변경
-    if (status === 'in-progress') {
-      await Queue.updateMany(
-        { status: 'in-progress' },
-        { status: 'waiting' }
-      );
-    }
-
-    const updatedQueue = await Queue.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    ).populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms');
-
-    if (!updatedQueue) {
-      console.log('❌ 대기 항목 없음:', id);
-      return res.status(404).json({
-        success: false,
-        message: '해당 대기 항목을 찾을 수 없습니다.'
-      });
-    }
-
-    console.log('✅ 상태 업데이트 완료:', updatedQueue);
-
-    // 전체 큐 목록 조회 후 브로드캐스트
-    const updatedQueueList = await Queue.find()
-      .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms')
-      .sort({ createdAt: 1 })
-      .lean();
-
-    broadcastQueueUpdate(updatedQueueList);
-
-    res.json({
-      success: true,
-      data: updatedQueue
-    });
-  } catch (error) {
-    console.error('❌ 상태 업데이트 실패:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-});
-
-// DELETE /api/queues/:id
-router.delete('/:id', async (req, res) => {
-  try {
-    const queueId = req.params.id;
-    console.log('🗑️ 대기 삭제 시도:', queueId);
+    const { queueId } = req.params;
 
     // 삭제 전 대기 정보 확인
     const queue = await Queue.findById(queueId);
     if (!queue) {
-      console.log('❌ 대기 항목 없음:', queueId);
       return res.status(404).json({
         success: false,
-        message: '해당 대기번호를 찾을 수 없습니다.'
+        message: '해당 대기열을 찾을 수 없습니다.'
       });
     }
 
@@ -224,187 +301,278 @@ router.delete('/:id', async (req, res) => {
     const queueInfo = {
       queueNumber: queue.queueNumber,
       date: queue.date,
-      name: queue.name,
       status: queue.status
     };
 
     // 삭제 실행
     await Queue.findByIdAndDelete(queueId);
     
-    console.log('✅ 대기 삭제 완료:', queueInfo);
+    logger.info('✅ 대기열 삭제 완료:', queueInfo);
 
-    // 전체 큐 목록 조회 후 브로드캐스트
-    const updatedQueueList = await Queue.find()
-      .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms')
-      .sort({ createdAt: 1 })
+    // 전체 큐 목록 업데이트 브로드캐스트
+    const updatedQueueList = await Queue.find({ 
+      status: { $in: ACTIVE_STATUSES },
+      isArchived: false 
+    })
+      .populate('patientId', 'basicInfo')
+      .sort({ sequenceNumber: 1 })
       .lean();
 
     broadcastQueueUpdate(updatedQueueList);
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: '대기 항목이 삭제되었습니다.',
+      message: '대기열이 삭제되었습니다.',
       data: queueInfo
     });
 
   } catch (error) {
-    console.error('❌ 대기 삭제 실패:', error);
+    logger.error('대기열 삭제 실패:', error);
     res.status(500).json({ 
       success: false, 
-      message: '대기 삭제 중 오류가 발생했습니다.',
+      message: '대기열 삭제 중 오류가 발생했습니다.',
       error: error.message 
     });
   }
 });
 
-// PUT /api/queues/:id/status
-router.put('/:id/status', async (req, res) => {
+// 테스트 관련 라우트
+router.get('/test', async (req, res) => {
   try {
-    const queueId = req.params.id;
-    const { status } = req.body;
-
-    // 상태값 유효성 검사
-    const validStatuses = ['waiting', 'called', 'in-progress', 'done', 'no-show', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      console.log('❌ 잘못된 상태값:', status);
-      return res.status(400).json({
-        success: false,
-        message: `유효하지 않은 상태값입니다. 가능한 값: ${validStatuses.join(', ')}`
-      });
-    }
-
-    // 대기 항목 존재 여부 확인
-    const queue = await Queue.findById(queueId);
-    if (!queue) {
-      console.log('❌ 대기 항목 없음:', queueId);
-      return res.status(404).json({
-        success: false,
-        message: '해당 대기번호를 찾을 수 없습니다.'
-      });
-    }
-
-    // 상태 업데이트
-    const previousStatus = queue.status;
-    queue.status = status;
-    
-    if (status === 'done' || status === 'no-show') {
-      queue.completedAt = new Date();
-    }
-
-    const updated = await queue.save();
-    
-    console.log('✅ 상태 변경 완료:', {
-      queueNumber: queue.queueNumber,
-      from: previousStatus,
-      to: status
-    });
-
-    // 전체 큐 목록 조회 후 브로드캐스트
-    const updatedQueueList = await Queue.find()
-      .populate('patientId', 'basicInfo.name basicInfo.birthDate basicInfo.phone symptoms')
-      .sort({ createdAt: 1 })
-      .lean();
-
-    broadcastQueueUpdate(updatedQueueList);
-
-    res.status(200).json({
-      success: true,
-      message: '대기 상태가 변경되었습니다.',
-      data: {
-        queueNumber: updated.queueNumber,
-        previousStatus,
-        currentStatus: updated.status,
-        updatedAt: updated.updatedAt
-      }
-    });
-
-  } catch (error) {
-    console.error('❌ 대기 상태 변경 실패:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: '대기 상태 변경 중 오류가 발생했습니다.',
-      error: error.message 
-    });
-  }
-});
-
-// 오늘 대기 목록 조회
-router.get('/today', async (req, res) => {
-  try {
-    const today = moment().format('YYYY-MM-DD');
-    
-    const queueList = await Queue.find({ date: today })
-      .sort({ createdAt: 1 })
-      .populate('patientId', 'basicInfo.name basicInfo.phone basicInfo.visitType')
-      .lean();
-
-    console.log('✅ 대기 목록 조회:', {
-      날짜: today,
-      총인원: queueList.length,
-      '대기중': queueList.filter(q => q.status === 'waiting').length,
-      '진료중': queueList.filter(q => q.status === 'in-progress').length,
-      '완료': queueList.filter(q => q.status === 'done').length,
-      '첫번째 환자': queueList[0]?.patientId?.basicInfo?.name || '없음'
-    });
+    const allQueues = await Queue.find()
+      .populate('patientId', 'basicInfo')
+      .sort({ registeredAt: -1 });
 
     res.json({
       success: true,
-      message: '대기 목록 조회 성공',
-      data: queueList
+      message: '전체 대기 목록 조회 성공',
+      count: allQueues.length,
+      data: allQueues
+    });
+  } catch (error) {
+    logger.error('테스트 조회 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
+router.post('/test-data', async (req, res) => {
+  try {
+    logger.info('테스트 데이터 생성 시작');
+
+    // 기존 테스트 데이터 삭제
+    await Queue.deleteMany({ isTest: true });
+
+    // 테스트용 환자 생성
+    const testPatient = new Patient({
+      basicInfo: {
+        name: '테스트환자',
+        gender: 'male',
+        birthDate: '1990-01-01',
+        phoneNumber: '010-0000-0000'
+      }
+    });
+    await testPatient.save();
+
+    // 테스트 대기열 생성
+    const testQueue = new Queue({
+      patientId: testPatient._id,
+      sequenceNumber: 1,
+      visitType: '초진',
+      status: 'waiting',
+      symptoms: ['발열', '두통'],
+      registeredAt: new Date(),
+      date: new Date(), // ← 오늘 날짜로 고정
+      isTest: true
+    });
+
+    await testQueue.save();
+
+    const populatedQueue = await Queue.findById(testQueue._id)
+      .populate('patientId', 'basicInfo');
+
+    res.json({
+      success: true,
+      message: '테스트 데이터 생성 성공',
+      testData: populatedQueue
     });
 
   } catch (error) {
-    console.error('❌ 대기 목록 조회 실패:', error);
+    logger.error('테스트 데이터 생성 실패:', error);
     res.status(500).json({
       success: false,
-      message: '대기 목록 조회 중 오류가 발생했습니다.',
+      message: '테스트 데이터 생성 중 오류가 발생했습니다.',
       error: error.message
     });
   }
 });
 
-// 상태 변경 API
-router.patch('/:queueId/status', async (req, res) => {
-  try {
-    const { queueId } = req.params;
-    const { status } = req.body;
+// 현재 진료 중인 환자 조회
+router.get('/current-patient', getCurrentPatient);
 
-    if (!['waiting', 'in-progress', 'done'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: '유효하지 않은 상태값입니다.'
+// 대기 상태 변경 라우트
+router.put('/:id/status', validateObjectId, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const queueId = req.params.id;
+
+    if (!status) {
+      return res.status(400).json({ 
+        success: false, 
+        message: '상태 값이 필요합니다.' 
       });
     }
 
-    const updatedQueue = await Queue.findByIdAndUpdate(
+    const queue = await Queue.findByIdAndUpdate(
       queueId,
-      { status },
+      { 
+        status,
+        updatedAt: new Date()
+      },
       { new: true }
-    )
-    .populate('patientId', 'basicInfo.name basicInfo.phone basicInfo.visitType')
+    ).populate('patientId');
+
+    if (!queue) {
+      return res.status(404).json({ 
+        success: false, 
+        message: '대기열 정보를 찾을 수 없습니다.' 
+      });
+    }
+
+    // WebSocket 이벤트 발생
+    req.app.get('io').emit('QUEUE_UPDATE', {
+      type: 'QUEUE_UPDATE',
+      queue: queue,
+      timestamp: queue.updatedAt
+    });
+
+    res.json({ 
+      success: true, 
+      message: '상태가 업데이트되었습니다.',
+      data: queue 
+    });
+  } catch (error) {
+    console.error('상태 업데이트 실패:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: '상태 업데이트 중 오류가 발생했습니다.' 
+    });
+  }
+});
+
+// 다음 환자 호출
+router.post('/next', async (req, res) => {
+  try {
+    logger.info('🔍 다음 환자 호출 시작');
+
+    // 1. 현재 날짜 범위 설정
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // 2. 대기 중인 환자 찾기
+    const nextQueue = await Queue.findOne({
+      status: 'waiting',
+      isArchived: false,
+      registeredAt: {
+        $gte: today,
+        $lt: tomorrow
+      }
+    })
+    .sort({ sequenceNumeric: 1 })
+    .populate('patientId', PATIENT_FIELDS);
+
+    if (!nextQueue) {
+      return res.json({
+        success: true,
+        data: null,
+        message: '대기 중인 환자가 없습니다.'
+      });
+    }
+
+    // 3. 환자 상태 업데이트
+    nextQueue.status = 'called';
+    nextQueue.calledAt = new Date();
+    await nextQueue.save();
+
+    // 4. 대기열 히스토리 기록
+    await QueueHistory.create({
+      queueId: nextQueue._id,
+      patientId: nextQueue.patientId._id,
+      previousStatus: 'waiting',
+      newStatus: 'called',
+      changedBy: req.user?.id || 'SYSTEM',
+      changedAt: new Date()
+    });
+
+    // 5. WebSocket 알림 전송
+    broadcastPatientCalled({
+      type: 'PATIENT_CALLED',
+      queueId: nextQueue._id,
+      patient: {
+        id: nextQueue.patientId._id,
+        name: nextQueue.patientId.basicInfo.name
+      },
+      status: 'called',
+      timestamp: new Date().toISOString()
+    });
+
+    // 6. 전체 큐 목록 업데이트 브로드캐스트
+    const updatedQueueList = await Queue.find({ 
+      status: { $in: ACTIVE_STATUSES },
+      isArchived: false,
+      registeredAt: {
+        $gte: today,
+        $lt: tomorrow
+      }
+    })
+    .populate('patientId', PATIENT_FIELDS)
+    .sort({ sequenceNumeric: 1 })
     .lean();
 
-    if (!updatedQueue) {
-      return res.status(404).json({
-        success: false,
-        message: '해당 대기번호를 찾을 수 없습니다.'
-      });
-    }
+    broadcastQueueUpdate(updatedQueueList);
 
-    res.status(200).json({
+    res.json({
       success: true,
-      message: '상태 변경 성공',
-      data: updatedQueue  // populate된 전체 객체 반환
+      data: nextQueue,
+      message: '다음 환자 호출 성공'
     });
 
   } catch (error) {
-    console.error('❌ 상태 변경 실패:', error);
+    logger.error('❌ 다음 환자 호출 실패:', error);
     res.status(500).json({
       success: false,
-      message: '상태 변경 중 오류가 발생했습니다.',
-      error: error.message
+      message: '다음 환자 호출 중 오류가 발생했습니다.'
     });
   }
+});
+
+// 에러 핸들링 미들웨어
+router.use((err, req, res, next) => {
+  const errorId = Math.random().toString(36).substring(7);
+  
+  logger.error('❌ Queue API 에러:', {
+    errorId,
+    method: req.method,
+    path: req.originalUrl,
+    error: {
+      name: err.name,
+      message: err.message,
+      code: err.code,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    },
+    timestamp: new Date().toISOString()
+  });
+
+  res.status(500).json({
+    success: false,
+    errorId,
+    message: '서버 내부 오류가 발생했습니다.',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
 });
 
 module.exports = router;

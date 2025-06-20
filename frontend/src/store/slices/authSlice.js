@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { login } from '../../api/authApi';
 
 // Mock login API
 const mockLoginAPI = async (credentials) => {
@@ -25,20 +26,38 @@ const mockLoginAPI = async (credentials) => {
 
 // Async thunk action
 export const loginUser = createAsyncThunk(
-  'auth/login',
+  'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await mockLoginAPI(credentials);
-      return response;
+      const { token, user } = await login(credentials.email, credentials.password);
+      
+      if (!token) {
+        return rejectWithValue('서버에서 토큰을 받지 못했습니다.');
+      }
+
+      // 토큰과 사용자 정보를 localStorage에 저장
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      return { user, token }; // token도 반환하여 fullfilled에서 사용 가능
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.response?.data?.message || '로그인 실패');
     }
   }
 );
 
 const initialState = {
   isAuthenticated: Boolean(localStorage.getItem('token')),
-  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
+  user: (() => {
+    try {
+      const userData = localStorage.getItem('user');
+      return userData ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage:', error);
+      localStorage.removeItem('user'); // 잘못된 데이터 제거
+      return null;
+    }
+  })(),
   loading: false,
   error: null
 };

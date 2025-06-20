@@ -2,6 +2,7 @@ const winston = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
 const config = require('../config');
 const path = require('path');
+const moment = require('moment-timezone');
 
 // 로그 포맷 정의
 const logFormat = winston.format.combine(
@@ -17,60 +18,53 @@ const logFormat = winston.format.combine(
 const logDir = path.dirname(config.logging.file);
 const logFileName = path.basename(config.logging.file);
 
+// 로그 레벨 정의
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  debug: 3
+};
+
+// 로그 색상 정의
+const colors = {
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  debug: 'blue'
+};
+
+winston.addColors(colors);
+
+// 타임스탬프 포맷터
+const timeStamp = () => moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss.SSS');
+
 // 로거 생성
 const logger = winston.createLogger({
-  level: config.logging.level,
-  format: logFormat,
-  defaultMeta: { service: 'hospital-management' },
+  levels,
+  format: winston.format.combine(
+    winston.format.timestamp({ format: timeStamp }),
+    winston.format.json(),
+    winston.format.prettyPrint()
+  ),
   transports: [
-    // 콘솔 출력 (개발 환경)
+    // 콘솔 출력
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
         winston.format.printf(
-          info => `${info.timestamp} ${info.level}: ${info.message}`
+          (info) => `${info.timestamp} ${info.level}: ${info.message}`
         )
       )
     }),
-
-    // 일별 로그 파일 생성
-    new DailyRotateFile({
-      dirname: logDir,
-      filename: `${logFileName}-%DATE%`,
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '14d',
-      format: winston.format.combine(
-        winston.format.printf(
-          info => {
-            const { timestamp, level, message, ...args } = info;
-            const rest = Object.keys(args).length ? JSON.stringify(args, null, 2) : '';
-            return `${timestamp} ${level}: ${message} ${rest}`;
-          }
-        )
-      )
-    })
-  ],
-  // 예외 및 거부 처리
-  exceptionHandlers: [
-    new DailyRotateFile({
-      dirname: logDir,
-      filename: 'exceptions-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '14d'
-    })
-  ],
-  rejectionHandlers: [
-    new DailyRotateFile({
-      dirname: logDir,
-      filename: 'rejections-%DATE%.log',
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      maxSize: '20m',
-      maxFiles: '14d'
+    // 파일 출력 (에러)
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error'
+    }),
+    // 파일 출력 (전체)
+    new winston.transports.File({
+      filename: 'logs/combined.log'
     })
   ]
 });

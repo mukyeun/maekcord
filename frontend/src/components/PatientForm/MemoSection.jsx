@@ -5,7 +5,7 @@ import memoIcon from '../../assets/icons/memo.svg';
 
 const { TextArea } = Input;
 
-const MemoSection = ({ data, onChange }) => {
+const MemoSection = ({ data = '', onChange }) => {
   return (
     <StyledCard>
       <SectionTitle>
@@ -38,11 +38,6 @@ const MemoSection = ({ data, onChange }) => {
       </FormItem>
     </StyledCard>
   );
-};
-
-MemoSection.defaultProps = {
-  data: '',
-  onChange: () => {}
 };
 
 export default MemoSection; 

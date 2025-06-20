@@ -532,67 +532,38 @@ const appointmentController = {
   },
 
   // 예약 수정
-  updateAppointment: async (req, res, next) => {
+  updateAppointment: async (req, res) => {
     try {
-      const { id } = req.params;
+      const appointmentId = req.params.id;
       const updateData = req.body;
 
-      const appointment = await Appointment.findById(id);
-      if (!appointment) {
-        throw new NotFoundError('예약을 찾을 수 없습니다.');
-      }
+      const updatedAppointment = await Appointment.findByIdAndUpdate(
+        appointmentId, 
+        updateData, 
+        { new: true }
+      ).populate('patientId', 'basicInfo');
 
-      // 이미 완료된 예약은 수정 불가
-      if (appointment.status === 'completed') {
-        throw new ValidationError('완료된 예약은 수정할 수 없습니다.');
-      }
-
-      // 시간 변경 시 중복 체크
-      if (updateData.dateTime && updateData.dateTime !== appointment.dateTime.toISOString()) {
-        const newDateTime = moment(updateData.dateTime);
-        const existingAppointment = await Appointment.findOne({
-          _id: { $ne: id },
-          dateTime: {
-            $gte: newDateTime.toDate(),
-            $lt: newDateTime.add(updateData.duration || appointment.duration, 'minutes').toDate()
-          },
-          status: 'scheduled'
+      if (!updatedAppointment) {
+        return res.status(404).json({
+          success: false,
+          message: '예약을 찾을 수 없습니다.'
         });
-
-        if (existingAppointment) {
-          throw new ValidationError('해당 시간에 이미 다른 예약이 있습니다.');
-        }
       }
 
-      // 수정된 필드들 추적
-      const modifiedFields = Object.keys(updateData)
-        .filter(key => updateData[key] !== appointment[key])
-        .join(', ');
+      logger.info(`Appointment updated: ${appointmentId}`, { updateData });
 
-      Object.assign(appointment, updateData);
-      appointment.updatedBy = req.user.id;
-      await appointment.save();
-
-      // 환자 기록에 예약 수정 활동 추가
-      const patient = await Patient.findById(appointment.patientId);
-      if (patient) {
-        patient.addActivityLog('appointment_updated', 
-          `예약 수정: ${modifiedFields}`, 
-          req.user.id
-        );
-        await patient.save();
-      }
-
-      logger.info(`Appointment updated: ${id}, Modified fields: ${modifiedFields}`);
-
-      res.json({
+      res.status(200).json({
         success: true,
         message: '예약이 수정되었습니다.',
-        data: appointment
+        data: updatedAppointment
       });
     } catch (error) {
-      logger.error('Appointment update failed:', error);
-      next(error);
+      logger.error('❌ 예약 수정 오류:', error);
+      res.status(500).json({
+        success: false,
+        message: '예약 수정 중 오류가 발생했습니다.',
+        error: error.message
+      });
     }
   },
 

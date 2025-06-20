@@ -114,54 +114,49 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// JWT 토큰 생성
+userSchema.methods.generateAuthToken = function() {
+  return jwt.sign(
+    { 
+      id: this._id,
+      role: this.role
+    },
+    config.jwt.secret,
+    { expiresIn: config.jwt.expiresIn }
+  );
+};
+
+// 로그인 시도 처리
+userSchema.methods.incLoginAttempts = async function() {
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $set: { loginAttempts: 1 },
+      $unset: { lockUntil: 1 }
+    });
+  }
+  const updates = { $inc: { loginAttempts: 1 } };
+  if (this.loginAttempts + 1 >= config.security.maxLoginAttempts) {
+    updates.$set = {
+      lockUntil: Date.now() + config.security.lockTime
+    };
+  }
+  return this.updateOne(updates);
+};
+
+// 로그인 성공 처리
+userSchema.methods.successfulLogin = function() {
+  return this.updateOne({
+    $set: { lastLogin: new Date() },
+    $unset: { lockUntil: 1 },
+    $set: { loginAttempts: 0 }
+  });
+};
+
 // updatedAt 자동 갱신
 userSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
-
-// 인스턴스 메서드
-userSchema.methods = {
-  // JWT 토큰 생성
-  generateAuthToken: function() {
-    return jwt.sign(
-      { 
-        id: this._id,
-        role: this.role
-      },
-      config.jwt.secret,
-      { expiresIn: config.jwt.expiresIn }
-    );
-  },
-
-  // 로그인 시도 처리
-  incLoginAttempts: async function() {
-    // 잠금 시간이 지난 경우
-    if (this.lockUntil && this.lockUntil < Date.now()) {
-      return this.updateOne({
-        $set: { loginAttempts: 1 },
-        $unset: { lockUntil: 1 }
-      });
-    }
-
-    const updates = { $inc: { loginAttempts: 1 } };
-    if (this.loginAttempts + 1 >= config.security.maxLoginAttempts) {
-      updates.$set = {
-        lockUntil: Date.now() + config.security.lockTime
-      };
-    }
-    return this.updateOne(updates);
-  },
-
-  // 로그인 성공 처리
-  successfulLogin: function() {
-    return this.updateOne({
-      $set: { lastLogin: new Date() },
-      $unset: { lockUntil: 1 },
-      $set: { loginAttempts: 0 }
-    });
-  }
-};
 
 // 정적 메서드
 userSchema.statics = {

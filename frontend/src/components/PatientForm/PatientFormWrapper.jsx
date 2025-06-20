@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, message, Steps } from 'antd';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Modal, Button, message, Steps, Alert, Form } from 'antd';
 import styled from 'styled-components';
 import BasicInfoSection from './BasicInfoSection';
 import MedicationSection from './MedicationSection';
@@ -7,7 +7,17 @@ import SymptomSection from './SymptomSection';
 import StressSection from './StressSection';
 import WaveAnalysisSection from './WaveAnalysisSection';
 import MemoSection from './MemoSection';
-import { registerPatient } from '../../api/patientApi';
+import { registerPatient, updatePatient, findPatientByCode, checkPatient } from '../../api/patientApi';
+import { registerQueue, deleteQueue, getQueueStatus } from '../../api/queueApi';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('Asia/Seoul');
 
 const FormContainer = styled.div`
   max-width: 1200px;
@@ -25,140 +35,406 @@ const ActionButtons = styled.div`
 const initialFormData = {
   basicInfo: {
     name: '',
-    phone: '',
     residentNumber: '',
     gender: '',
+    birthDate: '',
+    phone: '',
     personality: '',
     workIntensity: '',
-    height: '',
-    weight: '',
-    bmi: '',
-    visitType: '초진'
+    height: null,
+    weight: null,
+    bmi: null,
+    visitType: '초진',
   },
   medication: {
     current: [],
-    history: []
+    preferences: [],
   },
-  symptoms: {
-    symptoms: [],
-    symptomDetails: ''
-  },
-  memo: '',
+  symptoms: [],
   records: {
-    pulseWave: {
-      systolicBP: '',
-      diastolicBP: '',
-      heartRate: '',
-      pulsePressure: '',
-      'a-b': '',
-      'a-c': '',
-      'a-d': '',
-      'a-e': '',
-      'b/a': '',
-      'c/a': '',
-      'd/a': '',
-      'e/a': '',
-      elasticityScore: '',
-      PVC: '',
-      BV: '',
-      SV: '',
-      lastUpdated: null
+    pulse: {
+      values: {},
+      measuredAt: '',
     },
     stress: {
       items: [],
-      totalScore: 0,
+      score: 0,
       level: '',
-      description: '',
-      details: ''
+      measuredAt: '',
     }
-  }
+  },
+  memo: '',
 };
 
-const PatientFormWrapper = ({ visible, onClose, onSuccess }) => {
+const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false, fetchQueue = () => {} }) => {
+  const [isModalVisible, setIsModalVisible] = useState(visible);
   const [formData, setFormData] = useState(initialFormData);
   const [currentStep, setCurrentStep] = useState(0);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (visible) {
-      setCurrentStep(0);
-      setFormData(initialFormData);
-    }
+    setIsModalVisible(visible);
   }, [visible]);
 
+  useEffect(() => {
+    if (isModalVisible) {
+      // 모달이 열릴 때 완전히 초기화
+      setFormData(initialFormData);
+      setCurrentStep(0);
+      setError(null);
+      form.resetFields && form.resetFields();
+    }
+  }, [isModalVisible, form]);
+
   const handleSectionChange = (section, newData) => {
-    console.log(`✏️ Section updated: ${section}`, newData);
     setFormData((prev) => ({
       ...prev,
       [section]: newData
     }));
   };
 
-  const handleNext = () => {
-    console.log('➡️ 다음 버튼 클릭됨');
-    setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1));
+  const extractBirthDate = (residentNumber) => {
+    if (!residentNumber || residentNumber.length < 7) return null;
+    
+    const cleanNumber = residentNumber.replace(/-/g, '');
+    const year = cleanNumber.substring(0, 2);
+    const month = cleanNumber.substring(2, 4);
+    const day = cleanNumber.substring(4, 6);
+    const genderDigit = cleanNumber.substring(6, 7);
+    
+    let fullYear;
+    if (genderDigit === '1' || genderDigit === '2') {
+      fullYear = `19${year}`;
+    } else if (genderDigit === '3' || genderDigit === '4') {
+      fullYear = `20${year}`;
+    } else {
+      return null;
+    }
+    
+    return `${fullYear}-${month}-${day}`;
   };
 
-  const handlePrev = () => {
-    console.log('⬅️ 이전 버튼 클릭됨');
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  const validateFormData = (data) => {
+    const errors = [];
+    
+    if (!data.basicInfo?.name) errors.push('이름을 입력해주세요.');
+    if (!data.basicInfo?.gender) errors.push('성별을 선택해주세요.');
+    if (!data.basicInfo?.residentNumber) errors.push('주민등록번호를 입력해주세요.');
+    if (!data.basicInfo?.phone) errors.push('연락처를 입력해주세요.');
+
+    return errors;
   };
 
-  const sanitizeFormData = (formData) => {
-    const sanitizedBasicInfo = {
-      ...formData.basicInfo,
-      name: formData.basicInfo?.name?.trim() || '',
-      phone: formData.basicInfo?.phone || '',
-      visitType: formData.basicInfo?.visitType || '초진'
+  const sanitizeFormData = (data) => {
+    const birthDate = extractBirthDate(data.basicInfo?.residentNumber);
+
+    // 기본 정보 정제
+    const sanitizedData = {
+      basicInfo: {
+        name: data.basicInfo?.name || '',
+        gender: data.basicInfo?.gender || '',
+        birthDate: birthDate || '',
+        phone: data.basicInfo?.phone || '',
+        residentNumber: data.basicInfo?.residentNumber || '',
+        personality: data.basicInfo?.personality || '',
+        workIntensity: data.basicInfo?.workIntensity || '',
+        height: Number(data.basicInfo?.height) || null,
+        weight: Number(data.basicInfo?.weight) || null,
+        bmi: Number(data.basicInfo?.bmi) || null,
+        visitType: data.basicInfo?.visitType || '초진'
+      },
+      
+      // 의료 정보 정제
+      medications: {
+        current: Array.isArray(data.medication?.medications) 
+          ? data.medication.medications.filter(Boolean).map(m => m.trim())
+          : [],
+        preferences: Array.isArray(data.medication?.preferences)
+          ? data.medication.preferences.filter(Boolean).map(p => p.trim())
+          : []
+      },
+
+      // 스트레스 정보 정제
+      stress: data.records?.stress
+        ? {
+            level: data.records.stress.level || 'normal',
+            score: Number(data.records.stress.score) || 0,
+            items: Array.isArray(data.records.stress.items)
+              ? data.records.stress.items
+              : [],
+            measuredAt: data.records.stress.measuredAt || new Date()
+          }
+        : null,
+
+      // 맥파 정보 정제 - pulseWave로 변경
+      records: {
+        pulseWave: data.records?.pulseWave
+          ? {
+              systolicBP: Number(data.records.pulseWave.systolicBP) || 0,
+              diastolicBP: Number(data.records.pulseWave.diastolicBP) || 0,
+              heartRate: Number(data.records.pulseWave.heartRate) || 0,
+              pulsePressure: Number(data.records.pulseWave.pulsePressure) || 0,
+              'a-b': Number(data.records.pulseWave['a-b']) || 0,
+              'a-c': Number(data.records.pulseWave['a-c']) || 0,
+              'a-d': Number(data.records.pulseWave['a-d']) || 0,
+              'a-e': Number(data.records.pulseWave['a-e']) || 0,
+              'b/a': Number(data.records.pulseWave['b/a']) || 0,
+              'c/a': Number(data.records.pulseWave['c/a']) || 0,
+              'd/a': Number(data.records.pulseWave['d/a']) || 0,
+              'e/a': Number(data.records.pulseWave['e/a']) || 0,
+              elasticityScore: Number(data.records.pulseWave.elasticityScore) || 0,
+              PVC: Number(data.records.pulseWave.PVC) || 0,
+              BV: Number(data.records.pulseWave.BV) || 0,
+              SV: Number(data.records.pulseWave.SV) || 0,
+              lastUpdated: data.records.pulseWave.lastUpdated || new Date()
+            }
+          : null,
+        stress: data.records?.stress
+          ? {
+              level: data.records.stress.level || 'normal',
+              score: Number(data.records.stress.score) || 0,
+              items: Array.isArray(data.records.stress.items)
+                ? data.records.stress.items
+                : [],
+              measuredAt: data.records.stress.measuredAt || new Date()
+            }
+          : null
+      },
+
+      // 증상 정보 정제
+      symptoms: Array.isArray(data.symptoms) 
+        ? data.symptoms.filter(Boolean).map(s => s.trim())
+        : [],
+      
+      // 메모 정제
+      memo: (data.memo || '').trim(),
+      
+      // 메타데이터
+      metadata: {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'active'
+      }
     };
 
-    const flatSymptoms = Array.isArray(formData.symptoms?.symptoms)
-      ? formData.symptoms.symptoms
-      : [];
+    console.log('📝 정제된 환자 데이터:', JSON.stringify(sanitizedData, null, 2));
+    
+    return sanitizedData;
+  };
 
-    return {
-      basicInfo: sanitizedBasicInfo,
-      symptoms: flatSymptoms,
-      symptomDetails: formData.symptoms?.symptomDetails || '',
-      medication: formData.medication || {},
-      records: formData.records || {},
-      memo: formData.memo || ''
-    };
+  const extractPatientId = (response) => {
+    if (!response?.data) return null;
+    
+    const { data } = response;
+    
+    if (data.patientId) return data.patientId;
+    if (data.patient?._id) return data.patient._id;
+    if (data._id) return data._id;
+    
+    return null;
   };
 
   const handleSave = async () => {
     try {
-      setSaving(true);
-
-      if (!formData.basicInfo?.name?.trim()) {
-        message.error('환자 이름을 입력해주세요.');
+      const errors = validateFormData(formData);
+      if (errors.length > 0) {
+        errors.forEach(err => message.warning(err));
         return;
       }
+      console.log('🟡 저장 시작 - 폼 데이터:', formData);
 
-      const sanitizedData = sanitizeFormData(formData);
+      const sanitized = sanitizeFormData(formData);
+      console.log("🧼 정제 후 데이터:", sanitized);
 
-      console.log('📝 저장할 데이터:', {
-        'basicInfo.name': sanitizedData.basicInfo.name,
-        'basicInfo.gender': sanitizedData.basicInfo.gender,
-        symptoms: sanitizedData.symptoms,
-        '전체 구조': JSON.stringify(sanitizedData, null, 2)
-      });
+      // 환자 등록
+      const res = await registerPatient(sanitized);
+      console.log('👤 환자 등록 응답:', res);
 
-      const response = await registerPatient(sanitizedData);
-      console.log('✅ 저장 완료:', response);
-
-      message.success('환자 정보가 저장되었습니다.');
-      if (typeof onSuccess === 'function') {
-        await onSuccess();
+      let patientId;
+      if (res.success === false && res.patientId) {
+        // 이미 등록된 환자인 경우, 주민번호로 checkPatient 호출
+        const checkResponse = await checkPatient(sanitized.basicInfo.residentNumber);
+        if (!checkResponse || !checkResponse._id) {
+          throw new Error("환자 ID를 찾을 수 없습니다");
+        }
+        patientId = checkResponse._id;
+        
+        // 환자 정보 업데이트 시도
+        try {
+          // basicInfo와 records 모두 업데이트하도록 수정
+          await updatePatient(patientId, { basicInfo: sanitized.basicInfo, records: sanitized.records });
+        } catch (updateError) {
+          console.warn('⚠️ 환자 정보 업데이트 실패:', updateError);
+          // 업데이트 실패해도 계속 진행
+        }
+      } else {
+        // 새로 등록된 환자인 경우
+        patientId = res?.data?.patientId || res?.data?._id || res?._id;
       }
-      onClose();
+
+      if (!patientId) {
+        throw new Error("환자 ID를 받아오지 못했습니다");
+      }
+
+      console.log('✅ 등록된 환자 ID:', patientId);
+
+      // 대기열 등록 시도
+      try {
+        // 오늘 날짜를 YYYY-MM-DD로
+        const todayStr = dayjs().format('YYYY-MM-DD');
+        // 기존 대기열 확인
+        const existingQueue = await getQueueStatus(patientId, todayStr);
+        
+        if (existingQueue.exists) {
+          // 사용자에게 확인
+          const shouldUpdate = window.confirm(
+            '이미 같은 날짜에 등록된 대기열이 있습니다. 최신 정보로 업데이트하시겠습니까?'
+          );
+          
+          if (shouldUpdate) {
+            // 기존 대기열 삭제
+            await deleteQueue(existingQueue.data._id);
+            console.log('🗑️ 기존 대기열 삭제 완료');
+          } else {
+            throw new Error('사용자가 업데이트를 취소했습니다.');
+          }
+        }
+
+        // 새로운 대기열 등록
+        const queueData = {
+          patientId,
+          visitType: formData.basicInfo?.visitType || '초진',
+          symptoms: formData.symptoms || [],
+          date: dayjs().format('YYYY-MM-DD'), // 반드시 YYYY-MM-DD
+        };
+
+        const queueResponse = await registerQueue(queueData);
+        console.log('✅ 대기열 등록 성공:', queueResponse);
+        
+        // 성공 메시지 표시
+        message.success('환자 정보가 저장되었습니다.');
+        
+        // 완전한 초기화
+        setFormData(initialFormData);
+        setCurrentStep(0);
+        setError(null);
+        form.resetFields && form.resetFields();
+        
+        onSaveSuccess();
+        
+        // 약간의 지연 후 모달 닫기 (초기화가 완료되도록)
+        setTimeout(() => {
+          handleClose();
+        }, 100);
+        
+        fetchQueue();
+
+      } catch (queueError) {
+        if (queueError.message === '사용자가 업데이트를 취소했습니다.') {
+          message.info('대기열 등록이 취소되었습니다.');
+        } else {
+          console.error('❌ 대기열 등록 실패:', queueError);
+          message.error(queueError.message || '대기열 등록 중 오류가 발생했습니다.');
+        }
+      }
+
     } catch (error) {
       console.error('❌ 저장 실패:', error);
-      message.error('저장에 실패했습니다: ' + error.message);
+      message.error(error.message || '저장 중 오류가 발생했습니다.');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
+
+  // ✅ 대기열 상태 번역 함수 개선
+  const translateQueueStatus = (status) => {
+    const statusMap = {
+      waiting: '대기 중',
+      called: '호출됨',
+      consulting: '진료 중',
+      done: '완료',
+      cancelled: '취소됨'
+    };
+    return statusMap[status] || status;
+  };
+
+  const hasUnsavedChanges = () => {
+    return (
+      Object.values(formData.basicInfo).some(value => value !== '') ||
+      (formData.symptoms?.symptoms?.length > 0) ||
+      Object.values(formData.medication).some(arr => arr?.length > 0) ||
+      formData.memo !== '' ||
+      Object.values(formData.records?.pulseWave || {}).some(v => v !== '') ||
+      (formData.records?.stress?.items?.length > 0)
+    );
+  };
+
+  const handleClose = useCallback(() => {
+    // 모달을 닫을 때도 완전히 초기화
+    setFormData(initialFormData);
+    setCurrentStep(0);
+    setError(null);
+    form.resetFields && form.resetFields();
+    
+    setIsModalVisible(false);
+    if (typeof onClose === 'function') {
+      onClose();
+    }
+  }, [onClose, form]);
+
+  const handleExit = () => {
+    if (hasUnsavedChanges()) {
+      Modal.confirm({
+        title: '작성 중인 내용이 있습니다',
+        content: '저장하지 않고 나가시겠습니까?',
+        okText: '나가기',
+        cancelText: '계속 작성',
+        onOk: () => {
+          handleClose();
+          if (window.location.pathname !== '/') {
+            window.location.href = '/';
+          }
+        }
+      });
+    } else {
+      handleClose();
+      if (window.location.pathname !== '/') {
+        window.location.href = '/';
+      }
+    }
+  };
+
+  const handleCancel = useCallback((e) => {
+    e?.stopPropagation();
+    e?.preventDefault();
+    
+    if (hasUnsavedChanges()) {
+      Modal.confirm({
+        title: '작성 중인 내용이 있습니다',
+        content: '저장하지 않고 나가시겠습니까?',
+        okText: '나가기',
+        cancelText: '계속 작성',
+        onOk: () => {
+          // 취소 시에도 완전히 초기화
+          setFormData(initialFormData);
+          setCurrentStep(0);
+          setError(null);
+          form.resetFields && form.resetFields();
+          handleClose();
+        }
+      });
+    } else {
+      // 변경사항이 없어도 초기화
+      setFormData(initialFormData);
+      setCurrentStep(0);
+      setError(null);
+      form.resetFields && form.resetFields();
+      handleClose();
+    }
+  }, [handleClose, form]);
 
   const sections = [
     {
@@ -225,50 +501,60 @@ const PatientFormWrapper = ({ visible, onClose, onSuccess }) => {
     }
   ];
 
+  // Save button enable condition - 이름만 필수, 메모는 선택사항
+  const isSaveButtonEnabled = currentStep === sections.length - 1 && formData.basicInfo.name;
+
   return (
     <Modal
       title="환자 정보 입력"
-      open={visible}
-      onCancel={onClose}
+      open={isModalVisible}
+      onCancel={handleClose}
       width="90%"
       style={{ top: 20 }}
       footer={null}
-      destroyOnClose
+      destroyOnClose={true}
+      maskClosable={false}
+      keyboard={true}
+      styles={{
+        body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
+      }}
     >
-      <FormContainer>
-        <Steps
-          current={currentStep}
-          onChange={setCurrentStep}
-          items={sections.map((section) => ({ title: section.title }))}
-          style={{ marginBottom: 24 }}
-        />
+      <Form form={form}>
+        <FormContainer>
+          <Steps
+            current={currentStep}
+            onChange={setCurrentStep}
+            items={sections.map((section) => ({ title: section.title }))}
+            style={{ marginBottom: 24 }}
+          />
 
-        {sections[currentStep].content}
+          {sections[currentStep].content}
 
-        <ActionButtons>
-          {currentStep > 0 && (
-            <Button onClick={handlePrev} disabled={saving}>
-              이전
-            </Button>
-          )}
-          {currentStep < sections.length - 1 ? (
-            <Button type="primary" onClick={handleNext} disabled={saving}>
-              다음
-            </Button>
-          ) : (
-            <Button 
-              type="primary" 
-              onClick={handleSave} 
-              loading={saving}
-              disabled={!formData.basicInfo.name}
-            >
-              저장
-            </Button>
-          )}
-        </ActionButtons>
-      </FormContainer>
+          <ActionButtons>
+            {currentStep > 0 && (
+              <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading}>
+                이전
+              </Button>
+            )}
+            {currentStep < sections.length - 1 ? (
+              <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading}>
+                다음
+              </Button>
+            ) : (
+              <Button 
+                type="primary"
+                onClick={handleSave}
+                loading={loading}
+                disabled={!isSaveButtonEnabled}
+              >
+                저장하기
+              </Button>
+            )}
+          </ActionButtons>
+        </FormContainer>
+      </Form>
     </Modal>
   );
 };
 
-export default PatientFormWrapper;
+export default React.memo(PatientFormWrapper);

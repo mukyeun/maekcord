@@ -12,14 +12,19 @@ const validators = {
   },
 
   validatePatient: (req, res, next) => {
-    const { name, birthDate, gender, contact } = req.body;
+    const { basicInfo } = req.body;
     
-    if (!name || !birthDate || !gender || !contact) {
-      return next(new ValidationError('필수 입력 항목이 누락되었습니다.'));
-    }
-    
-    if (!contact.phone) {
-      return next(new ValidationError('연락처는 필수 입력 항목입니다.'));
+    // basicInfo가 있는 경우에만 검증
+    if (basicInfo) {
+      const { name, gender } = basicInfo;
+      
+      if (name && !name.trim()) {
+        return next(new ValidationError('환자 이름은 필수 입력 항목입니다.'));
+      }
+      
+      if (gender && !['male', 'female', ''].includes(gender)) {
+        return next(new ValidationError('유효하지 않은 성별입니다.'));
+      }
     }
     
     next();

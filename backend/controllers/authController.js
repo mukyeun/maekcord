@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const RefreshToken = require('../models/refreshToken');
-const logger = require('../config/logger');
+const logger = require('../utils/logger');
 const authService = require('../services/authService');
 const { USER_ROLES } = require('../config/constants');
 const config = require('../config');
@@ -40,37 +40,47 @@ const authController = {
   /**
    * 사용자 로그인
    */
-  async login(req, res, next) {
+  async login(req, res) {
     try {
       const { email, password } = req.body;
+      
+      console.log('로그인 시도:', { email, password }); // 디버깅용
 
-      // 사용자 찾기
-      const user = await User.findOne({ email });
+      // 사용자 찾기 (비밀번호 포함)
+      const user = await User.findOne({ email }).select('+password');
       if (!user) {
-        throw new AuthenticationError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        console.log('사용자를 찾을 수 없음:', email); // 디버깅용
+        return res.status(401).json({
+          success: false,
+          message: '이메일 또는 비밀번호가 올바르지 않습니다.'
+        });
       }
 
-      // 계정 잠금 확인
-      if (user.isLocked) {
-        throw new AuthenticationError(
-          `계정이 잠겼습니다. ${new Date(user.lockUntil).toLocaleString()}까지 기다려주세요.`
-        );
-      }
+      console.log('사용자 찾음:', { email: user.email, name: user.name }); // 디버깅용
 
       // 비밀번호 확인
       const isMatch = await user.comparePassword(password);
+      console.log('비밀번호 확인 결과:', isMatch); // 디버깅용
+      
       if (!isMatch) {
-        await user.incLoginAttempts();
-        throw new AuthenticationError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        return res.status(401).json({
+          success: false,
+          message: '이메일 또는 비밀번호가 올바르지 않습니다.'
+        });
       }
 
-      // 로그인 성공 처리
-      await user.successfulLogin();
+      // JWT 토큰 생성
+      const token = jwt.sign(
+        { 
+          id: user._id,  // userId 대신 id 사용
+          email: user.email, 
+          role: user.role 
+        },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      );
 
-      // 토큰 생성
-      const token = user.generateAuthToken();
-
-      logger.info(`User logged in: ${email}`);
+      console.log('로그인 성공:', { email: user.email, role: user.role }); // 디버깅용
 
       res.json({
         success: true,
@@ -86,8 +96,11 @@ const authController = {
         }
       });
     } catch (error) {
-      logger.error('Login failed:', error);
-      next(error);
+      console.error('로그인 오류:', error); // 디버깅용
+      res.status(500).json({
+        success: false,
+        message: '서버 내부 오류가 발생했습니다.'
+      });
     }
   },
 

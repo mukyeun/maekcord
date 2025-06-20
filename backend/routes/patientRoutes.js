@@ -7,6 +7,8 @@ const Patient = require('../models/Patient');
 const Queue = require('../models/Queue');
 const moment = require('moment');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
+const generateAndSaveQueue = require('../utils/generateAndSaveQueue');
 
 /**
  * @swagger
@@ -119,7 +121,32 @@ const mongoose = require('mongoose');
  *                     pages:
  *                       type: integer
  */
-router.get('/', auth, patientController.getPatients);
+router.get('/', async (req, res) => {
+  try {
+    logger.info('📋 환자 목록 조회 시작');
+    
+    const patients = await Patient.find()
+      .select('patientId name birthDate gender status createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    logger.info(`✅ 환자 목록 조회 성공: ${patients.length}명 조회됨`);
+    logger.debug('조회된 환자 목록:', patients);
+
+    res.json({
+      success: true,
+      data: patients,
+      message: '환자 목록 조회 성공'
+    });
+  } catch (error) {
+    logger.error('❌ 환자 목록 조회 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 목록 조회 중 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+});
 
 /**
  * @swagger
@@ -150,102 +177,94 @@ router.get('/', auth, patientController.getPatients);
  *       404:
  *         description: 환자를 찾을 수 없음
  */
-router.get('/:id', auth, patientController.getPatient);
-
-// 환자 등록 및 대기번호 생성 API
-router.post('/register', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    // 1. 요청 데이터 전체 로깅
-    console.log('📦 수신된 요청:', {
-      'body 전체': JSON.stringify(req.body, null, 2),
-      'basicInfo 존재': !!req.body.basicInfo,
-      'name 존재': !!req.body.basicInfo?.name,
-      'name 값': req.body.basicInfo?.name
-    });
+    const { id } = req.params;
+    logger.info('📋 환자 상세 조회 요청:', id);
 
-    // 2. 데이터 구조 분해
-    const {
-      basicInfo = {},
-      symptoms = [],
-      medication = {},
-      records = {},
-      memo = ''
-    } = req.body;
-
-    // 3. basicInfo 검증
-    if (!basicInfo?.name?.trim()) {
-      console.warn('❌ name 누락:', { basicInfo });
-      return res.status(400).json({
+    const patient = await Patient.findById(id).lean();
+    
+    if (!patient) {
+      logger.warn('⚠️ 환자를 찾을 수 없음:', id);
+      return res.status(404).json({
         success: false,
-        message: '환자 이름은 필수입니다.'
+        message: '해당 환자를 찾을 수 없습니다.'
       });
     }
-
-    // 4. 환자 데이터 구성
-    const patientData = {
-      basicInfo: {
-        ...basicInfo,
-        name: basicInfo.name.trim(),
-        phone: basicInfo.phone || '',
-        visitType: basicInfo.visitType || '초진'
-      },
-      symptoms: Array.isArray(symptoms) ? symptoms : [],
-      medication,
-      records,
-      memo
-    };
-
-    // 5. 저장 전 데이터 확인
-    console.log('📝 저장할 데이터:', {
-      'basicInfo.name': patientData.basicInfo.name,
-      'symptoms': patientData.symptoms,
-      '전체 구조': JSON.stringify(patientData, null, 2)
-    });
-
-    // 6. 환자 저장
-    const newPatient = new Patient(patientData);
-    const savedPatient = await newPatient.save();
-
-    // 7. 대기번호 생성 및 저장
-    const today = moment().format('YYYY-MM-DD');
-    const countToday = await Queue.countDocuments({ date: today });
-    const queueNumber = `Q${today.replace(/-/g, '')}-${String(countToday + 1).padStart(3, '0')}`;
-
-    const newQueue = new Queue({
-      queueNumber,
-      date: today,
-      patientId: savedPatient._id,
-      name: savedPatient.basicInfo.name,
-      phone: savedPatient.basicInfo.phone,
-      birthDate: savedPatient.basicInfo.birthDate,
-      visitType: savedPatient.basicInfo.visitType,
-      symptoms: savedPatient.symptoms,
-      status: 'waiting'
-    });
-
-    const savedQueue = await newQueue.save();
-
-    // 8. 응답
-    res.status(201).json({
+    
+    logger.info('✅ 환자 상세 조회 성공:', patient);
+    
+    res.json({
       success: true,
-      message: '환자 등록이 완료되었습니다.',
-      data: {
-        patient: savedPatient,
-        queue: savedQueue
-      }
+      data: patient,
+      message: '환자 상세 조회 성공'
     });
-
   } catch (error) {
-    console.error('❌ 환자 등록 실패:', {
-      message: error.message,
-      stack: error.stack
-    });
-
+    logger.error('❌ 환자 상세 조회 실패:', error);
     res.status(500).json({
       success: false,
-      message: '환자 등록 중 오류가 발생했습니다.',
+      message: '환자 상세 조회 중 오류가 발생했습니다.',
       error: error.message
     });
+  }
+});
+
+// 환자 등록 API
+router.post('/register', async (req, res) => {
+  try {
+    const residentNumber = req.body.basicInfo?.residentNumber;
+    console.log('✅ residentNumber:', residentNumber);
+
+    // 기존 환자 존재 확인
+    const existing = await Patient.findOne({
+      'basicInfo.residentNumber': residentNumber,
+    });
+
+    let patientId;
+    if (existing) {
+      patientId = existing.patientId;
+    } else {
+      patientId = await Patient.generateUniqueId();
+    }
+    console.log('✅ 생성된 patientId:', patientId);
+
+    const patientData = { ...req.body, patientId };
+    console.log('✅ 저장할 전체 데이터:', patientData);
+
+    let savedPatient;
+    if (existing) {
+      // 먼저 patientId를 설정
+      patientData.patientId = existing.patientId;
+    
+      // 이후 전체 덮어쓰기
+      Object.assign(existing, patientData);
+    
+      savedPatient = await existing.save();
+    } else {
+      const newPatient = new Patient(patientData);
+      savedPatient = await newPatient.save();
+    }
+
+    // MongoDB의 _id를 patientId로 사용
+    const patientIdFromMongo = savedPatient._id;
+    
+    if (existing) {
+      return res.status(200).json({
+        success: false,
+        message: '이미 등록된 환자입니다.',
+        patientId: existing.patientId,
+        _id: existing._id,
+      });
+    }
+    
+    res.status(201).json({ 
+      success: true, 
+      patientId: patientIdFromMongo,  // ObjectId 반환
+      data: savedPatient 
+    });
+  } catch (err) {
+    console.error('❌ 환자 등록 오류:', err.message);
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -277,7 +296,7 @@ router.post('/register', async (req, res) => {
  *       404:
  *         description: 환자를 찾을 수 없음
  */
-router.put('/:id', auth, validatePatient, patientController.updatePatient);
+router.put('/:id', auth, patientController.updatePatient);
 
 /**
  * @swagger
@@ -316,5 +335,55 @@ router.put('/:id', auth, validatePatient, patientController.updatePatient);
  *         description: 환자를 찾을 수 없음
  */
 router.put('/:id/status', auth, patientController.updateStatus);
+
+// ✅ 환자 중복 체크 API
+router.post('/check', async (req, res) => {
+  try {
+    const residentNumber = req.body?.basicInfo?.residentNumber;
+    
+    if (!residentNumber) {
+      return res.status(400).json({
+        success: false,
+        message: '주민번호가 필요합니다.'
+      });
+    }
+
+    const existingPatient = await Patient.findOne({
+      'basicInfo.residentNumber': residentNumber
+    });
+
+    if (existingPatient) {
+      return res.json({
+        exists: true,
+        patientId: existingPatient.patientId,
+        _id: existingPatient._id
+      });
+    }
+
+    res.json({
+      exists: false,
+      patientId: null,
+      _id: null
+    });
+  } catch (error) {
+    logger.error('❌ 환자 중복 체크 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || '환자 중복 체크 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+router.get('/code/:patientCode', async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ patientId: req.params.patientCode });
+    if (!patient) {
+      return res.status(404).json({ message: '환자를 찾을 수 없습니다.' });
+    }
+    res.json(patient);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;

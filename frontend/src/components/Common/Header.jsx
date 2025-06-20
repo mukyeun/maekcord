@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Button, Space, Typography, Modal, Form, Input, message } from 'antd';
 import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
 import { 
   MenuOutlined, 
   UserOutlined, 
@@ -10,7 +11,7 @@ import {
   LoginOutlined,
   LogoutOutlined 
 } from '@ant-design/icons';
-import PatientFormWrapper from '../PatientForm/PatientFormWrapper';
+import { loginUser, logout } from '../../store/slices/authSlice';
 import ReceptionDashboard from '../ReceptionDashboard/ReceptionDashboard';
 import QueueDisplay from '../QueueDisplay/QueueDisplay';
 import DoctorView from '../DoctorView/DoctorView';
@@ -52,51 +53,31 @@ const LoginButton = styled(Button)`
 `;
 
 const Header = ({ onToggle }) => {
-  const [isPatientFormVisible, setIsPatientFormVisible] = useState(false);
+  const dispatch = useDispatch();
+  const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
+  const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
   const [isReceptionDashboardVisible, setIsReceptionDashboardVisible] = useState(false);
   const [isQueueDisplayVisible, setIsQueueDisplayVisible] = useState(false);
-  const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
-  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
 
   const handleLogin = async (values) => {
     try {
-      // 실제 API 연동 시 이 부분을 수정
-      if (values.username === 'maek' && values.password === '1234') {
-        setIsLoggedIn(true);
-        setUsername(values.username);
+      console.log('로그인 시도:', values); // 디버깅용 로그
+      const result = await dispatch(loginUser(values)).unwrap();
+      if (result) {
         setIsLoginModalVisible(false);
         message.success('로그인되었습니다.');
-        
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('username', values.username);
-      } else {
-        message.error('아이디 또는 비밀번호가 잘못되었습니다.');
       }
     } catch (error) {
-      message.error('로그인 중 오류가 발생했습니다.');
+      console.error('로그인 실패:', error);
+      message.error('아이디 또는 비밀번호가 잘못되었습니다.');
     }
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUsername('');
+    dispatch(logout());
     message.success('로그아웃되었습니다.');
-    
-    // localStorage에서 로그인 정보 제거
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
   };
-
-  useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const savedUsername = localStorage.getItem('username');
-    if (loggedIn && savedUsername) {
-      setIsLoggedIn(true);
-      setUsername(savedUsername);
-    }
-  }, []);
 
   return (
     <StyledHeader>
@@ -110,7 +91,7 @@ const Header = ({ onToggle }) => {
       </Space>
 
       <Space>
-        {isLoggedIn ? (
+        {isAuthenticated ? (
           <>
             <ActionButton 
               icon={<MedicineBoxOutlined />}
@@ -130,15 +111,9 @@ const Header = ({ onToggle }) => {
             >
               접수실
             </ActionButton>
-            <ActionButton 
-              icon={<UserOutlined />}
-              onClick={() => setIsPatientFormVisible(true)}
-            >
-              환자
-            </ActionButton>
             <Space>
               <span style={{ marginRight: '8px' }}>
-                {username}님 환영합니다
+                {user?.name || user?.username || '사용자'}님 환영합니다
               </span>
               <LoginButton 
                 type="primary"
@@ -172,11 +147,14 @@ const Header = ({ onToggle }) => {
           layout="vertical"
         >
           <Form.Item
-            label="아이디"
-            name="username"
-            rules={[{ required: true, message: '아이디를 입력해주세요' }]}
+            label="이메일"
+            name="email"
+            rules={[
+              { required: true, message: '이메일을 입력해주세요' },
+              { type: 'email', message: '올바른 이메일 형식을 입력해주세요' }
+            ]}
           >
-            <Input prefix={<UserOutlined />} placeholder="아이디" />
+            <Input prefix={<UserOutlined />} placeholder="이메일" />
           </Form.Item>
 
           <Form.Item
@@ -188,37 +166,35 @@ const Header = ({ onToggle }) => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
-              로그인
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              style={{ width: '100%' }}
+              loading={loading}
+            >
+              {loading ? '로그인 중...' : '로그인'}
             </Button>
           </Form.Item>
           <div style={{ textAlign: 'center', color: '#666' }}>
-            테스트 계정: maek / 1234
+            테스트 계정: admin@test.com / 123456
           </div>
         </Form>
       </Modal>
 
-      {/* 모달들은 로그인 상태일 때만 렌더링 */}
-      {isLoggedIn && (
-        <>
-          <PatientFormWrapper 
-            visible={isPatientFormVisible}
-            onClose={() => setIsPatientFormVisible(false)}
-          />
-          <ReceptionDashboard
-            visible={isReceptionDashboardVisible}
-            onClose={() => setIsReceptionDashboardVisible(false)}
-          />
-          <QueueDisplay
-            visible={isQueueDisplayVisible}
-            onClose={() => setIsQueueDisplayVisible(false)}
-          />
-          <DoctorView
-            visible={isDoctorViewVisible}
-            onClose={() => setIsDoctorViewVisible(false)}
-          />
-        </>
-      )}
+      <DoctorView
+        visible={isDoctorViewVisible}
+        onClose={() => setIsDoctorViewVisible(false)}
+      />
+
+      <ReceptionDashboard
+        visible={isReceptionDashboardVisible}
+        onClose={() => setIsReceptionDashboardVisible(false)}
+      />
+
+      <QueueDisplay
+        visible={isQueueDisplayVisible}
+        onClose={() => setIsQueueDisplayVisible(false)}
+      />
     </StyledHeader>
   );
 };

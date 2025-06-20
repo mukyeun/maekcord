@@ -2,28 +2,37 @@ const nodemailer = require('nodemailer');
 const config = require('../config');
 const logger = require('./logger');
 
-// 이메일 전송을 위한 트랜스포터 생성
-const transporter = nodemailer.createTransport({
-  host: config.email.host,
-  port: config.email.port,
-  secure: config.email.port === 465, // true for 465, false for other ports
-  auth: {
-    user: config.email.user,
-    pass: config.email.pass
-  }
-});
+// 개발 환경에서는 이메일 서비스 초기화를 건너뛰기
+let transporter = null;
 
-// 트랜스포터 연결 확인
-transporter.verify()
-  .then(() => logger.info('이메일 서비스가 준비되었습니다.'))
-  .catch(err => logger.error('이메일 서비스 설정 오류:', err));
+if (process.env.NODE_ENV === 'production') {
+  // 프로덕션 환경에서만 실제 이메일 서비스 초기화
+  transporter = nodemailer.createTransport({
+    host: config.email.host,
+    port: config.email.port,
+    secure: config.email.port === 465, // true for 465, false for other ports
+    auth: {
+      user: config.email.auth.user,
+      pass: config.email.auth.pass
+    }
+  });
+
+  // 트랜스포터 연결 확인
+  transporter.verify()
+    .then(() => logger.info('이메일 서비스가 준비되었습니다.'))
+    .catch(err => logger.error('이메일 서비스 설정 오류:', err));
+} else {
+  // 개발 환경에서는 로그만 출력
+  logger.info('개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.');
+}
 
 /**
  * 이메일 전송 함수
  * @param {Object} options - 이메일 옵션
- * @param {string} options.email - 수신자 이메일
+ * @param {string} options.to - 수신자 이메일
  * @param {string} options.subject - 이메일 제목
- * @param {string} options.message - 이메일 본문 (HTML 가능)
+ * @param {string} options.text - 이메일 본문 (텍스트)
+ * @param {string} options.html - 이메일 본문 (HTML)
  * @param {Object} [options.attachments] - 첨부 파일
  * @returns {Promise}
  */
@@ -34,9 +43,14 @@ const sendEmail = async (options) => {
       subject: options.subject,
       content: options.text || options.html
     });
-    return true;
+    return { messageId: 'dev-simulation-' + Date.now() };
   }
-  throw new Error('이메일 서비스가 구성되지 않았습니다');
+  
+  if (!transporter) {
+    throw new Error('이메일 서비스가 구성되지 않았습니다');
+  }
+  
+  return await transporter.sendMail(options);
 };
 
 const sendPasswordResetEmail = async (user, resetToken) => {

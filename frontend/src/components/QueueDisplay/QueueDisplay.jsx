@@ -14,7 +14,7 @@ import {
 } from '@ant-design/icons';
 import * as queueApi from '../../api/queueApi';
 import { wsClient } from '../../utils/websocket';
-import { speak, initSpeech } from '../../utils/speechUtils';
+import { speak, initSpeech, announcePatientCall, getVoices, speakText, isSpeechSynthesisSupported, safeSpeak } from '../../utils/speechUtils';
 import { soundManager } from '../../utils/sound';
 import styled from 'styled-components';  // styled-components import 추가
 
@@ -103,7 +103,7 @@ const QueueDisplay = ({ visible, onClose }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
   const [isRealtime, setIsRealtime] = useState(true);
   const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
-    return localStorage.getItem('queueVoiceEnabled') !== 'false';
+    return localStorage.getItem('queueVoiceEnabled') !== 'false' && isSpeechSynthesisSupported();
   });
   const [activeTab, setActiveTab] = useState('1');
 
@@ -161,13 +161,25 @@ const QueueDisplay = ({ visible, onClose }) => {
   };
 
   const handleVoiceToggle = (checked) => {
+    if (checked && !isSpeechSynthesisSupported()) {
+      message.warning('이 브라우저는 음성 합성을 지원하지 않습니다.');
+      return;
+    }
+
     setIsVoiceEnabled(checked);
     localStorage.setItem('queueVoiceEnabled', checked);
     
     // 음성 테스트
     if (checked) {
-      speak('음성 안내가 켜졌습니다.')
-        .catch(error => console.error('음성 테스트 실패:', error));
+      try {
+        safeSpeak('음성 안내가 켜졌습니다.')
+          .catch(error => console.error('음성 테스트 실패:', error));
+      } catch (err) {
+        console.error('음성 합성 사용 불가', err);
+        message.error('음성 합성을 사용할 수 없습니다.');
+        setIsVoiceEnabled(false);
+        localStorage.setItem('queueVoiceEnabled', 'false');
+      }
     }
   };
 
@@ -186,20 +198,13 @@ const QueueDisplay = ({ visible, onClose }) => {
 
   const handlePatientCalled = useCallback(async (patient) => {
     try {
-      if (!patient?.name) {
-        console.error('환자 정보가 없습니다:', patient);
-        return;
+      if (!patient?.patientId?.basicInfo?.name) return;
+      
+      if (isVoiceEnabled && isSpeechSynthesisSupported()) {
+        await safeSpeak(`${patient.patientId.basicInfo.name}님 진료실로 들어오세요.`);
       }
-
-      const message = `${patient.name}님, 진료실로 와주세요`;
-      console.log('📢 음성 출력 시도:', message);
-
-      if (isVoiceEnabled) {
-        await speak(message);
-      }
-    } catch (error) {
-      console.error('음성 출력 오류:', error);
-      message.error('음성 출력에 실패했습니다.');
+    } catch (e) {
+      console.error('음성합성 실패:', e);
     }
   }, [isVoiceEnabled]);
 
@@ -207,18 +212,26 @@ const QueueDisplay = ({ visible, onClose }) => {
   const fetchQueueList = async () => {
     try {
       setLoading(true);
-      const response = await queueApi.getQueueList();
-      console.log('대기 목록 응답:', response); // 디버깅용 로그
+      console.log('📋 QueueDisplay - 대기 목록 조회 시작');
+      const response = await queueApi.getTodayQueueList();
+      console.log('🔍 QueueDisplay - 서버 응답:', response);
 
-      // response가 바로 배열인 경우를 처리
-      const queueData = Array.isArray(response) ? response : 
-                       Array.isArray(response?.data) ? response.data :
-                       response?.data?.data || [];
-      
-      console.log('처리된 대기 목록:', queueData);
+      // 응답 데이터 처리
+      let queueData;
+      if (response && Array.isArray(response.data)) {
+        queueData = response.data;
+      } else if (Array.isArray(response)) {
+        queueData = response;
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
+        queueData = response.data.data;
+      } else {
+        throw new Error('유효하지 않은 대기 목록 데이터');
+      }
+
+      console.log('✅ QueueDisplay - 처리된 대기 목록:', queueData);
       setQueueList(queueData);
     } catch (error) {
-      console.error('대기 목록 조회 실패:', error);
+      console.error('❌ QueueDisplay - 대기 목록 조회 실패:', error);
       message.error('대기 목록을 불러오는데 실패했습니다.');
       setQueueList([]);
     } finally {
@@ -228,33 +241,68 @@ const QueueDisplay = ({ visible, onClose }) => {
 
   // WebSocket 메시지 처리
   const handleWebSocketMessage = useCallback((data) => {
-    console.log('📨 WebSocket 메시지 수신:', data);
+    console.log('📨 QueueDisplay - WebSocket 메시지 수신:', data);
     
     if (data.type === 'QUEUE_UPDATE' && Array.isArray(data.queue)) {
-      console.log('큐 업데이트:', data.queue);
+      console.log('📋 QueueDisplay - 큐 목록 업데이트:', data.queue);
       setQueueList(data.queue);
-    } else if (data.type === 'PATIENT_CALLED' && data.patient) {
-      handlePatientCalled(data.patient);
+    } else if (data.type === 'PATIENT_CALLED') {
+      console.log('📞 QueueDisplay - 환자 호출 이벤트:', data);
+      
+      // 호출된 환자 정보 설정
+      if (data.patient) {
+        setLastCalledPatient(data.patient);
+        
+        // 음성 안내 실행
+        if (isVoiceEnabled && isSpeechSynthesisSupported()) {
+          handlePatientCalled(data.patient);
+        }
+      }
+      
+      // 환자 호출 시 목록 새로고침
+      fetchQueueList();
+    } else if (data.type === 'PONG' || data.type === 'pong' || data.type === 'CONNECTED') {
+      // 연결 확인 및 ping-pong 메시지 - 무시
+      console.log('🔗 WebSocket 연결 확인 메시지:', data.type);
+    } else {
+      console.log('⚠️ QueueDisplay - 처리되지 않은 WebSocket 메시지:', data);
     }
-  }, []);
+  }, [isVoiceEnabled, handlePatientCalled]);
 
-  // 초기화 및 WebSocket 연결
+  // WebSocket 연결 설정
   useEffect(() => {
     if (!visible) return;
 
-    console.log('QueueDisplay 마운트 - 데이터 로드 시작');
-    initSpeech();
-    fetchQueueList();
+    let isComponentMounted = true;
 
-    wsClient.connect();
-    const removeListener = wsClient.addListener(handleWebSocketMessage);
+    const setupWebSocket = () => {
+      if (!isComponentMounted) return;
+
+      console.log('🔄 QueueDisplay - WebSocket 연결 설정');
+      wsClient.connect();
+      
+      // 연결 후 즉시 대기 목록 조회
+      fetchQueueList();
+      
+      return wsClient.addListener(handleWebSocketMessage);
+    };
+
+    const removeListener = setupWebSocket();
 
     return () => {
-      console.log('QueueDisplay 언마운트');
-      removeListener();
-      wsClient.disconnect();
+      console.log('🔌 QueueDisplay - WebSocket 정리');
+      isComponentMounted = false;
+      if (removeListener) removeListener();
     };
   }, [visible, handleWebSocketMessage]);
+
+  // 컴포넌트 마운트/언마운트 시 대기 목록 조회
+  useEffect(() => {
+    if (visible) {
+      console.log('🔄 QueueDisplay - 초기 대기 목록 조회');
+      fetchQueueList();
+    }
+  }, [visible]);
 
   // 필터링된 목록 계산
   const getFilteredList = () => {
@@ -287,18 +335,43 @@ const QueueDisplay = ({ visible, onClose }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return new Date(dateString).toLocaleString('ko-KR');
   };
 
   const handleSearch = (e) => {
     setSearchText(e.target.value);
   };
+
+  // voices 대신 getVoices() 함수 사용
+  const availableVoices = getVoices();
+
+  useEffect(() => {
+    console.log('대기 목록 데이터:', queueList);
+  }, [queueList]);
+
+  useEffect(() => {
+    try {
+      if (!isSpeechSynthesisSupported()) {
+        console.warn('⚠️ 음성 합성 지원 안 됨');
+        setIsVoiceEnabled(false);
+        localStorage.setItem('queueVoiceEnabled', 'false');
+        return;
+      }
+
+      if (lastCalledPatient?.patientId?.basicInfo?.name && isVoiceEnabled) {
+        safeSpeak(`${lastCalledPatient.patientId.basicInfo.name}님 진료실로 들어오세요.`);
+      }
+    } catch (e) {
+      console.error('음성합성 중 오류:', e);
+    }
+  }, [lastCalledPatient, isVoiceEnabled]);
+
+  // 음성 합성 음성 목록 초기화 (최초 1회)
+  useEffect(() => {
+    if (isSpeechSynthesisSupported()) {
+      window.speechSynthesis.getVoices(); // 초기화 트리거
+    }
+  }, []);
 
   if (error) {
     return (
@@ -313,6 +386,10 @@ const QueueDisplay = ({ visible, onClose }) => {
         </div>
       </Modal>
     );
+  }
+
+  if (!isSpeechSynthesisSupported()) {
+    console.warn('음성 합성 사용 불가');
   }
 
   return (
@@ -334,6 +411,7 @@ const QueueDisplay = ({ visible, onClose }) => {
                   size="small"
                   checked={isVoiceEnabled}
                   onChange={handleVoiceToggle}
+                  disabled={!isSpeechSynthesisSupported()}
                 />
                 <Switch
                   size="small"
@@ -348,7 +426,20 @@ const QueueDisplay = ({ visible, onClose }) => {
         onCancel={onClose}
         width="500px"
         footer={null}
+        styles={{
+          body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
+        }}
       >
+        {!isSpeechSynthesisSupported() && (
+          <Alert
+            message="음성 안내 지원 안됨"
+            description="이 브라우저는 음성 합성을 지원하지 않습니다."
+            type="warning"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+        )}
+
         <div className="notification-bar">
           <span>🔊 {lastCalledPatient && lastCalledPatient.status === 'called' && lastCalledPatient.patientId?.basicInfo?.name}님 진료실로 와주세요</span>
           <span className="close">×</span>
@@ -358,12 +449,13 @@ const QueueDisplay = ({ visible, onClose }) => {
           <Tabs 
             defaultActiveKey="1" 
             onChange={setActiveTab}
-          >
-            <Tabs.TabPane tab="전체" key="1" />
-            <Tabs.TabPane tab="대기" key="2" />
-            <Tabs.TabPane tab="호출" key="3" />
-            <Tabs.TabPane tab="진료중" key="4" />
-          </Tabs>
+            items={[
+              { label: '전체', key: '1' },
+              { label: '대기', key: '2' },
+              { label: '호출', key: '3' },
+              { label: '진료중', key: '4' }
+            ]}
+          />
 
           <Input
             prefix={<SearchOutlined />}
@@ -381,6 +473,8 @@ const QueueDisplay = ({ visible, onClose }) => {
           renderItem={(item) => {
             const statusInfo = STATUS_CONFIG[item.status] || STATUS_CONFIG.waiting;
             const isJustCalled = item._id === lastCalledPatient?._id;
+
+            console.log(item.patientId?.basicInfo?.name, item.queueNumber, item.createdAt);
 
             return (
               <AnimatePresence mode="wait">

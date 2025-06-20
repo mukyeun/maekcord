@@ -1,0 +1,29 @@
+{
+  "profiles": [
+    {
+      "name": {
+        "ko": "침삽실삭",
+        "hanja": "沈澁實數"
+      },
+      "characteristics": {
+        "pvc": "침",
+        "bv": "삽",
+        "sv": "실",
+        "hr": "삭"
+      },
+      "clinical": {
+        "causes": [],
+        "management": [],
+        "diseases": [],
+        "organSymptoms": {}
+      },
+      "reference": {
+        "document": "스마트맥진의 탄생 하편(하)",
+        "pages": {
+          "start": 476,
+          "end": 479
+        }
+      }
+    }
+  ]
+} 
