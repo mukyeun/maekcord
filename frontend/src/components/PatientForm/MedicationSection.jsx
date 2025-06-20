@@ -132,6 +132,7 @@ const MedicationSection = ({ data, onChange, errors }) => {
                   onDropdownVisibleChange={handleDropdownVisibleChange}
                   onSelect={handlePreferenceSelect}
                   options={[
+                    { value: '없음', label: '없음' },
                     { value: '커피', label: '커피' },
                     { value: '술', label: '술' },
                     { value: '담배', label: '담배' },

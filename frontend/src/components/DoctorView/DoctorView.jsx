@@ -164,9 +164,26 @@ const DoctorView = ({ visible, onClose }) => {
       setStress(currentPatient.stress || '');
       setPulseAnalysis(currentPatient.pulseAnalysis || '');
 
-      const lastRecord = currentPatient.patientId?.records?.slice(-1)[0];
-      const savedPulse = lastRecord?.pulseWave || {};
+      let lastRecord = null;
+      const patientRecords = currentPatient.patientId?.records;
+
+      // `records`가 배열인 경우와 객체인 경우 모두 처리
+      if (Array.isArray(patientRecords) && patientRecords.length > 0) {
+        lastRecord = patientRecords[patientRecords.length - 1];
+      } else if (typeof patientRecords === 'object' && patientRecords !== null && !Array.isArray(patientRecords)) {
+        lastRecord = patientRecords;
+      }
       
+      // 백엔드에서 보내준 최신 맥파(latestPulseWave)를 우선 사용
+      const savedPulse = currentPatient.patientId.latestPulseWave || lastRecord?.pulseWave || {};
+      
+      console.log('🩺 맥파 데이터 로드:', {
+        patientName: currentPatient.patientId?.basicInfo?.name,
+        latestPulseWave: currentPatient.patientId.latestPulseWave,
+        lastRecordPulseWave: lastRecord?.pulseWave,
+        finalPulseData: savedPulse
+      });
+
       setPulseData({
         systolicBP: savedPulse.systolicBP || '',
         diastolicBP: savedPulse.diastolicBP || '',

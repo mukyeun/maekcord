@@ -182,18 +182,49 @@ exports.getTodayQueueList = async (req, res) => {
       }))
     });
 
-    const result = queues.map(queue => ({
-      _id: queue._id,
-      patientId: queue.patientId,
-      queueNumber: queue.queueNumber,
-      patientName: queue.patientId?.basicInfo?.name,
-      status: queue.status,
-      symptoms: queue.symptoms,
-      memo: queue.memo,
-      stress: queue.stress,
-      pulseAnalysis: queue.pulseAnalysis,
-      registeredAt: queue.registeredAt,
-    }));
+    const result = queues.map(queue => {
+      // 각 환자의 최신 맥파 데이터 찾기
+      let latestPulseWave = null;
+      
+      // records.pulseWave에서 직접 가져오기 (배열이 아닌 객체)
+      if (queue.patientId && queue.patientId.records && queue.patientId.records.pulseWave) {
+        latestPulseWave = queue.patientId.records.pulseWave;
+        console.log('✅ 환자 맥파 데이터 찾음:', {
+          patientName: queue.patientId.basicInfo?.name,
+          pulseWaveData: latestPulseWave
+        });
+      }
+      // fallback: records 배열에서 찾기 (기존 방식)
+      else if (queue.patientId && queue.patientId.records && Array.isArray(queue.patientId.records) && queue.patientId.records.length > 0) {
+        const recordsWithPulseWave = queue.patientId.records
+          .filter(record => record.pulseWave && Object.keys(record.pulseWave).length > 0)
+          .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
+        
+        if (recordsWithPulseWave.length > 0) {
+          latestPulseWave = recordsWithPulseWave[0].pulseWave;
+          console.log('✅ 환자 맥파 데이터 찾음 (배열에서):', {
+            patientName: queue.patientId.basicInfo?.name,
+            pulseWaveData: latestPulseWave
+          });
+        }
+      }
+
+      return {
+        _id: queue._id,
+        patientId: {
+          ...queue.patientId.toObject(),
+          latestPulseWave: latestPulseWave
+        },
+        queueNumber: queue.queueNumber,
+        patientName: queue.patientId?.basicInfo?.name,
+        status: queue.status,
+        symptoms: queue.symptoms,
+        memo: queue.memo,
+        stress: queue.stress,
+        pulseAnalysis: queue.pulseAnalysis,
+        registeredAt: queue.registeredAt,
+      };
+    });
 
     res.json({
       success: true,
@@ -438,15 +469,55 @@ exports.getCurrentPatient = async (req, res) => {
         message: '현재 진료 중인 환자가 없습니다.' 
       });
     }
+
+    // 최신 맥파 데이터 찾기
+    let latestPulseWave = null;
+    
+    // records.pulseWave에서 직접 가져오기 (배열이 아닌 객체)
+    if (currentQueue.patientId && currentQueue.patientId.records && currentQueue.patientId.records.pulseWave) {
+      latestPulseWave = currentQueue.patientId.records.pulseWave;
+      console.log('✅ 최신 맥파 데이터 찾음:', {
+        patientName: currentQueue.patientId.basicInfo?.name,
+        pulseWaveData: latestPulseWave
+      });
+    }
+    // fallback: records 배열에서 찾기 (기존 방식)
+    else if (currentQueue.patientId && currentQueue.patientId.records && Array.isArray(currentQueue.patientId.records) && currentQueue.patientId.records.length > 0) {
+      // records 배열에서 pulseWave가 있는 가장 최근 기록 찾기
+      const recordsWithPulseWave = currentQueue.patientId.records
+        .filter(record => record.pulseWave && Object.keys(record.pulseWave).length > 0)
+        .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));
+      
+      if (recordsWithPulseWave.length > 0) {
+        latestPulseWave = recordsWithPulseWave[0].pulseWave;
+        console.log('✅ 최신 맥파 데이터 찾음 (배열에서):', {
+          patientName: currentQueue.patientId.basicInfo?.name,
+          pulseWaveData: latestPulseWave,
+          recordDate: recordsWithPulseWave[0].date || recordsWithPulseWave[0].createdAt
+        });
+      }
+    }
+
+    // 최신 맥파 데이터를 환자 정보에 추가
+    const patientWithLatestPulseWave = {
+      ...currentQueue.patientId.toObject(),
+      latestPulseWave: latestPulseWave
+    };
+
+    const responseData = {
+      ...currentQueue.toObject(),
+      patientId: patientWithLatestPulseWave
+    };
     
     console.log('✅ 현재 진료 중인 환자 조회 완료:', {
       patientName: currentQueue.patientId?.basicInfo?.name,
-      queueNumber: currentQueue.queueNumber
+      queueNumber: currentQueue.queueNumber,
+      hasLatestPulseWave: !!latestPulseWave
     });
     
     res.json({ 
       success: true, 
-      data: currentQueue,
+      data: responseData,
       message: '현재 진료 중인 환자 조회 성공'
     });
   } catch (error) {
