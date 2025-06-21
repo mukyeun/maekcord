@@ -213,6 +213,17 @@ export const callNextPatient = async () => {
   }
 };
 
+export const saveNote = async (queueId, noteData) => {
+  try {
+    // noteData에는 { symptoms, memo, stress, pulseAnalysis } 등이 포함됩니다.
+    const response = await axiosInstance.put(`${BASE_URL}/${queueId}/note`, noteData);
+    return response.data;
+  } catch (error)    {
+    console.error(`진단 내용 저장 실패 (ID: ${queueId}):`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
 export default {
   getQueueList,
   getTodayQueueList,
@@ -225,5 +236,6 @@ export default {
   getDebugInfo,
   getQueueStatus,
   getCurrentPatient,
-  callNextPatient
+  callNextPatient,
+  saveNote
 };

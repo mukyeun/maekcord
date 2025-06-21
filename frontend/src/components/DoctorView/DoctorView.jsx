@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Tabs, Card, Tag, Space, Button, Input, message, Spin, Form, Select, Alert, Descriptions, Row, Col, Divider, Switch } from 'antd';
-import { FileTextOutlined, SaveOutlined, UserOutlined, HeartOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import { Modal, Tabs, Card, Tag, Space, Button, Input, message, Spin, Form, Select, Alert, Descriptions, Row, Col, Divider, Switch, Typography } from 'antd';
+import { FileTextOutlined, SaveOutlined, UserOutlined, HeartOutlined, MedicineBoxOutlined, BookOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import * as queueApi from '../../api/queueApi';
+import * as pulseApi from '../../api/pulseApi';
 import { wsClient } from '../../utils/websocket';
 import { 증상카테고리 } from '../../data/symptoms';
+import PulseVisualization from './PulseVisualization';
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
+const { Text } = Typography;
 
 const StyledCard = styled(Card)`
   margin-bottom: 16px;
@@ -36,18 +39,16 @@ const DoctorView = ({ visible, onClose }) => {
   const [stress, setStress] = useState('');
   const [pulseAnalysis, setPulseAnalysis] = useState('');
   const [status, setStatus] = useState('waiting');
+  const [pulseProfileModalVisible, setPulseProfileModalVisible] = useState(false);
+  const [selectedPulseProfile, setSelectedPulseProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
   
   const [pulseData, setPulseData] = useState({
     systolicBP: '', diastolicBP: '', heartRate: '', pulsePressure: '',
     'a-b': '', 'a-c': '', 'a-d': '', 'a-e': '', 'b/a': '', 'c/a': '', 'd/a': '', 'e/a': '',
-    elasticityScore: '', PVC: '', BV: '', SV: ''
+    elasticityScore: '', PVC: '', BV: '', SV: '', HR: ''
   });
   
-  const [macSangData, setMacSangData] = useState({
-    floating: false, sunken: false, slow: false, rapid: false, slippery: false, 
-    rough: false, string: false, scattered: false, notes: ''
-  });
-
   const getBasicInfoData = (patient) => {
     if (!patient?.patientId?.basicInfo) return [];
     return [
@@ -167,14 +168,12 @@ const DoctorView = ({ visible, onClose }) => {
       let lastRecord = null;
       const patientRecords = currentPatient.patientId?.records;
 
-      // `records`가 배열인 경우와 객체인 경우 모두 처리
       if (Array.isArray(patientRecords) && patientRecords.length > 0) {
         lastRecord = patientRecords[patientRecords.length - 1];
       } else if (typeof patientRecords === 'object' && patientRecords !== null && !Array.isArray(patientRecords)) {
         lastRecord = patientRecords;
       }
       
-      // 백엔드에서 보내준 최신 맥파(latestPulseWave)를 우선 사용
       const savedPulse = currentPatient.patientId.latestPulseWave || lastRecord?.pulseWave || {};
       
       console.log('🩺 맥파 데이터 로드:', {
@@ -201,19 +200,7 @@ const DoctorView = ({ visible, onClose }) => {
         PVC: savedPulse.PVC || '',
         BV: savedPulse.BV || '',
         SV: savedPulse.SV || '',
-      });
-
-      const savedMacSang = lastRecord?.macSang || {};
-      setMacSangData({
-        floating: savedMacSang.floating || false,
-        sunken: savedMacSang.sunken || false,
-        slow: savedMacSang.slow || false,
-        rapid: savedMacSang.rapid || false,
-        slippery: savedMacSang.slippery || false,
-        rough: savedMacSang.rough || false,
-        string: savedMacSang.string || false,
-        scattered: savedMacSang.scattered || false,
-        notes: savedMacSang.notes || ''
+        HR: savedPulse.HR || savedPulse.heartRate || ''
       });
     } else {
       setSymptoms([]);
@@ -223,11 +210,7 @@ const DoctorView = ({ visible, onClose }) => {
       setPulseData({
         systolicBP: '', diastolicBP: '', heartRate: '', pulsePressure: '',
         'a-b': '', 'a-c': '', 'a-d': '', 'a-e': '', 'b/a': '', 'c/a': '', 'd/a': '', 'e/a': '',
-        elasticityScore: '', PVC: '', BV: '', SV: ''
-      });
-      setMacSangData({
-        floating: false, sunken: false, slow: false, rapid: false, slippery: false,
-        rough: false, string: false, scattered: false, notes: ''
+        elasticityScore: '', PVC: '', BV: '', SV: '', HR: ''
       });
     }
   }, [currentPatient]);
@@ -250,19 +233,20 @@ const DoctorView = ({ visible, onClose }) => {
   };
 
   const handleCompleteConsultation = async () => {
-    if (!currentPatient) return message.warning('완료할 진료가 없습니다.');
+    if (!currentPatient) return message.warning('진료 완료할 환자가 없습니다.');
+    
     setLoading(true);
     try {
-      await queueApi.updateQueueStatus(currentPatient._id, 'done', symptoms, memo, stress, pulseAnalysis);
-      message.success('진료가 완료되었습니다.');
-      wsClient.send({ type: 'CONSULTATION_COMPLETED', patientId: currentPatient._id });
-      await queueApi.callNextPatient();
-      message.info('다음 환자를 호출했습니다.');
-      setCurrentPatient(null);
+      await queueApi.saveNote(currentPatient._id, { symptoms, memo, stress, pulseAnalysis });
+      await queueApi.updateQueueStatus(currentPatient._id, 'completed');
+      
       setStatus('waiting');
+      setCurrentPatient(null);
+      message.success('진료를 완료했습니다.');
+      wsClient.send({ type: 'CONSULTATION_COMPLETED' });
     } catch (error) {
       console.error('진료 완료 실패:', error);
-      message.error('진료 완료에 실패했습니다.');
+      message.error('진료 완료 처리에 실패했습니다.');
     } finally {
       setLoading(false);
     }
@@ -273,139 +257,254 @@ const DoctorView = ({ visible, onClose }) => {
     setPulseAnalysis(pulseDataString);
     message.success('맥파 분석 데이터가 임시 저장되었습니다.');
   };
-  const handleSaveMacSangData = () => {
-    const selected = Object.entries(macSangData).filter(([k, v]) => v && k !== 'notes').map(([k]) => k).join(', ');
-    const note = macSangData.notes ? `, 비고: ${macSangData.notes}` : '';
-    const macSangString = selected ? `81맥상: ${selected}${note}` : macSangData.notes;
-    setPulseAnalysis(prev => prev ? `${prev}; ${macSangString}` : macSangString);
-    message.success('81맥상 데이터가 임시 저장되었습니다.');
-  };
 
   const handleSaveNote = async () => {
-    if (!currentPatient) return message.warning('저장할 환자 정보가 없습니다.');
+    if (!currentPatient) return message.warning('저장할 환자가 없습니다.');
+    setLoading(true);
     try {
-      await queueApi.updateQueueStatus(currentPatient._id, status, symptoms, memo, stress, pulseAnalysis);
-      message.success('진단 메모가 저장되었습니다.');
+      await queueApi.saveNote(currentPatient._id, { symptoms, memo, stress, pulseAnalysis });
+      message.success('진단 내용이 저장되었습니다.');
     } catch (error) {
-      console.error('진단 메모 저장 실패:', error);
-      message.error('진단 메모 저장에 실패했습니다.');
+      console.error('진단 내용 저장 실패:', error);
+      message.error('진단 내용 저장에 실패했습니다.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleShowPulseProfile = async (pulseName) => {
+    if (!pulseName || pulseName === '평맥') {
+      message.info('평맥에 대한 정보는 제공되지 않습니다.');
+      return;
+    }
+    setLoadingProfile(true);
+    setPulseProfileModalVisible(true);
+    try {
+      const response = await pulseApi.getPulseProfileByName(pulseName);
+      if (response.success) {
+        setSelectedPulseProfile(response.data);
+      } else {
+        message.error(response.message);
+        setPulseProfileModalVisible(false);
+      }
+    } catch (error) {
+      console.error('맥상 프로파일 조회 실패:', error);
+      message.error('맥상 정보를 불러오는 데 실패했습니다.');
+      setPulseProfileModalVisible(false);
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
+
+  const handleAddToMemo = () => {
+    if (!selectedPulseProfile) return;
+
+    const { name, clinical } = selectedPulseProfile;
+    const infoToAdd = `
+---
+[맥상 정보: ${name.ko}(${name.hanja})]
+- 주요 원인: ${clinical.causes.join(', ') || '정보 없음'}
+- 관련 질환: ${clinical.diseases.join(', ') || '정보 없음'}
+- 관리법: ${clinical.management.join(', ') || '정보 없음'}
+- 장부별 증상:
+  - 간: ${clinical.organSymptoms?.liver?.join(', ') || '정보 없음'}
+  - 심장: ${clinical.organSymptoms?.heart?.join(', ') || '정보 없음'}
+  - 비장: ${clinical.organSymptoms?.spleen?.join(', ') || '정보 없음'}
+  - 폐: ${clinical.organSymptoms?.lung?.join(', ') || '정보 없음'}
+  - 신장: ${clinical.organSymptoms?.kidney?.join(', ') || '정보 없음'}
+---
+`;
+    setMemo(prev => (prev ? `${prev}\n${infoToAdd}` : infoToAdd).trim());
+    message.success('맥상 정보가 진단 메모에 추가되었습니다.');
+    setPulseProfileModalVisible(false);
   };
 
   const renderPulseAnalysis = () => {
     const handleInputChange = (key, value) => {
-      setPulseData(prev => ({ ...prev, [key]: value }));
+      setPulseData(prev => {
+        const newPulseData = { ...prev, [key]: value };
+        if (key === 'systolicBP' || key === 'diastolicBP') {
+          const sbp = Number(newPulseData.systolicBP);
+          const dbp = Number(newPulseData.diastolicBP);
+          if (!isNaN(sbp) && !isNaN(dbp)) {
+            newPulseData.pulsePressure = sbp - dbp;
+          }
+        }
+        if (key === 'heartRate') {
+          newPulseData.HR = value;
+        }
+        return newPulseData;
+      });
     };
 
     return (
-      <PulseAnalysisCard title="맥파 데이터 입력" icon={<HeartOutlined />}>
-        <Row gutter={16}>
+      <PulseAnalysisCard title="맥파 분석 데이터">
+        <Form layout="vertical">
+          <Row gutter={16}>
             <Col span={6}><Form.Item label="수축기 혈압"><Input value={pulseData.systolicBP} onChange={e => handleInputChange('systolicBP', e.target.value)} /></Form.Item></Col>
             <Col span={6}><Form.Item label="이완기 혈압"><Input value={pulseData.diastolicBP} onChange={e => handleInputChange('diastolicBP', e.target.value)} /></Form.Item></Col>
             <Col span={6}><Form.Item label="심박수"><Input value={pulseData.heartRate} onChange={e => handleInputChange('heartRate', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="맥압"><Input value={pulseData.pulsePressure} onChange={e => handleInputChange('pulsePressure', e.target.value)} /></Form.Item></Col>
-        </Row>
-        <Row gutter={16}>
-            <Col span={6}><Form.Item label="a-b"><Input value={pulseData['a-b']} onChange={e => handleInputChange('a-b', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="a-c"><Input value={pulseData['a-c']} onChange={e => handleInputChange('a-c', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="a-d"><Input value={pulseData['a-d']} onChange={e => handleInputChange('a-d', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="a-e"><Input value={pulseData['a-e']} onChange={e => handleInputChange('a-e', e.target.value)} /></Form.Item></Col>
-        </Row>
-        <Row gutter={16}>
-            <Col span={6}><Form.Item label="b/a"><Input value={pulseData['b/a']} onChange={e => handleInputChange('b/a', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="c/a"><Input value={pulseData['c/a']} onChange={e => handleInputChange('c/a', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="d/a"><Input value={pulseData['d/a']} onChange={e => handleInputChange('d/a', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="e/a"><Input value={pulseData['e/a']} onChange={e => handleInputChange('e/a', e.target.value)} /></Form.Item></Col>
-        </Row>
-        <Row gutter={16}>
-            <Col span={6}><Form.Item label="혈관 탄성도"><Input value={pulseData.elasticityScore} onChange={e => handleInputChange('elasticityScore', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="PVC"><Input value={pulseData.PVC} onChange={e => handleInputChange('PVC', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="BV"><Input value={pulseData.BV} onChange={e => handleInputChange('BV', e.target.value)} /></Form.Item></Col>
-            <Col span={6}><Form.Item label="SV"><Input value={pulseData.SV} onChange={e => handleInputChange('SV', e.target.value)} /></Form.Item></Col>
-        </Row>
-        <Button type="primary" onClick={handleSavePulseData} style={{ marginTop: 16 }}>맥파 데이터 저장</Button>
+            <Col span={6}><Form.Item label="맥압"><Input value={pulseData.pulsePressure} disabled /></Form.Item></Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={6}><Form.Item label="탄성도 점수"><Input value={pulseData.elasticityScore} disabled /></Form.Item></Col>
+            <Col span={6}><Form.Item label="PVC"><Input value={pulseData.PVC} disabled /></Form.Item></Col>
+            <Col span={6}><Form.Item label="BV"><Input value={pulseData.BV} disabled /></Form.Item></Col>
+            <Col span={6}><Form.Item label="SV"><Input value={pulseData.SV} disabled /></Form.Item></Col>
+            <Col span={6}><Form.Item label="HR"><Input value={pulseData.HR} disabled /></Form.Item></Col>
+          </Row>
+          <Divider>변곡점 데이터</Divider>
+          <Row gutter={16}>
+            <Col span={3}><Form.Item label="a-b"><Input value={pulseData['a-b']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="a-c"><Input value={pulseData['a-c']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="a-d"><Input value={pulseData['a-d']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="a-e"><Input value={pulseData['a-e']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="b/a"><Input value={pulseData['b/a']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="c/a"><Input value={pulseData['c/a']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="d/a"><Input value={pulseData['d/a']} disabled /></Form.Item></Col>
+            <Col span={3}><Form.Item label="e/a"><Input value={pulseData['e/a']} disabled /></Form.Item></Col>
+          </Row>
+        </Form>
       </PulseAnalysisCard>
     );
   };
 
   const renderMacSang = () => (
-    <MacSangCard title="81맥상 진단" icon={<MedicineBoxOutlined />}>
-      <Row gutter={16}>
-        <Col span={6}><Form.Item label="부맥"><Switch checked={macSangData.floating} onChange={c => setMacSangData(p => ({...p, floating: c}))} /></Form.Item></Col>
-        <Col span={6}><Form.Item label="침맥"><Switch checked={macSangData.sunken} onChange={c => setMacSangData(p => ({...p, sunken: c}))} /></Form.Item></Col>
-        <Col span={6}><Form.Item label="지맥"><Switch checked={macSangData.slow} onChange={c => setMacSangData(p => ({...p, slow: c}))} /></Form.Item></Col>
-        <Col span={6}><Form.Item label="촉맥"><Switch checked={macSangData.rapid} onChange={c => setMacSangData(p => ({...p, rapid: c}))} /></Form.Item></Col>
-      </Row>
-      <Row gutter={16}>
-        <Col span={6}><Form.Item label="활맥"><Switch checked={macSangData.slippery} onChange={c => setMacSangData(p => ({...p, slippery: c}))} /></Form.Item></Col>
-        <Col span={6}><Form.Item label="삽맥"><Switch checked={macSangData.rough} onChange={c => setMacSangData(p => ({...p, rough: c}))} /></Form.Item></Col>
-        <Col span={6}><Form.Item label="현맥"><Switch checked={macSangData.string} onChange={c => setMacSangData(p => ({...p, string: c}))} /></Form.Item></Col>
-        <Col span={6}><Form.Item label="산맥"><Switch checked={macSangData.scattered} onChange={c => setMacSangData(p => ({...p, scattered: c}))} /></Form.Item></Col>
-      </Row>
-      <Form.Item label="비고">
-        <TextArea rows={3} value={macSangData.notes} onChange={e => setMacSangData(p => ({ ...p, notes: e.target.value }))} />
-      </Form.Item>
-      <Button type="primary" onClick={handleSaveMacSangData} style={{ marginTop: 16 }}>81맥상 저장</Button>
-    </MacSangCard>
+    <PulseVisualization pulseData={pulseData} />
   );
+
+  const renderContent = () => (
+    <Tabs activeKey={activeTab} onChange={setActiveTab}>
+      <TabPane tab="진료 요약" key="1" disabled={!currentPatient}>
+        <StyledCard title="환자 기본 정보">
+          <Descriptions column={2} bordered>
+            {getBasicInfoData(currentPatient).map((item, index) => <Descriptions.Item key={index} label={item.label}>{item.value}</Descriptions.Item>)}
+          </Descriptions>
+        </StyledCard>
+      </TabPane>
+      <TabPane tab="맥파 분석" key="2" disabled={!currentPatient}>
+        {renderPulseAnalysis()}
+      </TabPane>
+      <TabPane tab="81맥상" key="3" disabled={!currentPatient}>
+        <PulseVisualization pulseData={pulseData} onShowProfile={handleShowPulseProfile} />
+      </TabPane>
+      <TabPane tab="진단 메모" key="4" disabled={!currentPatient}>
+        <StyledCard title="진단 메모">
+          <Form layout="vertical">
+            <Form.Item label="주요 증상">
+              <Select
+                mode="multiple"
+                style={{ width: '100%' }}
+                placeholder="환자의 주요 증상을 선택하세요"
+                value={symptoms}
+                onChange={setSymptoms}
+                options={symptomOptions}
+              />
+            </Form.Item>
+            <Form.Item label="스트레스 단계">
+              <Input value={stress} onChange={e => setStress(e.target.value)} />
+            </Form.Item>
+            <Form.Item label="진단 메모">
+              <TextArea rows={4} value={memo} onChange={e => setMemo(e.target.value)} />
+            </Form.Item>
+          </Form>
+        </StyledCard>
+      </TabPane>
+    </Tabs>
+  );
+
+  if (!visible) return null;
 
   return (
     <Modal
-      title={<Space><UserOutlined />진료실 {currentPatient && <Tag color="blue">{currentPatient.patientId?.basicInfo?.name} ({currentPatient.queueNumber})</Tag>}</Space>}
-      open={visible}
+      title={
+        currentPatient
+          ? `진료실 - ${currentPatient.patientId.basicInfo.name} (Q${String(currentPatient.queueNumber).padStart(3, '0')})`
+          : '진료실'
+      }
+      visible={visible}
       onCancel={onClose}
-      width={1400}
-      footer={null}
-      style={{ top: 20 }}
-      styles={{ body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' } }}
+      footer={
+        <Space>
+          <Button onClick={onClose}>닫기</Button>
+          {status === 'called' && <Button type="primary" onClick={handleStartConsultation}>진료 시작</Button>}
+          {status === 'consulting' && <Button onClick={handleSaveNote} icon={<SaveOutlined />}>진단 저장</Button>}
+          {status === 'consulting' && <Button type="primary" danger onClick={handleCompleteConsultation}>진료 완료</Button>}
+        </Space>
+      }
+      width={1200}
+      centered
     >
-      <Card style={{ marginBottom: 16 }}>
-        <Row gutter={16} align="middle">
-          <Col span={8}>
-            <strong>현재 상태:</strong> 
-            <Tag color={status === 'waiting' ? 'orange' : status === 'called' ? 'blue' : 'green'}>
-              {status === 'waiting' ? '대기중' : status === 'called' ? '호출됨' : '진료중'}
-            </Tag>
-          </Col>
-          <Col span={16}>
-            <Space>
-              {status === 'called' && <Button type="primary" onClick={handleStartConsultation} loading={loading}>진료 시작</Button>}
-              {status === 'consulting' && <Button type="primary" danger onClick={handleCompleteConsultation} loading={loading}>진료 완료</Button>}
-            </Space>
-          </Col>
-        </Row>
-      </Card>
+      <Spin spinning={loading} tip="로딩 중...">
+        {currentPatient ? renderContent() : <Alert message="현재 진료 중인 환자가 없습니다." type="info" showIcon />}
+      </Spin>
 
-      {!currentPatient || !currentPatient.patientId ? (
-        <Alert message="호출된 환자가 없습니다" description="접수실에서 환자를 호출해 주세요." type="info" showIcon style={{ marginBottom: 16 }}/>
-      ) : loading ? (
-        <div style={{ textAlign: 'center', padding: '40px 0' }}><Spin size="large" /><p>환자 정보를 불러오는 중...</p></div>
-      ) : (
-        <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="진료 요약" key="1">
-            <StyledCard title="환자 기본 정보">
-              <Descriptions column={2} bordered>
-                {getBasicInfoData(currentPatient).map((item, index) => <Descriptions.Item key={index} label={item.label}>{item.value}</Descriptions.Item>)}
-              </Descriptions>
-            </StyledCard>
-          </TabPane>
-          <TabPane tab="맥파 분석" key="2">{renderPulseAnalysis()}</TabPane>
-          <TabPane tab="81맥상" key="3">{renderMacSang()}</TabPane>
-          <TabPane tab="진단 메모" key="4">
-            <StyledCard title="진단 메모">
-              <Form.Item label="증상"><Select mode="multiple" value={symptoms} onChange={setSymptoms} options={symptomOptions} style={{ width: '100%' }} /></Form.Item>
-              <Form.Item label="메모"><TextArea rows={4} value={memo} onChange={e => setMemo(e.target.value)} /></Form.Item>
-              <Form.Item label="스트레스"><TextArea rows={2} value={stress} onChange={e => setStress(e.target.value)} /></Form.Item>
-              <Form.Item label="맥파 분석 결과"><TextArea rows={3} value={pulseAnalysis} onChange={e => setPulseAnalysis(e.target.value)} /></Form.Item>
-              <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote} style={{ marginTop: 16 }}>진단 메모 저장</Button>
-            </StyledCard>
-          </TabPane>
-        </Tabs>
+      {selectedPulseProfile && (
+        <Modal
+          title={`맥상 정보: ${selectedPulseProfile.name.ko} (${selectedPulseProfile.name.hanja})`}
+          visible={pulseProfileModalVisible}
+          onCancel={() => setPulseProfileModalVisible(false)}
+          footer={[
+            <Button key="back" onClick={() => setPulseProfileModalVisible(false)}>
+              닫기
+            </Button>,
+            <Button key="submit" type="primary" onClick={handleAddToMemo}>
+              진단에 추가
+            </Button>,
+          ]}
+          width={900}
+          styles={{ body: { maxHeight: '70vh', overflow: 'auto' } }}
+        >
+          <Spin spinning={loadingProfile}>
+            <Tabs defaultActiveKey="1" size="small">
+              <Tabs.TabPane tab="기본 정보" key="1">
+                <Descriptions bordered column={1} size="small">
+                  <Descriptions.Item label="주요 원인">
+                    <Text>{selectedPulseProfile.clinical.causes?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="관련 질환">
+                    <Text>{selectedPulseProfile.clinical.diseases?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="관리법">
+                    <Text>{selectedPulseProfile.clinical.management?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Tabs.TabPane>
+              
+              <Tabs.TabPane tab="장부별 증상" key="2">
+                <Descriptions bordered column={1} size="small">
+                  <Descriptions.Item label="간(肝)">
+                    <Text>{selectedPulseProfile.clinical.organSymptoms?.liver?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="심장(心)">
+                    <Text>{selectedPulseProfile.clinical.organSymptoms?.heart?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="비장(脾)">
+                    <Text>{selectedPulseProfile.clinical.organSymptoms?.spleen?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="폐(肺)">
+                    <Text>{selectedPulseProfile.clinical.organSymptoms?.lung?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="신장(腎)">
+                    <Text>{selectedPulseProfile.clinical.organSymptoms?.kidney?.join(', ') || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Tabs.TabPane>
+              
+              <Tabs.TabPane tab="참고 문헌" key="3">
+                <Descriptions bordered column={1} size="small">
+                  <Descriptions.Item label="문헌명">
+                    <Text>{selectedPulseProfile.reference?.document || '정보 없음'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="페이지">
+                    <Text>{selectedPulseProfile.reference?.pages ? `p. ${selectedPulseProfile.reference.pages.start}-${selectedPulseProfile.reference.pages.end}` : '정보 없음'}</Text>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Tabs.TabPane>
+            </Tabs>
+          </Spin>
+        </Modal>
       )}
-      <Divider />
-      <div style={{ textAlign: 'right' }}>
-        <Button icon={<FileTextOutlined />} onClick={() => message.info('PDF 출력 기능은 준비 중입니다.')} disabled={!currentPatient}>PDF 출력</Button>
-      </div>
     </Modal>
   );
 };

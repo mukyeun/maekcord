@@ -669,6 +669,45 @@ exports.callNextPatient = asyncHandler(async (req, res) => {
   }
 });
 
+// 진단 내용 저장
+const saveQueueNote = async (req, res) => {
+  const { queueId } = req.params;
+  const { symptoms, memo, stress, pulseAnalysis } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(queueId)) {
+    return res.status(400).json({ message: '유효하지 않은 ID입니다.' });
+  }
+
+  try {
+    const queueEntry = await Queue.findById(queueId);
+    if (!queueEntry) {
+      return res.status(404).json({ message: '해당 접수를 찾을 수 없습니다.' });
+    }
+
+    queueEntry.symptoms = symptoms || queueEntry.symptoms;
+    queueEntry.memo = memo || queueEntry.memo;
+    queueEntry.stress = stress || queueEntry.stress;
+    queueEntry.pulseAnalysis = pulseAnalysis || queueEntry.pulseAnalysis;
+
+    const updatedQueueEntry = await queueEntry.save();
+    
+    // 환자 정보에도 최신 증상과 메모 업데이트 (선택적)
+    if (queueEntry.patientId) {
+      await Patient.findByIdAndUpdate(queueEntry.patientId, {
+        $set: { 
+          'symptoms': symptoms,
+          'memo': memo 
+        }
+      });
+    }
+
+    res.status(200).json({ message: '진단 내용이 저장되었습니다.', data: updatedQueueEntry });
+  } catch (error) {
+    console.error('진단 내용 저장 중 오류 발생:', error);
+    res.status(500).json({ message: '서버 오류로 인해 진단 내용을 저장하지 못했습니다.', error: error.message });
+  }
+};
+
 // exports 정리
 module.exports = {
   registerQueue: exports.registerQueue,
@@ -678,5 +717,6 @@ module.exports = {
   checkPatientStatus: exports.checkPatientStatus,
   getCurrentPatient: exports.getCurrentPatient,
   callQueue,  // callQueue 함수만 사용
-  callNextPatient: exports.callNextPatient
+  callNextPatient: exports.callNextPatient,
+  saveQueueNote: exports.saveQueueNote
 };
