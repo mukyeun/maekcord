@@ -4,11 +4,17 @@ const patientController = require('../controllers/patientController');
 const auth = require('../middlewares/auth');
 const { validatePatient } = require('../middlewares/validators');
 const Patient = require('../models/Patient');
+const PatientData = require('../models/PatientData');
 const Queue = require('../models/Queue');
 const moment = require('moment');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const generateAndSaveQueue = require('../utils/generateAndSaveQueue');
+const { exec } = require('child_process');
+const path = require('path');
+const util = require('util');
+const execPromise = util.promisify(require('child_process').exec);
+const fs = require('fs');
 
 /**
  * @swagger
@@ -17,10 +23,140 @@ const generateAndSaveQueue = require('../utils/generateAndSaveQueue');
  *   description: 환자 관리 API
  */
 
+// 유비오맥파기 실행 API
+router.post('/execute-ubio', async (req, res) => {
+  const ubioPath = 'C:\\Program Files (x86)\\uBioMacpa Pro\\bin\\uBioMacpaPro.exe';
+  const ubioDir = path.dirname(ubioPath);
+  const ubioExe = path.basename(ubioPath);
+
+  try {
+    logger.info('🔬 유비오맥파기 실행 시도:', ubioPath);
+
+    if (!fs.existsSync(ubioPath)) {
+      logger.error('❌ 유비오맥파기 실행 파일을 찾을 수 없습니다:', ubioPath);
+      return res.status(404).json({
+        success: false,
+        message: '유비오맥파기 프로그램을 찾을 수 없습니다. 설치 경로를 확인해주세요.'
+      });
+    }
+
+    const { stdout, stderr } = await execPromise(`"${ubioExe}"`, { cwd: ubioDir });
+
+    if (stderr) {
+      logger.warn('⚠️ 유비오맥파기 실행 중 경고 또는 오류 발생:', stderr);
+      // 오류 메시지에 '저장위치'가 포함된 경우, 특정 안내 메시지 전송
+      if (stderr.includes('저장위치')) {
+        return res.status(500).json({
+          success: false,
+          message: '프로그램이 실행되었으나 저장 위치를 찾지 못했습니다. 프로그램 설정에서 저장 경로를 확인해주세요.',
+          error: stderr
+        });
+      }
+    }
+    
+    logger.info('✅ 유비오맥파기 실행 성공');
+    res.json({
+      success: true,
+      message: '유비오맥파기가 성공적으로 실행되었습니다.',
+      stdout: stdout
+    });
+
+  } catch (error) {
+    logger.error('❌ 유비오맥파기 실행 API 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '유비오맥파기 실행 중 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+});
+
+// 유비오맥파 측정 결과 자동 가져오기 API
+router.post('/read-ubio-result', async (req, res) => {
+  const { patientName } = req.body;
+  if (!patientName) {
+    return res.status(400).json({ success: false, message: '환자 이름이 필요합니다.' });
+  }
+
+  const filePath = 'D:\\uBioMacpaData\\유비오측정맥파.xlsx';
+  logger.info(`🔬 유비오맥파 결과 파일 읽기 시도: ${filePath}`);
+
+  try {
+    const fs = require('fs');
+    if (!fs.existsSync(filePath)) {
+      logger.error('❌ 유비오맥파 결과 파일을 찾을 수 없습니다:', filePath);
+      return res.status(404).json({
+        success: false,
+        message: '측정 결과 파일을 찾을 수 없습니다. 저장 경로를 확인해주세요. (D:\\uBioMacpaData\\유비오측정맥파.xlsx)'
+      });
+    }
+
+    const xlsx = require('xlsx');
+    const workbook = xlsx.readFile(filePath, {cellDates: true});
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const rows = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+    
+    logger.info(`📑 엑셀 파일 로드 완료. 총 ${rows.length}개 행`);
+
+    let rowData = null;
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const excelRowName = rows[i][0];
+      if (excelRowName && typeof excelRowName === 'string' && excelRowName.trim() === patientName.trim()) {
+        rowData = rows[i];
+        logger.info(`✅ '${patientName}' 환자 데이터 발견 (엑셀 ${i + 1}번째 행)`);
+        break;
+      }
+    }
+
+    if (!rowData) {
+      logger.warn(`⚠️ 엑셀 파일에서 '${patientName}' 환자 데이터를 찾을 수 없습니다.`);
+      return res.status(404).json({
+        success: false,
+        message: `엑셀 파일에서 '${patientName}' 환자의 데이터를 찾을 수 없습니다.`
+      });
+    }
+
+    if (rowData.length < 17) {
+      logger.error(`❌ 데이터 형식 오류: ${patientName} 환자의 데이터 길이가 너무 짧습니다. (${rowData.length}개)`);
+      return res.status(400).json({
+        success: false,
+        message: '선택된 환자의 데이터 형식이 올바르지 않습니다.'
+      });
+    }
+
+    const ELASTICITY_SCORES = { 'A': 0.2, 'B': 0.4, 'C': 0.6, 'D': 0.8, 'E': 1.0 };
+
+    const pulseData = {
+      'elasticityScore': ELASTICITY_SCORES[rowData[8]] || null,
+      'a-b': rowData[9] !== undefined ? parseFloat(rowData[9]) : null,
+      'a-c': rowData[10] !== undefined ? parseFloat(rowData[10]) : null,
+      'a-d': rowData[11] !== undefined ? parseFloat(rowData[11]) : null,
+      'a-e': rowData[12] !== undefined ? parseFloat(rowData[12]) : null,
+      'b/a': rowData[13] !== undefined ? parseFloat(rowData[13]) : null,
+      'c/a': rowData[14] !== undefined ? parseFloat(rowData[14]) : null,
+      'd/a': rowData[15] !== undefined ? parseFloat(rowData[15]) : null,
+      'e/a': rowData[16] !== undefined ? parseFloat(rowData[16]) : null,
+    };
+
+    res.json({ success: true, pulseData });
+
+  } catch (error) {
+    logger.error('❌ 유비오맥파 결과 처리 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '결과 파일 처리 중 서버 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+});
+
 // 임시 환자 데이터 엔드포인트 (동적 라우트보다 먼저 배치)
 router.get('/data', async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '', visitType = '', status = '' } = req.query;
+    
+    console.log('🔍 검색 요청:', { search, page, limit, visitType, status });
     
     const searchConditions = {};
     
@@ -28,7 +164,8 @@ router.get('/data', async (req, res) => {
       searchConditions.$or = [
         { 'basicInfo.name': { $regex: search, $options: 'i' } },
         { 'basicInfo.patientId': { $regex: search, $options: 'i' } },
-        { 'basicInfo.phone': { $regex: search, $options: 'i' } }
+        { 'basicInfo.phone': { $regex: search, $options: 'i' } },
+        { 'basicInfo.residentNumber': { $regex: search, $options: 'i' } }
       ];
     }
     
@@ -42,17 +179,72 @@ router.get('/data', async (req, res) => {
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    const PatientData = require('../models/PatientData');
-    const patients = await PatientData.find(searchConditions)
+    // 먼저 Patient 모델에서 검색 시도
+    console.log('🔍 Patient 모델에서 검색 시도...');
+    let patientsFromPatient = await Patient.find(searchConditions)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    console.log(`📊 Patient 모델 검색 결과: ${patientsFromPatient.length}개`);
+
+    // PatientData 모델에서도 검색
+    console.log('🔍 PatientData 모델에서 검색 시도...');
+    let patientsFromPatientData = await PatientData.find(searchConditions)
       .sort({ 'basicInfo.lastVisitDate': -1 })
       .skip(skip)
       .limit(parseInt(limit))
       .lean();
 
-    const totalRecords = await PatientData.countDocuments(searchConditions);
+    console.log(`📊 PatientData 모델 검색 결과: ${patientsFromPatientData.length}개`);
 
-    const patientsWithAge = patients.map(patient => {
-      if (patient.basicInfo.birthDate) {
+    // 결과 병합 및 중복 제거
+    let allPatients = [];
+    
+    // Patient 모델 결과를 PatientData 형식으로 변환
+    const patientResults = patientsFromPatient.map(patient => ({
+      _id: patient._id,
+      basicInfo: {
+        patientId: patient.patientId,
+        name: patient.basicInfo.name,
+        phone: patient.basicInfo.phone,
+        gender: patient.basicInfo.gender,
+        residentNumber: patient.basicInfo.residentNumber,
+        birthDate: patient.basicInfo.birthDate,
+        visitType: patient.basicInfo.visitType,
+        personality: patient.basicInfo.personality,
+        workIntensity: patient.basicInfo.workIntensity,
+        height: patient.basicInfo.height,
+        weight: patient.basicInfo.weight,
+        bmi: patient.basicInfo.bmi,
+        lastVisitDate: patient.updatedAt,
+        firstVisitDate: patient.createdAt,
+        visitCount: patient.records ? patient.records.length : 1
+      },
+      status: patient.status,
+      medication: patient.medication,
+      pulseWaveInfo: patient.records && patient.records.length > 0 ? {
+        symptoms: patient.records[patient.records.length - 1].symptoms,
+        memo: patient.records[patient.records.length - 1].memo,
+        stress: patient.records[patient.records.length - 1].stress,
+        pulseAnalysis: patient.records[patient.records.length - 1].pulseAnalysis
+      } : null
+    }));
+
+    // PatientData 결과 추가
+    allPatients = [...patientResults, ...patientsFromPatientData];
+
+    // 중복 제거 (patientId 기준)
+    const uniquePatients = allPatients.filter((patient, index, self) => 
+      index === self.findIndex(p => p.basicInfo?.patientId === patient.basicInfo?.patientId)
+    );
+
+    console.log(`📊 최종 결과: ${uniquePatients.length}개 (중복 제거 후)`);
+
+    // 나이 계산
+    const patientsWithAge = uniquePatients.map(patient => {
+      if (patient.basicInfo?.birthDate) {
         const birthDate = new Date(patient.basicInfo.birthDate);
         const today = new Date();
         const age = today.getFullYear() - birthDate.getFullYear();
@@ -65,6 +257,11 @@ router.get('/data', async (req, res) => {
       }
       return patient;
     });
+
+    // 전체 레코드 수 계산 (두 모델 모두에서)
+    const totalFromPatient = await Patient.countDocuments(searchConditions);
+    const totalFromPatientData = await PatientData.countDocuments(searchConditions);
+    const totalRecords = Math.max(totalFromPatient, totalFromPatientData);
 
     res.json({
       success: true,
@@ -89,78 +286,67 @@ router.get('/data', async (req, res) => {
 router.get('/data/:patientId', async (req, res) => {
   try {
     const { patientId } = req.params;
-    
-    const PatientData = require('../models/PatientData');
-    const Patient = require('../models/Patient');
-    
-    // PatientData에서 환자 정보 조회
-    const patientData = await PatientData.findOne({
-      'basicInfo.patientId': patientId
-    }).lean();
+    logger.info(`[DEBUG] /data/:patientId 라우트 진입. 요청된 patientId: ${patientId}`);
 
-    if (!patientData) {
+    // Patient와 PatientData 모델에서 동시에 검색
+    const [patient, patientData] = await Promise.all([
+      Patient.findOne({ patientId: patientId }).lean(),
+      PatientData.findOne({ 'basicInfo.patientId': patientId }).lean()
+    ]);
+    
+    logger.info(`[DEBUG] Patient 모델 조회 결과: ${patient ? '데이터 있음' : '데이터 없음'}`);
+    logger.info(`[DEBUG] PatientData 모델 조회 결과: ${patientData ? '데이터 있음' : '데이터 없음'}`);
+
+    if (!patient && !patientData) {
+      logger.warn(`[DEBUG] 두 모델 모두에서 환자 없음: ${patientId}`);
       return res.status(404).json({
         success: false,
-        message: '환자를 찾을 수 없습니다.'
+        message: '해당 환자를 찾을 수 없습니다.'
       });
     }
 
-    // Patient 모델에서 맥파 데이터 조회
-    const patientWithPulseWave = await Patient.findOne({
-      patientId: patientId
-    }).lean();
+    // 두 모델의 정보를 병합
+    // patientData를 기본으로 하고, patient 정보로 덮어쓰거나 추가
+    const combinedData = { ...(patientData || {}), ...(patient || {}) };
 
-    // 나이 계산
-    if (patientData.basicInfo.birthDate) {
-      const birthDate = new Date(patientData.basicInfo.birthDate);
+    // 나이 계산 (birthDate가 basicInfo 안에 있을 수 있으므로)
+    if (combinedData.basicInfo?.birthDate) {
+      const birthDate = new Date(combinedData.basicInfo.birthDate);
       const today = new Date();
-      const age = today.getFullYear() - birthDate.getFullYear();
+      let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        patientData.age = age - 1;
-      } else {
-        patientData.age = age;
+        age--;
       }
+      combinedData.age = age;
     }
 
-    // 맥파 분석 정보 추가
-    let pulseWaveInfo = null;
-    if (patientWithPulseWave && patientWithPulseWave.records && patientWithPulseWave.records.length > 0) {
-      // 가장 최근 맥파 데이터 찾기
-      const recordsWithPulseWave = patientWithPulseWave.records
-        .filter(record => record.pulseWave && Object.keys(record.pulseWave).length > 0)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-      if (recordsWithPulseWave.length > 0) {
-        const latestRecord = recordsWithPulseWave[0];
-        pulseWaveInfo = {
-          date: latestRecord.date,
-          pulseWave: latestRecord.pulseWave,
-          pulseAnalysis: latestRecord.pulseAnalysis,
-          macSang: latestRecord.macSang,
-          symptoms: latestRecord.symptoms,
-          memo: latestRecord.memo,
-          stress: latestRecord.stress
-        };
-      }
+    // 최신 맥파 정보 추가 (patient 모델의 records 사용)
+    if (patient?.records && patient.records.length > 0) {
+      const latestRecord = patient.records[patient.records.length - 1];
+      combinedData.pulseWaveInfo = {
+        date: latestRecord.date,
+        pulseWave: latestRecord.pulseWave,
+        pulseAnalysis: latestRecord.pulseAnalysis,
+        macSang: latestRecord.macSang,
+        symptoms: latestRecord.symptoms,
+        memo: latestRecord.memo,
+        stress: latestRecord.stress
+      };
     }
 
-    // 응답 데이터에 맥파 정보 포함
-    const responseData = {
-      ...patientData,
-      pulseWaveInfo
-    };
-
+    logger.info(`[DEBUG] 최종 병합된 데이터 전송. 환자 ID: ${patientId}`);
     res.json({
       success: true,
-      patientData: responseData
+      patientData: combinedData
     });
+
   } catch (error) {
-    console.error('환자 상세 정보 조회 오류:', error);
+    logger.error(`❌ 환자 상세 정보 조회 실패: ${req.params.patientId}`, error);
     res.status(500).json({
       success: false,
-      message: '환자 상세 정보 조회 중 오류가 발생했습니다.'
+      message: '환자 상세 정보 조회 중 오류가 발생했습니다.',
+      error: error.message
     });
   }
 });

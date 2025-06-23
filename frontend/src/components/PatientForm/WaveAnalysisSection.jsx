@@ -98,6 +98,103 @@ const SECOND_ROW_FIELDS = [
  */
 const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = false }) => {
   const fileInputRef = useRef();
+  const [isMeasuring, setIsMeasuring] = useState(false);
+
+  // 유비오맥파기 실행 함수
+  const handleUbioMeasurement = async () => {
+    if (!formData.basicInfo?.name) {
+      message.warning('환자 이름을 먼저 입력해주세요.');
+      return;
+    }
+
+    setIsMeasuring(true);
+    message.loading('유비오맥파기를 실행 중...', 0);
+
+    try {
+      // 백엔드 API를 통해 실제 유비오맥파기 실행
+      const response = await fetch('/api/patients/execute-ubio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patientName: formData.basicInfo.name,
+          patientId: formData.basicInfo.patientId
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        message.destroy();
+        message.success('유비오맥파기가 성공적으로 실행되었습니다. 측정을 완료한 후 데이터를 입력해주세요.');
+        
+        // 측정 완료 후 사용자에게 안내
+        setTimeout(() => {
+          message.info('측정이 완료되면 엑셀 데이터 가져오기 버튼을 사용하여 결과를 불러올 수 있습니다.');
+        }, 2000);
+      } else {
+        message.destroy();
+        message.error(result.message || '유비오맥파기 실행 중 오류가 발생했습니다.');
+      }
+      
+    } catch (error) {
+      console.error('유비오맥파기 실행 오류:', error);
+      message.destroy();
+      message.error('유비오맥파기 실행 중 오류가 발생했습니다. 프로그램이 설치되어 있는지 확인해주세요.');
+    } finally {
+      setIsMeasuring(false);
+    }
+  };
+
+  // 자동 결과 가져오기 함수
+  const handleFetchAutoResult = async () => {
+    if (!formData.basicInfo?.name) {
+      message.warning('결과를 가져올 환자 이름을 먼저 입력해주세요.');
+      return;
+    }
+
+    message.loading('최근 측정 결과를 자동으로 가져오는 중...', 0);
+
+    try {
+      const response = await fetch('/api/patients/read-ubio-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientName: formData.basicInfo.name })
+      });
+
+      const result = await response.json();
+      message.destroy();
+
+      if (result.success) {
+        const newPulseWave = {
+          ...formData.records?.pulseWave,
+          ...result.pulseData,
+          lastUpdated: new Date().toISOString()
+        };
+
+        // 자동 계산 값 추가
+        newPulseWave.PVC = calculatePVC(newPulseWave);
+        newPulseWave.BV = calculateBV(newPulseWave);
+        newPulseWave.SV = calculateSV(newPulseWave);
+
+        onPulseWaveChange({
+          ...formData,
+          records: {
+            ...formData.records,
+            pulseWave: newPulseWave
+          }
+        });
+        message.success(`'${formData.basicInfo.name}'님의 최근 측정 데이터를 성공적으로 불러왔습니다.`);
+      } else {
+        message.error(result.message || '결과를 가져오는 데 실패했습니다.');
+      }
+    } catch (error) {
+      message.destroy();
+      console.error('자동 결과 가져오기 오류:', error);
+      message.error('자동으로 결과를 가져오는 중 오류가 발생했습니다.');
+    }
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -233,19 +330,19 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
         <ControlsContainer>
           <Button 
             icon={<PlayCircleOutlined />} 
-            onClick={() => {
-              message.info('U-Bio 실행 기능은 준비 중입니다');
-            }}
-            disabled={fileProcessing}
+            onClick={handleUbioMeasurement}
+            disabled={fileProcessing || isMeasuring}
+            loading={isMeasuring}
+            type="primary"
           >
-            유비오맥파기 실행
+            {isMeasuring ? '측정 중...' : '유비오맥파기 실행'}
           </Button>
           <Button 
             icon={<DownloadOutlined />} 
-            onClick={() => fileInputRef.current?.click()} 
-            disabled={fileProcessing || !formData?.basicInfo?.name}
+            onClick={handleFetchAutoResult} 
+            disabled={fileProcessing || isMeasuring || !formData?.basicInfo?.name}
           >
-            엑셀 데이터 가져오기
+            측정결과 불러오기
           </Button>
         </ControlsContainer>
 

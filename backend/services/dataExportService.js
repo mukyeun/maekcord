@@ -9,7 +9,7 @@ const moment = require('moment-timezone');
 
 class DataExportService {
   constructor() {
-    this.exportDir = path.join(__dirname, '../exports');
+    this.exportDir = path.join(__dirname, '../../exports');
     this.ensureExportDirectory();
   }
 

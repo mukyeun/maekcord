@@ -28,7 +28,8 @@ import {
   Card,
   CardContent,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -133,7 +134,7 @@ const PatientDataTable = () => {
   const handleExportData = async () => {
     setExportLoading(true);
     try {
-      const response = await axios.post('/api/data-export/export/patient-data', {
+      const response = await axios.post('/api/data-export/export/excel', {
         startDate: '',
         endDate: '',
         visitType: visitTypeFilter,
@@ -188,6 +189,118 @@ const PatientDataTable = () => {
   const handleClose = () => {
     navigate('/');
   };
+
+  // 긴 텍스트를 위한 헬퍼 함수
+  const renderTruncatedCell = (text, maxLength = 20) => {
+    if (!text || text.length <= maxLength) {
+      return text || 'N/A';
+    }
+    return (
+      <Tooltip title={text} arrow>
+        <Typography variant="body2" component="span">
+          {`${text.substring(0, maxLength)}...`}
+        </Typography>
+      </Tooltip>
+    );
+  };
+
+  // 테이블 컬럼 정의
+  const columns = [
+    { field: 'patientId', headerName: '환자 ID', flex: 1, valueGetter: (params) => params.row.basicInfo?.patientId || 'N/A' },
+    { field: 'name', headerName: '이름', flex: 0.7, valueGetter: (params) => params.row.basicInfo?.name || 'N/A' },
+    {
+      field: 'gender',
+      headerName: '성별',
+      flex: 0.5,
+      valueGetter: (params) => params.row.basicInfo?.gender,
+      renderCell: (params) => getGenderDisplay(params.value),
+    },
+    { field: 'age', headerName: '나이', flex: 0.5, valueGetter: (params) => params.row.age || 'N/A' },
+    { field: 'phone', headerName: '전화번호', flex: 1, valueGetter: (params) => params.row.basicInfo?.phone || 'N/A' },
+    {
+      field: 'visitType',
+      headerName: '방문 유형',
+      flex: 0.7,
+      valueGetter: (params) => params.row.basicInfo?.visitType || 'N/A',
+    },
+    {
+      field: 'visitCount',
+      headerName: '방문 횟수',
+      flex: 0.7,
+      valueGetter: (params) => params.row.basicInfo?.visitCount || 'N/A',
+    },
+    {
+      field: 'lastVisitDate',
+      headerName: '마지막 방문일',
+      flex: 1,
+      valueGetter: (params) => params.row.basicInfo?.lastVisitDate,
+      renderCell: (params) => params.value ? moment(params.value).format('YYYY-MM-DD') : 'N/A',
+    },
+    {
+      field: 'medication',
+      headerName: '복용약물',
+      flex: 1,
+      valueGetter: (params) => {
+        if (!params.row.medication || !params.row.medication.current || params.row.medication.current.length === 0) {
+          return 'N/A';
+        }
+        return params.row.medication.current.map(med => med.name).join(', ');
+      },
+      renderCell: (params) => renderTruncatedCell(params.value),
+    },
+    {
+      field: 'symptoms',
+      headerName: '증상',
+      flex: 1.5,
+      valueGetter: (params) => params.row.pulseWaveInfo?.symptoms || 'N/A',
+      renderCell: (params) => renderTruncatedCell(params.value),
+    },
+    {
+      field: 'stress',
+      headerName: '스트레스',
+      flex: 1,
+      valueGetter: (params) => params.row.pulseWaveInfo?.stress?.text || 'N/A',
+      renderCell: (params) => renderTruncatedCell(params.value),
+    },
+    {
+      field: 'pulseAnalysis',
+      headerName: '맥파분석',
+      flex: 1.5,
+      valueGetter: (params) => params.row.pulseWaveInfo?.pulseAnalysis?.text || 'N/A',
+      renderCell: (params) => renderTruncatedCell(params.value),
+    },
+    {
+      field: 'memo',
+      headerName: '메모',
+      flex: 1.5,
+      valueGetter: (params) => params.row.pulseWaveInfo?.memo || 'N/A',
+      renderCell: (params) => renderTruncatedCell(params.value),
+    },
+    {
+      field: 'status',
+      headerName: '상태',
+      flex: 0.7,
+      renderCell: (params) => {
+        const statusInfo = getStatusDisplay(params.row.status);
+        return <Chip label={statusInfo.label} color={statusInfo.color} size="small" />;
+      },
+    },
+    {
+      field: 'actions',
+      headerName: '작업',
+      flex: 1,
+      sortable: false,
+      renderCell: (params) => (
+        <Box>
+          <Tooltip title="상세보기">
+            <IconButton onClick={() => handleViewPatient(params.row.basicInfo.patientId)}>
+              <ViewIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      ),
+    },
+  ];
 
   return (
     <Box sx={{ p: 3 }}>
@@ -297,7 +410,7 @@ const PatientDataTable = () => {
 
       {/* 환자 데이터 테이블 */}
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ minWidth: 650 }} aria-label="환자 데이터 테이블">
           <TableHead>
             <TableRow>
               <TableCell>환자 ID</TableCell>
@@ -308,6 +421,11 @@ const PatientDataTable = () => {
               <TableCell>방문 유형</TableCell>
               <TableCell>방문 횟수</TableCell>
               <TableCell>마지막 방문일</TableCell>
+              <TableCell>복용약물</TableCell>
+              <TableCell>증상</TableCell>
+              <TableCell>스트레스</TableCell>
+              <TableCell>맥파분석</TableCell>
+              <TableCell>메모</TableCell>
               <TableCell>상태</TableCell>
               <TableCell>작업</TableCell>
             </TableRow>
@@ -328,18 +446,42 @@ const PatientDataTable = () => {
             ) : (
               patients.map((patient) => {
                 const statusInfo = getStatusDisplay(patient.status);
+
+                const medicationText = (
+                  (Array.isArray(patient.medication?.currentMedications) && patient.medication.currentMedications.length > 0 && patient.medication.currentMedications.map(med => med.name).join(', ')) ||
+                  (Array.isArray(patient.medication?.current) && patient.medication.current.length > 0 && patient.medication.current.map(med => med.name).join(', ')) ||
+                  'N/A'
+                );
+
+                const symptomsText = (
+                  patient.pulseWaveInfo?.symptoms ||
+                  (Array.isArray(patient.symptoms?.mainSymptoms) && patient.symptoms.mainSymptoms.length > 0 && patient.symptoms.mainSymptoms.map(s => s.symptom).join(', ')) ||
+                  'N/A'
+                );
+
+                const stressText = patient.pulseWaveInfo?.stress?.text || patient.lifestyle?.stress?.level || 'N/A';
+                const analysisText = patient.pulseWaveInfo?.pulseAnalysis?.text || 'N/A';
+                const memoText = patient.pulseWaveInfo?.memo || patient.symptoms?.symptomMemo || 'N/A';
+                
                 return (
                   <TableRow key={patient._id} hover>
-                    <TableCell>{patient.basicInfo.patientId}</TableCell>
-                    <TableCell>{patient.basicInfo.name}</TableCell>
-                    <TableCell>{getGenderDisplay(patient.basicInfo.gender)}</TableCell>
+                    <TableCell>{patient.basicInfo?.patientId}</TableCell>
+                    <TableCell>{patient.basicInfo?.name}</TableCell>
+                    <TableCell>{getGenderDisplay(patient.basicInfo?.gender)}</TableCell>
                     <TableCell>{patient.age || 'N/A'}</TableCell>
-                    <TableCell>{patient.basicInfo.phone || 'N/A'}</TableCell>
-                    <TableCell>{patient.basicInfo.visitType}</TableCell>
-                    <TableCell>{patient.basicInfo.visitCount}</TableCell>
+                    <TableCell>{patient.basicInfo?.phone || 'N/A'}</TableCell>
+                    <TableCell>{patient.basicInfo?.visitType}</TableCell>
+                    <TableCell>{patient.basicInfo?.visitCount}</TableCell>
                     <TableCell>
-                      {moment(patient.basicInfo.lastVisitDate).format('YYYY-MM-DD')}
+                      {patient.basicInfo?.lastVisitDate
+                        ? moment(patient.basicInfo.lastVisitDate).format('YYYY-MM-DD')
+                        : 'N/A'}
                     </TableCell>
+                    <TableCell>{renderTruncatedCell(medicationText)}</TableCell>
+                    <TableCell>{renderTruncatedCell(symptomsText)}</TableCell>
+                    <TableCell>{renderTruncatedCell(stressText)}</TableCell>
+                    <TableCell>{renderTruncatedCell(analysisText)}</TableCell>
+                    <TableCell>{renderTruncatedCell(memoText)}</TableCell>
                     <TableCell>
                       <Chip 
                         label={statusInfo.label} 
@@ -350,7 +492,7 @@ const PatientDataTable = () => {
                     <TableCell>
                       <IconButton
                         size="small"
-                        onClick={() => handleViewPatient(patient.basicInfo.patientId)}
+                        onClick={() => handleViewPatient(patient.basicInfo?.patientId)}
                         title="상세보기"
                       >
                         <ViewIcon />

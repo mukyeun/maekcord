@@ -6342,3 +6342,152 @@
     '    at async E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:185:21',
   timestamp: '2025-06-21 14:56:12.862'
 }
+{
+  level: 'error',
+  message: '❌ 유비오맥파기 실행 API 오류: fs is not defined',
+  stack: 'ReferenceError: fs is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:33:5\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n' +
+    '    at Function.handle (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n' +
+    '    at router (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)',
+  timestamp: '2025-06-23 10:43:02.417'
+}
+{
+  level: 'error',
+  message: '❌ 유비오맥파기 실행 API 오류: fs is not defined',
+  stack: 'ReferenceError: fs is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:33:5\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n' +
+    '    at Function.handle (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n' +
+    '    at router (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)',
+  timestamp: '2025-06-23 10:43:12.558'
+}
+{
+  level: 'error',
+  message: '❌ 유비오맥파기 실행 API 오류: fs is not defined',
+  stack: 'ReferenceError: fs is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:33:5\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n' +
+    '    at Function.handle (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n' +
+    '    at router (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)',
+  timestamp: '2025-06-23 10:43:23.446'
+}
+{
+  level: 'error',
+  message: '❌ 환자 상세 정보 조회 실패: P2506199563459 PatientData is not defined',
+  stack: 'ReferenceError: PatientData is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:296:7\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)',
+  timestamp: '2025-06-23 10:49:06.379'
+}
+{
+  level: 'error',
+  message: '❌ 환자 상세 정보 조회 실패: P2506191358844 PatientData is not defined',
+  stack: 'ReferenceError: PatientData is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:296:7\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)',
+  timestamp: '2025-06-23 10:49:09.410'
+}
+{
+  level: 'error',
+  message: '❌ 환자 상세 정보 조회 실패: P2506199563459 PatientData is not defined',
+  stack: 'ReferenceError: PatientData is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:296:7\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)',
+  timestamp: '2025-06-23 10:52:29.257'
+}
+{
+  level: 'error',
+  message: '❌ 환자 상세 정보 조회 실패: P2506189565412 PatientData is not defined',
+  stack: 'ReferenceError: PatientData is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:296:7\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)',
+  timestamp: '2025-06-23 10:52:39.676'
+}
+{
+  level: 'error',
+  message: '❌ 환자 상세 정보 조회 실패: P2506199563459 PatientData is not defined',
+  stack: 'ReferenceError: PatientData is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:296:7\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)',
+  timestamp: '2025-06-23 10:54:49.740'
+}
+{
+  level: 'error',
+  message: '❌ 환자 상세 정보 조회 실패: P2506189565412 PatientData is not defined',
+  stack: 'ReferenceError: PatientData is not defined\n' +
+    '    at E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:296:7\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n' +
+    '    at Route.dispatch (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\route.js:119:3)\n' +
+    '    at Layer.handle [as handle_request] (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n' +
+    '    at E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:284:15\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:365:14)\n' +
+    '    at param (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:376:14)\n' +
+    '    at Function.process_params (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:421:3)\n' +
+    '    at next (E:\\program\\maekcord_a\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)',
+  timestamp: '2025-06-23 10:54:54.507'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-23 12:48:06.300'
+}

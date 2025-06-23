@@ -304,31 +304,22 @@ router.get('/export/files', async (req, res) => {
 });
 
 // 파일 다운로드
-router.get('/export/download/:fileName', async (req, res) => {
-  try {
-    const { fileName } = req.params;
-    const filePath = path.join(__dirname, '../exports', fileName);
-    
-    // 파일 존재 확인
-    try {
-      await fs.access(filePath);
-    } catch (error) {
-      return res.status(404).json({
-        success: false,
-        message: '파일을 찾을 수 없습니다.'
-      });
+router.get('/download/:fileName', (req, res) => {
+  const { fileName } = req.params;
+  // 'exports' 디렉토리는 프로젝트 루트에 있다고 가정합니다.
+  const filePath = path.join(__dirname, '..', '..', 'exports', fileName);
+
+  res.download(filePath, fileName, (err) => {
+    if (err) {
+      console.error(`[Download Error] Failed to download ${fileName}:`, err);
+      if (!res.headersSent) {
+        if (err.code === 'ENOENT') {
+          return res.status(404).json({ success: false, message: '요청한 파일을 찾을 수 없습니다.' });
+        }
+        return res.status(500).json({ success: false, message: '파일 다운로드 중 서버 오류가 발생했습니다.' });
+      }
     }
-
-    res.download(filePath, fileName);
-
-  } catch (error) {
-    console.error('파일 다운로드 오류:', error);
-    res.status(500).json({
-      success: false,
-      message: '파일 다운로드 중 오류가 발생했습니다.',
-      error: error.message
-    });
-  }
+  });
 });
 
 // 파일 삭제
@@ -461,6 +452,11 @@ router.post('/export/patient-data', async (req, res) => {
       error: error.message
     });
   }
+});
+
+// PDF 내보내기
+router.post('/export/pdf', async (req, res) => {
+  // ... (이하 생략) ...
 });
 
 module.exports = router; 

@@ -174,7 +174,7 @@ const Home = () => {
           <div className="feature-icon">
             <UserOutlined />
           </div>
-          <Title level={3} className="feature-title">환자</Title>
+          <Title level={3} className="feature-title">환자 정보입력</Title>
           <Text className="feature-description">
             환자 정보 입력 및 관리
           </Text>

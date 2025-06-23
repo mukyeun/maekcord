@@ -56,7 +56,13 @@ export const updatePatient = async (patientId, patientData) => {
 // ✅ 환자 검색
 export const searchPatient = async (searchParams) => {
   try {
-    const response = await api.post('/api/patients/search', searchParams);
+    const response = await api.get('/api/patients/data', { 
+      params: {
+        search: searchParams.search,
+        limit: searchParams.limit || 10,
+        page: 1
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('환자 검색 실패:', error);

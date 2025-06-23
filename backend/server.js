@@ -12,6 +12,7 @@ const pulseMapFullRouter = require('./routes/pulseMapFull');
 const reportRoutes = require('./routes/reportRoutes');
 const authRoutes = require('./routes/authRoutes');
 const pulseRoutes = require('./routes/pulse');
+const dataExportRoutes = require('./routes/dataExport');
 const http = require('http');
 const wsServer = require('./websocket/wsServer');
 
@@ -34,6 +35,7 @@ app.use('/api/pulse-map', pulseMapRoutes);
 app.use('/api/pulse-map-full', pulseMapFullRouter);
 app.use('/api/reports', reportRoutes);
 app.use('/api/pulse', pulseRoutes);
+app.use('/api/data-export', dataExportRoutes);
 
 // 기본 라우트 (테스트용)
 app.get('/', (req, res) => {
