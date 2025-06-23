@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Button, Space, Typography, Modal, Form, Input, message } from 'antd';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { 
   MenuOutlined, 
   UserOutlined, 
@@ -9,7 +10,8 @@ import {
   OrderedListOutlined,
   MedicineBoxOutlined,
   LoginOutlined,
-  LogoutOutlined 
+  LogoutOutlined,
+  TableOutlined
 } from '@ant-design/icons';
 import { loginUser, logout } from '../../store/slices/authSlice';
 import ReceptionDashboard from '../ReceptionDashboard/ReceptionDashboard';
@@ -54,6 +56,7 @@ const LoginButton = styled(Button)`
 
 const Header = ({ onToggle }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
@@ -110,6 +113,12 @@ const Header = ({ onToggle }) => {
               onClick={() => setIsReceptionDashboardVisible(true)}
             >
               접수실
+            </ActionButton>
+            <ActionButton 
+              icon={<TableOutlined />}
+              onClick={() => navigate('/patient-data')}
+            >
+              환자 데이터
             </ActionButton>
             <Space>
               <span style={{ marginRight: '8px' }}>

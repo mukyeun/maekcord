@@ -11,6 +11,7 @@ const pulseMapRoutes = require('./routes/pulseMap');
 const pulseMapFullRouter = require('./routes/pulseMapFull');
 const reportRoutes = require('./routes/reportRoutes');
 const authRoutes = require('./routes/authRoutes');
+const pulseRoutes = require('./routes/pulse');
 const http = require('http');
 const wsServer = require('./websocket/wsServer');
 
@@ -32,6 +33,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/pulse-map', pulseMapRoutes);
 app.use('/api/pulse-map-full', pulseMapFullRouter);
 app.use('/api/reports', reportRoutes);
+app.use('/api/pulse', pulseRoutes);
 
 // 기본 라우트 (테스트용)
 app.get('/', (req, res) => {
@@ -49,9 +51,62 @@ app.use((req, res) => {
 // 에러 핸들링
 app.use((err, req, res, next) => {
   console.error('서버 에러:', err);
+  
+  // 커스텀 에러 클래스들의 상태 코드 처리
+  if (err.statusCode) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message || '요청 처리 중 오류가 발생했습니다.',
+      error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+  }
+  
+  // JWT 관련 에러 처리
+  if (err.name === 'JsonWebTokenError') {
+    return res.status(401).json({
+      success: false,
+      message: '유효하지 않은 토큰입니다.'
+    });
+  }
+  
+  if (err.name === 'TokenExpiredError') {
+    return res.status(401).json({
+      success: false,
+      message: '만료된 토큰입니다.'
+    });
+  }
+  
+  // MongoDB 관련 에러 처리
+  if (err.name === 'MongoError' || err.name === 'MongoServerError') {
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: '데이터 중복 오류가 발생했습니다.'
+      });
+    }
+    return res.status(500).json({
+      success: false,
+      message: '데이터베이스 오류가 발생했습니다.'
+    });
+  }
+  
+  // Validation 에러 처리
+  if (err.name === 'ValidationError') {
+    return res.status(400).json({
+      success: false,
+      message: '입력값 검증 오류가 발생했습니다.',
+      errors: Object.values(err.errors).map(e => ({
+        field: e.path,
+        message: e.message
+      }))
+    });
+  }
+  
+  // 기본 500 에러 응답
   res.status(500).json({
     success: false,
-    message: '서버 내부 오류가 발생했습니다.'
+    message: '서버 내부 오류가 발생했습니다.',
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 

@@ -17,6 +17,154 @@ const generateAndSaveQueue = require('../utils/generateAndSaveQueue');
  *   description: 환자 관리 API
  */
 
+// 임시 환자 데이터 엔드포인트 (동적 라우트보다 먼저 배치)
+router.get('/data', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '', visitType = '', status = '' } = req.query;
+    
+    const searchConditions = {};
+    
+    if (search) {
+      searchConditions.$or = [
+        { 'basicInfo.name': { $regex: search, $options: 'i' } },
+        { 'basicInfo.patientId': { $regex: search, $options: 'i' } },
+        { 'basicInfo.phone': { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (visitType) {
+      searchConditions['basicInfo.visitType'] = visitType;
+    }
+    
+    if (status) {
+      searchConditions.status = status;
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    const PatientData = require('../models/PatientData');
+    const patients = await PatientData.find(searchConditions)
+      .sort({ 'basicInfo.lastVisitDate': -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const totalRecords = await PatientData.countDocuments(searchConditions);
+
+    const patientsWithAge = patients.map(patient => {
+      if (patient.basicInfo.birthDate) {
+        const birthDate = new Date(patient.basicInfo.birthDate);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          return { ...patient, age: age - 1 };
+        }
+        return { ...patient, age };
+      }
+      return patient;
+    });
+
+    res.json({
+      success: true,
+      patients: patientsWithAge,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalRecords / parseInt(limit)),
+        totalRecords,
+        limit: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('환자 데이터 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 데이터 조회 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 환자 상세 정보 조회 엔드포인트
+router.get('/data/:patientId', async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    
+    const PatientData = require('../models/PatientData');
+    const Patient = require('../models/Patient');
+    
+    // PatientData에서 환자 정보 조회
+    const patientData = await PatientData.findOne({
+      'basicInfo.patientId': patientId
+    }).lean();
+
+    if (!patientData) {
+      return res.status(404).json({
+        success: false,
+        message: '환자를 찾을 수 없습니다.'
+      });
+    }
+
+    // Patient 모델에서 맥파 데이터 조회
+    const patientWithPulseWave = await Patient.findOne({
+      patientId: patientId
+    }).lean();
+
+    // 나이 계산
+    if (patientData.basicInfo.birthDate) {
+      const birthDate = new Date(patientData.basicInfo.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        patientData.age = age - 1;
+      } else {
+        patientData.age = age;
+      }
+    }
+
+    // 맥파 분석 정보 추가
+    let pulseWaveInfo = null;
+    if (patientWithPulseWave && patientWithPulseWave.records && patientWithPulseWave.records.length > 0) {
+      // 가장 최근 맥파 데이터 찾기
+      const recordsWithPulseWave = patientWithPulseWave.records
+        .filter(record => record.pulseWave && Object.keys(record.pulseWave).length > 0)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      if (recordsWithPulseWave.length > 0) {
+        const latestRecord = recordsWithPulseWave[0];
+        pulseWaveInfo = {
+          date: latestRecord.date,
+          pulseWave: latestRecord.pulseWave,
+          pulseAnalysis: latestRecord.pulseAnalysis,
+          macSang: latestRecord.macSang,
+          symptoms: latestRecord.symptoms,
+          memo: latestRecord.memo,
+          stress: latestRecord.stress
+        };
+      }
+    }
+
+    // 응답 데이터에 맥파 정보 포함
+    const responseData = {
+      ...patientData,
+      pulseWaveInfo
+    };
+
+    res.json({
+      success: true,
+      patientData: responseData
+    });
+  } catch (error) {
+    console.error('환자 상세 정보 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 상세 정보 조회 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 /**
  * @swagger
  * components:

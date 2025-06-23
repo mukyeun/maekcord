@@ -9,6 +9,9 @@ const swaggerSpecs = require('./swagger/swagger');
 const queueRoutes = require('./routes/queueRoutes');
 const mongoose = require('mongoose');
 const pulseMapRoutes = require('./routes/pulseMapRoutes');
+const patientDataRoutes = require('./routes/patientData');
+const dataExportRoutes = require('./routes/dataExport');
+const pulseRoutes = require('./routes/pulse');
 require('dotenv').config();
 
 const app = express();
@@ -51,6 +54,14 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/queues', queueRoutes);
 app.use('/api/pulse-map', pulseMapRoutes);
+app.use('/api/pulse', pulseRoutes);
+
+// 환자 데이터 라우트 등록
+console.log('환자 데이터 라우트 등록 중...');
+app.use('/api/patient-data', patientDataRoutes);
+console.log('환자 데이터 라우트 등록 완료');
+
+app.use('/api/data-export', dataExportRoutes);
 
 // Swagger UI 설정
 if (process.env.NODE_ENV === 'development') {

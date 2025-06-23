@@ -1,0 +1,91 @@
+.pulse-info-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pulse-info-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.pulse-info-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.pulse-info-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2), 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.pulse-info-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 아이콘 스타일 (선택사항) */
+.pulse-info-button::before {
+  content: "ℹ";
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* 작은 버튼 스타일 */
+.pulse-info-button.small {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.pulse-info-button.small::before {
+  font-size: 14px;
+}
+
+/* 큰 버튼 스타일 */
+.pulse-info-button.large {
+  padding: 14px 28px;
+  font-size: 16px;
+}
+
+.pulse-info-button.large::before {
+  font-size: 18px;
+}
+
+/* 아웃라인 스타일 */
+.pulse-info-button.outline {
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  box-shadow: none;
+}
+
+.pulse-info-button.outline:hover {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .pulse-info-button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+  
+  .pulse-info-button::before {
+    font-size: 14px;
+  }
+} 

@@ -1,13 +1,20 @@
-import axiosInstance from './axiosInstance';
+import axios from 'axios';
 
-const BASE_URL = '/api/pulse-map';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-export const getPulseProfileByName = async (pulseName) => {
-  try {
-    const response = await axiosInstance.get(`${BASE_URL}/profile/${pulseName}`);
-    return response.data;
-  } catch (error) {
-    console.error(`맥상 프로파일(${pulseName}) 조회 실패:`, error.response?.data || error.message);
-    throw error;
-  }
+const api = axios.create({
+  baseURL: API_URL,
+  withCredentials: true,
+});
+
+export const getPulseProfileByName = (pulseName) => {
+  return api.get(`/pulse/info/${pulseName}`);
+};
+
+export const getPulseList = () => {
+  return api.get('/pulse/list');
+};
+
+export const searchPulses = (query) => {
+  return api.get(`/pulse/search?query=${query}`);
 }; 

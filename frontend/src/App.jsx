@@ -19,6 +19,7 @@ const App = () => (
           <Layout>
             <Header />
             <Content style={{ marginTop: 64 }}>
+              {/* 기존 라우트 */}
               <AppRoutes />
             </Content>
           </Layout>

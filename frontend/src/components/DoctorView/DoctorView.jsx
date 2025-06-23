@@ -39,9 +39,6 @@ const DoctorView = ({ visible, onClose }) => {
   const [stress, setStress] = useState('');
   const [pulseAnalysis, setPulseAnalysis] = useState('');
   const [status, setStatus] = useState('waiting');
-  const [pulseProfileModalVisible, setPulseProfileModalVisible] = useState(false);
-  const [selectedPulseProfile, setSelectedPulseProfile] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(false);
   
   const [pulseData, setPulseData] = useState({
     systolicBP: '', diastolicBP: '', heartRate: '', pulsePressure: '',
@@ -259,64 +256,19 @@ const DoctorView = ({ visible, onClose }) => {
   };
 
   const handleSaveNote = async () => {
-    if (!currentPatient) return message.warning('저장할 환자가 없습니다.');
-    setLoading(true);
+    if (!currentPatient) return;
     try {
-      await queueApi.saveNote(currentPatient._id, { symptoms, memo, stress, pulseAnalysis });
-      message.success('진단 내용이 저장되었습니다.');
+      await queueApi.saveNote(currentPatient._id, {
+        symptoms,
+        memo,
+        stress,
+        pulseAnalysis
+      });
+      message.success('진단 내용이 임시 저장되었습니다.');
     } catch (error) {
-      console.error('진단 내용 저장 실패:', error);
+      console.error('진단 저장 실패:', error);
       message.error('진단 내용 저장에 실패했습니다.');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  const handleShowPulseProfile = async (pulseName) => {
-    if (!pulseName || pulseName === '평맥') {
-      message.info('평맥에 대한 정보는 제공되지 않습니다.');
-      return;
-    }
-    setLoadingProfile(true);
-    setPulseProfileModalVisible(true);
-    try {
-      const response = await pulseApi.getPulseProfileByName(pulseName);
-      if (response.success) {
-        setSelectedPulseProfile(response.data);
-      } else {
-        message.error(response.message);
-        setPulseProfileModalVisible(false);
-      }
-    } catch (error) {
-      console.error('맥상 프로파일 조회 실패:', error);
-      message.error('맥상 정보를 불러오는 데 실패했습니다.');
-      setPulseProfileModalVisible(false);
-    } finally {
-      setLoadingProfile(false);
-    }
-  };
-
-  const handleAddToMemo = () => {
-    if (!selectedPulseProfile) return;
-
-    const { name, clinical } = selectedPulseProfile;
-    const infoToAdd = `
----
-[맥상 정보: ${name.ko}(${name.hanja})]
-- 주요 원인: ${clinical.causes.join(', ') || '정보 없음'}
-- 관련 질환: ${clinical.diseases.join(', ') || '정보 없음'}
-- 관리법: ${clinical.management.join(', ') || '정보 없음'}
-- 장부별 증상:
-  - 간: ${clinical.organSymptoms?.liver?.join(', ') || '정보 없음'}
-  - 심장: ${clinical.organSymptoms?.heart?.join(', ') || '정보 없음'}
-  - 비장: ${clinical.organSymptoms?.spleen?.join(', ') || '정보 없음'}
-  - 폐: ${clinical.organSymptoms?.lung?.join(', ') || '정보 없음'}
-  - 신장: ${clinical.organSymptoms?.kidney?.join(', ') || '정보 없음'}
----
-`;
-    setMemo(prev => (prev ? `${prev}\n${infoToAdd}` : infoToAdd).trim());
-    message.success('맥상 정보가 진단 메모에 추가되었습니다.');
-    setPulseProfileModalVisible(false);
   };
 
   const renderPulseAnalysis = () => {
@@ -386,7 +338,7 @@ const DoctorView = ({ visible, onClose }) => {
         {renderPulseAnalysis()}
       </TabPane>
       <TabPane tab="81맥상" key="3" disabled={!currentPatient}>
-        <PulseVisualization pulseData={pulseData} onShowProfile={handleShowPulseProfile} />
+        <PulseVisualization pulseData={pulseData} />
       </TabPane>
       <TabPane tab="진단 메모" key="4" disabled={!currentPatient}>
         <StyledCard title="진단 메모">
@@ -438,73 +390,6 @@ const DoctorView = ({ visible, onClose }) => {
       <Spin spinning={loading} tip="로딩 중...">
         {currentPatient ? renderContent() : <Alert message="현재 진료 중인 환자가 없습니다." type="info" showIcon />}
       </Spin>
-
-      {selectedPulseProfile && (
-        <Modal
-          title={`맥상 정보: ${selectedPulseProfile.name.ko} (${selectedPulseProfile.name.hanja})`}
-          visible={pulseProfileModalVisible}
-          onCancel={() => setPulseProfileModalVisible(false)}
-          footer={[
-            <Button key="back" onClick={() => setPulseProfileModalVisible(false)}>
-              닫기
-            </Button>,
-            <Button key="submit" type="primary" onClick={handleAddToMemo}>
-              진단에 추가
-            </Button>,
-          ]}
-          width={900}
-          styles={{ body: { maxHeight: '70vh', overflow: 'auto' } }}
-        >
-          <Spin spinning={loadingProfile}>
-            <Tabs defaultActiveKey="1" size="small">
-              <Tabs.TabPane tab="기본 정보" key="1">
-                <Descriptions bordered column={1} size="small">
-                  <Descriptions.Item label="주요 원인">
-                    <Text>{selectedPulseProfile.clinical.causes?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="관련 질환">
-                    <Text>{selectedPulseProfile.clinical.diseases?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="관리법">
-                    <Text>{selectedPulseProfile.clinical.management?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                </Descriptions>
-              </Tabs.TabPane>
-              
-              <Tabs.TabPane tab="장부별 증상" key="2">
-                <Descriptions bordered column={1} size="small">
-                  <Descriptions.Item label="간(肝)">
-                    <Text>{selectedPulseProfile.clinical.organSymptoms?.liver?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="심장(心)">
-                    <Text>{selectedPulseProfile.clinical.organSymptoms?.heart?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="비장(脾)">
-                    <Text>{selectedPulseProfile.clinical.organSymptoms?.spleen?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="폐(肺)">
-                    <Text>{selectedPulseProfile.clinical.organSymptoms?.lung?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="신장(腎)">
-                    <Text>{selectedPulseProfile.clinical.organSymptoms?.kidney?.join(', ') || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                </Descriptions>
-              </Tabs.TabPane>
-              
-              <Tabs.TabPane tab="참고 문헌" key="3">
-                <Descriptions bordered column={1} size="small">
-                  <Descriptions.Item label="문헌명">
-                    <Text>{selectedPulseProfile.reference?.document || '정보 없음'}</Text>
-                  </Descriptions.Item>
-                  <Descriptions.Item label="페이지">
-                    <Text>{selectedPulseProfile.reference?.pages ? `p. ${selectedPulseProfile.reference.pages.start}-${selectedPulseProfile.reference.pages.end}` : '정보 없음'}</Text>
-                  </Descriptions.Item>
-                </Descriptions>
-              </Tabs.TabPane>
-            </Tabs>
-          </Spin>
-        </Modal>
-      )}
     </Modal>
   );
 };

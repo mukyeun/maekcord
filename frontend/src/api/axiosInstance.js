@@ -45,6 +45,21 @@ axiosInstance.interceptors.response.use(
       message: error.message,
       response: error.response?.data
     });
+    
+    // 토큰 만료 또는 인증 오류 처리
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.warn('🔐 인증 토큰이 만료되었습니다. 로그인 페이지로 이동합니다.');
+      
+      // 토큰 제거
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닌 경우에만)
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+        window.location.href = '/login';
+      }
+    }
+    
     return Promise.reject(error);
   }
 );

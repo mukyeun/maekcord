@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Typography, Tag, Row, Col, Descriptions, Space, Button } from 'antd';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts';
 import styled from 'styled-components';
-import { BookOutlined } from '@ant-design/icons';
+import PulseInfoButton from '../PulseInfoButton';
 
 const { Title, Text } = Typography;
 
@@ -12,16 +12,13 @@ const ResultCard = styled(Card)`
   }
 `;
 
-// 팔요맥 분류 기준 (향후 DB에서 가져오거나 동적으로 계산할 수 있도록 상수로 분리)
 const PULSE_THRESHOLDS = {
-  PVC: { LOW: 60, HIGH: 90 }, // 부맥/평맥/침맥
-  // BV, SV, HR은 "강/중/약" → 삽맥/평맥/활맥 등으로 맵핑
-  BV: { LOW: 7, HIGH: 10 },   // 활맥/평맥/삽맥
-  SV: { LOW: 55, HIGH: 70 },  // 허맥/평맥/실맥
-  HR: { LOW: 65, HIGH: 85 },  // 지맥/평맥/삭맥
+  PVC: { LOW: 60, HIGH: 90 },
+  BV: { LOW: 7, HIGH: 10 },
+  SV: { LOW: 55, HIGH: 70 },
+  HR: { LOW: 65, HIGH: 85 },
 };
 
-// Tooltip 커스텀
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -36,44 +33,37 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-// 팔요맥 분류 로직
 const classifyPulse = (pulseData) => {
   const { PVC, BV, SV, HR } = pulseData;
   const th = PULSE_THRESHOLDS;
 
-  // 강/중/약 → 한글 맥상명으로 변환
   const classify = (value, low, high, labels) => {
     if (value === null || value === undefined) return '측정 안됨';
-    if (value < low) return labels.weak;   // 약
-    if (value > high) return labels.strong; // 강
-    return labels.medium; // 중
+    if (value < low) return labels.weak;
+    if (value > high) return labels.strong;
+    return labels.medium;
   };
   
-  // 요구사항 테이블에 맞춘 레이블
-  // 강: 침맥, 삽맥, 실맥, 삭맥
-  // 약: 부맥, 활맥, 허맥, 지맥
   return {
-    PVC: classify(PVC, th.PVC.LOW, th.PVC.HIGH, { weak: '부맥(약)', medium: '평맥(중)', strong: '침맥(강)' }),
-    BV: classify(BV, th.BV.LOW, th.BV.HIGH, { weak: '활맥(약)', medium: '평맥(중)', strong: '삽맥(강)' }),
-    SV: classify(SV, th.SV.LOW, th.SV.HIGH, { weak: '허맥(약)', medium: '평맥(중)', strong: '실맥(강)' }),
-    HR: classify(HR, th.HR.LOW, th.HR.HIGH, { weak: '지맥(약)', medium: '평맥(중)', strong: '삭맥(강)' }),
+    PVC: classify(PVC, th.PVC.LOW, th.PVC.HIGH, { weak: '부맥', medium: '평맥', strong: '침맥' }),
+    BV: classify(BV, th.BV.LOW, th.BV.HIGH, { weak: '활맥', medium: '평맥', strong: '삽맥' }),
+    SV: classify(SV, th.SV.LOW, th.SV.HIGH, { weak: '허맥', medium: '평맥', strong: '실맥' }),
+    HR: classify(HR, th.HR.LOW, th.HR.HIGH, { weak: '지맥', medium: '평맥', strong: '삭맥' }),
   };
 };
 
-const PulseVisualization = ({ pulseData = {}, onShowProfile }) => {
+const PulseVisualization = ({ pulseData = {} }) => {
   const {
     'a-b': a_b, 'a-c': a_c, 'a-d': a_d, 'a-e': a_e,
     'b/a': b_a, 'c/a': c_a, 'd/a': d_a, 'e/a': e_a,
     PVC, BV, SV, HR,
   } = pulseData;
 
-  // 거리값 데이터 (a-b, a-c, a-d, a-e)
   const distanceData = [
     { name: 'a-b', value: a_b }, { name: 'a-c', value: a_c },
     { name: 'a-d', value: a_d }, { name: 'a-e', value: a_e },
   ].filter(item => item.value !== null && item.value !== undefined);
 
-  // 비율값 데이터 (b/a, c/a, d/a, e/a)
   const ratioData = [
     { name: 'b/a', value: b_a }, { name: 'c/a', value: c_a },
     { name: 'd/a', value: d_a }, { name: 'e/a', value: e_a },
@@ -100,21 +90,47 @@ const PulseVisualization = ({ pulseData = {}, onShowProfile }) => {
 
   const pulseTypes = classifyPulse(pulseData);
 
-  // 종합 맥상 계산 로직
   const calculateCombinedPulse = (types) => {
-    const order = ['PVC', 'BV', 'SV', 'HR'];
-    const significantPulseInitials = order
-      .map(key => types[key]) // 정의된 순서대로 맥상 타입을 가져옴
-      .filter(type => type && !type.includes('평맥')) // '평맥'이 아닌 유의미한 맥상만 필터링
-      .map(type => type.charAt(0)); // 각 맥상의 첫 글자 추출 (예: '부맥' -> '부')
+    const significantRaw = ['PVC', 'BV', 'SV', 'HR']
+      .map(key => types[key])
+      .filter(type => type && !type.includes('평맥'));
 
-    if (significantPulseInitials.length === 0) {
-      return '평맥'; // 모든 맥상이 '평맥'일 경우
+    if (significantRaw.length === 0) return '평맥';
+
+    const pulseMap = new Map([
+      [["부맥", "허맥"].sort().join(), "부허맥"],
+      [["부맥", "삭맥", "활맥", "실맥"].sort().join(), "부삭활실맥"],
+      [["부맥", "삭맥", "활맥", "허맥"].sort().join(), "부삭활허맥"],
+      [["부맥", "삭맥", "삽맥", "실맥"].sort().join(), "부삭삽실맥"],
+      [["부맥", "삭맥", "삽맥", "허맥"].sort().join(), "부삭삽허맥"],
+      [["부맥", "지맥", "활맥", "실맥"].sort().join(), "부지활실맥"],
+      [["부맥", "지맥", "활맥", "허맥"].join(), "부지활허맥"],
+      [["부맥", "지맥", "삽맥", "실맥"].sort().join(), "부지삽실맥"],
+      [["부맥", "지맥", "삽맥", "허맥"].sort().join(), "부지삽허맥"],
+      [["침맥", "삭맥", "활맥", "실맥"].sort().join(), "침삭활실맥"],
+      [["침맥", "삭맥", "활맥", "허맥"].sort().join(), "침삭활허맥"],
+      [["침맥", "삭맥", "삽맥", "실맥"].sort().join(), "침삭삽실맥"],
+      [["침맥", "삭맥", "삽맥", "허맥"].sort().join(), "침삭삽허맥"],
+      [["침맥", "지맥", "활맥", "실맥"].sort().join(), "침지활실맥"],
+      [["침맥", "지맥", "활맥", "허맥"].sort().join(), "침지활허맥"],
+      [["침맥", "지맥", "삽맥", "실맥"].sort().join(), "침지삽실맥"],
+      [["침맥", "지맥", "삽맥", "허맥"].sort().join(), "침지삽허맥"],
+      [["부맥", "삽맥", "허맥"].sort().join(), "부삽허맥"],
+      [["부맥", "삽맥", "지맥", "허맥"].sort().join(), "부삽허지맥"],
+      [["부맥", "활맥"].sort().join(), "부활맥"],
+      [["부맥", "삽맥"].sort().join(), "부삽맥"],
+    ]);
+    
+    const key = significantRaw.sort().join();
+    if (pulseMap.has(key)) {
+      return pulseMap.get(key);
     }
     
-    // 중복된 이니셜을 제거하여 최종 맥상 조합 생성 (예: ['부', '허'] -> '부허맥')
-    const uniqueInitials = [...new Set(significantPulseInitials)];
-    return uniqueInitials.join('') + '맥';
+    if (significantRaw.length === 1) {
+      return significantRaw[0];
+    }
+
+    return significantRaw.join('');
   };
 
   const combinedPulse = calculateCombinedPulse(pulseTypes);
@@ -128,9 +144,9 @@ const PulseVisualization = ({ pulseData = {}, onShowProfile }) => {
   };
 
   const getParameterBarColor = (normalizedValue) => {
-    if (normalizedValue > 0) return '#f06261'; // 양성/강함 (붉은 계열)
-    if (normalizedValue < 0) return '#619fef'; // 음성/약함 (푸른 계열)
-    return '#888'; // 중간
+    if (normalizedValue > 0) return '#f06261';
+    if (normalizedValue < 0) return '#619fef';
+    return '#888';
   };
 
   return (
@@ -223,14 +239,10 @@ const PulseVisualization = ({ pulseData = {}, onShowProfile }) => {
                 <Tag color="purple" style={{ fontSize: '16px', padding: '5px 10px' }}>
                   {combinedPulse}
                 </Tag>
-                {combinedPulse !== '평맥' && (
-                  <Button
-                    size="small"
-                    icon={<BookOutlined />}
-                    onClick={() => onShowProfile(combinedPulse)}
-                  >
+                {combinedPulse && combinedPulse !== '평맥' && (
+                  <PulseInfoButton pulseType={combinedPulse}>
                     맥상정보 보기
-                  </Button>
+                  </PulseInfoButton>
                 )}
               </Space>
             </Descriptions.Item>

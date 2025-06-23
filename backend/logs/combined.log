@@ -152817,3 +152817,4310 @@
   message: '📨 WebSocket 메시지 수신:',
   timestamp: '2025-06-21 13:08:47.696'
 }
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:09:47.697'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:10:47.696'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:11:14.847'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:11:30.062'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:12:00.061'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:12:30.059'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:13:00.062'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:13:30.705'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:14:00.707'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:14:47.703'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:15:47.698'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:16:47.707'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:17:47.719'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:18:47.704'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:19:47.709'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:20:47.698'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:21:47.705'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:22:47.699'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:23:47.695'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:24:47.704'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:25:47.701'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:26:47.705'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:27:47.707'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:28:47.697'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:29:47.697'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:30:47.709'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:31:05.106'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:31:30.701'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:32:00.698'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:32:47.710'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:33:47.710'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:34:47.699'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:35:47.699'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:36:47.700'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:37:40.004'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:38:00.710'
+}
+{
+  requestId: 'k4piwk',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 13:38:28.623'
+}
+{
+  requestId: 'k4piwk',
+  statusCode: 200,
+  responseTime: '15ms',
+  timestamp: '2025-06-21 13:38:28.638',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:38:30.065'
+}
+{
+  requestId: 'lknban',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 13:38:34.075'
+}
+{
+  requestId: 'lknban',
+  statusCode: 200,
+  responseTime: '18ms',
+  timestamp: '2025-06-21 13:38:34.094',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '57uqfo',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 13:38:34.097'
+}
+{
+  requestId: '57uqfo',
+  statusCode: 200,
+  responseTime: '18ms',
+  timestamp: '2025-06-21 13:38:34.115',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '04zyhc',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 13:38:38.932'
+}
+{
+  requestId: '04zyhc',
+  statusCode: 200,
+  responseTime: '15ms',
+  timestamp: '2025-06-21 13:38:38.947',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:39:00.065'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:39:30.069'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:40:00.704'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:40:30.711'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 13:41:31.710'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 13:43:13.965'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 13:43:13.989'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 13:43:13.990'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 13:43:14.016'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 13:43:14.022'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:16:02.803'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:16:02.831'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:16:02.856'
+}
+{
+  requestId: '6oje83',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:16:02.864'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:16:02.878'
+}
+{
+  requestId: '6oje83',
+  statusCode: 200,
+  responseTime: '47ms',
+  timestamp: '2025-06-21 14:16:02.911',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'diav2j',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:16:02.918'
+}
+{
+  requestId: 'diav2j',
+  statusCode: 200,
+  responseTime: '21ms',
+  timestamp: '2025-06-21 14:16:02.939',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'zaz0oo',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:16:02.946'
+}
+{
+  requestId: 'zaz0oo',
+  statusCode: 200,
+  responseTime: '17ms',
+  timestamp: '2025-06-21 14:16:02.962',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:16:33.761'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:17:02.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:17:32.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:18:02.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:18:32.890'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:19:02.894'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:19:32.890'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:20:02.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:20:32.892'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:21:02.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:21:32.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:22:02.886'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:22:32.892'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:23:02.893'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:23:32.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:24:02.889'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:24:32.892'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:25:02.893'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:25:32.893'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:26:02.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:26:32.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:27:02.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:27:32.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:28:02.889'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:28:32.891'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:29:02.886'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:29:32.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:30:02.889'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 14:30:46.075'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 14:30:46.098'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 14:30:46.100'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 14:30:46.123'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 14:30:46.128'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:30:55.089'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:30:55.111'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:31:25.098'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:31:55.713'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:32:25.700'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:32:55.096'
+}
+{
+  requestId: 's4xpsi',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:33:23.483'
+}
+{
+  requestId: 's4xpsi',
+  statusCode: 200,
+  responseTime: '81ms',
+  timestamp: '2025-06-21 14:33:23.563',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:33:25.095'
+}
+{
+  code: 1001,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-21 14:33:33.785'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:33:37.854'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:33:37.873'
+}
+{
+  requestId: 'hb1zwp',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:33:37.897'
+}
+{
+  requestId: 'hb1zwp',
+  statusCode: 200,
+  responseTime: '16ms',
+  timestamp: '2025-06-21 14:33:37.913',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:34:07.926'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:34:37.912'
+}
+{
+  requestId: 'se8t7m',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:34:56.646'
+}
+{
+  requestId: 'se8t7m',
+  statusCode: 200,
+  responseTime: '13ms',
+  timestamp: '2025-06-21 14:34:56.659',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '6zns1',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:34:56.662'
+}
+{
+  requestId: '6zns1',
+  statusCode: 200,
+  responseTime: '15ms',
+  timestamp: '2025-06-21 14:34:56.677',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:35:07.908'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:35:37.912'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:36:07.918'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:36:37.911'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:37:07.917'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:37:37.912'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 14:46:56.697'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 14:46:56.704'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 14:46:56.705'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 14:46:56.734'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 14:46:56.738'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:47:03.411'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:47:03.436'
+}
+{
+  requestId: 'l5yp9s',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:47:03.437'
+}
+{
+  requestId: 'l5yp9s',
+  statusCode: 200,
+  responseTime: '24ms',
+  timestamp: '2025-06-21 14:47:03.461',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '0ejpkb',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:47:08.644'
+}
+{
+  requestId: '0ejpkb',
+  statusCode: 200,
+  responseTime: '32ms',
+  timestamp: '2025-06-21 14:47:08.676',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'hxot1n',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:47:08.680'
+}
+{
+  requestId: 'hxot1n',
+  statusCode: 200,
+  responseTime: '21ms',
+  timestamp: '2025-06-21 14:47:08.701',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:47:33.492'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:48:03.708'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:48:33.705'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:49:03.709'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:49:33.704'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:50:03.713'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:50:33.701'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:51:34.706'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 14:52:18.746'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 14:52:18.755'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 14:52:18.756'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 14:52:18.787'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 14:52:18.791'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:52:19.709'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:52:19.725'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:52:50.713'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:53:20.700'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:53:50.700'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 14:54:33.429'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 14:54:33.438'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 14:54:33.439'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 14:54:33.468'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 14:54:33.473'
+}
+{
+  ip: '::ffff:127.0.0.1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:54:33.534'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:54:33.552'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:55:03.720'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:55:33.705'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:56:03.705'
+}
+{
+  level: 'info',
+  message: '📋 환자 상세 조회 요청:',
+  timestamp: '2025-06-21 14:56:12.859'
+}
+{
+  stringValue: '"data"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'data',
+  path: '_id',
+  reason: BSONError: Argument passed in must be a string of 12 bytes or a string of 24 hex characters or an integer
+      at new ObjectId (E:\program\maekcord_a\backend\node_modules\bson\lib\bson.cjs:2055:23)
+      at castObjectId (E:\program\maekcord_a\backend\node_modules\mongoose\lib\cast\objectid.js:25:12)
+      at ObjectId.cast (E:\program\maekcord_a\backend\node_modules\mongoose\lib\schema\objectid.js:248:12)
+      at SchemaType.applySetters (E:\program\maekcord_a\backend\node_modules\mongoose\lib\schematype.js:1219:12)
+      at SchemaType.castForQuery (E:\program\maekcord_a\backend\node_modules\mongoose\lib\schematype.js:1633:15)
+      at cast (E:\program\maekcord_a\backend\node_modules\mongoose\lib\cast.js:389:32)
+      at Query.cast (E:\program\maekcord_a\backend\node_modules\mongoose\lib\query.js:4927:12)
+      at Query._castConditions (E:\program\maekcord_a\backend\node_modules\mongoose\lib\query.js:2237:10)
+      at model.Query._findOne (E:\program\maekcord_a\backend\node_modules\mongoose\lib\query.js:2533:8)
+      at model.Query.exec (E:\program\maekcord_a\backend\node_modules\mongoose\lib\query.js:4447:28),
+  valueType: 'string',
+  model: Model { Patient },
+  level: 'error',
+  message: '❌ 환자 상세 조회 실패: Cast to ObjectId failed for value "data" (type string) at path "_id" for model "Patient"',
+  stack: 'CastError: Cast to ObjectId failed for value "data" (type string) at path "_id" for model "Patient"\n' +
+    '    at ObjectId.cast (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\schema\\objectid.js:250:11)\n' +
+    '    at SchemaType.applySetters (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\schematype.js:1219:12)\n' +
+    '    at SchemaType.castForQuery (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\schematype.js:1633:15)\n' +
+    '    at cast (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\cast.js:389:32)\n' +
+    '    at Query.cast (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\query.js:4927:12)\n' +
+    '    at Query._castConditions (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\query.js:2237:10)\n' +
+    '    at model.Query._findOne (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\query.js:2533:8)\n' +
+    '    at model.Query.exec (E:\\program\\maekcord_a\\backend\\node_modules\\mongoose\\lib\\query.js:4447:28)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async E:\\program\\maekcord_a\\backend\\routes\\patientRoutes.js:185:21',
+  timestamp: '2025-06-21 14:56:12.862'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:56:33.708'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:57:03.706'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 14:57:28.020'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 14:57:28.029'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 14:57:28.030'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 14:57:28.061'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 14:57:28.066'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:57:28.710'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:57:28.727'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:57:59.711'
+}
+{
+  requestId: 'qsruc',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:58:05.431'
+}
+{
+  requestId: 'qsruc',
+  statusCode: 200,
+  responseTime: '35ms',
+  timestamp: '2025-06-21 14:58:05.466',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'v9d9z',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:58:05.471'
+}
+{
+  requestId: 'v9d9z',
+  statusCode: 200,
+  responseTime: '25ms',
+  timestamp: '2025-06-21 14:58:05.496',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:58:28.714'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:58:58.726'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 14:59:28.717'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-21 14:59:47.469'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-21 14:59:47.477'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-21 14:59:47.478'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-21 14:59:47.506'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-21 14:59:47.509'
+}
+{
+  ip: '::ffff:127.0.0.1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 14:59:47.652'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 14:59:47.669'
+}
+{
+  requestId: '77np9',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:59:50.526'
+}
+{
+  requestId: '77np9',
+  statusCode: 200,
+  responseTime: '37ms',
+  timestamp: '2025-06-21 14:59:50.564',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'cg7mqt',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-21 14:59:50.571'
+}
+{
+  requestId: 'cg7mqt',
+  statusCode: 200,
+  responseTime: '13ms',
+  timestamp: '2025-06-21 14:59:50.584',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:00:17.667'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:00:47.670'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:01:17.666'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:01:47.665'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:02:17.655'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:02:47.660'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:03:17.656'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:03:47.657'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-21 15:04:17.656'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-21 15:04:22.382'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 15:04:24.939'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 15:04:24.967'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-21 15:06:53.748'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 15:06:56.234'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 15:06:56.243'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-21 15:07:12.658'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 15:07:15.715'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 15:07:15.721'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-21 15:09:20.483'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-21 15:09:22.716'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-21 15:09:22.729'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-21 15:09:25.366'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-22 06:43:56.071'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-22 06:43:56.127'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-22 06:43:56.129'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-22 06:43:56.185'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-22 06:43:56.195'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 06:51:54.179'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 06:51:54.192'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 06:51:54.215'
+}
+{
+  count: 12,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 06:51:54.220'
+}
+{
+  requestId: 'b6vse',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:51:54.232'
+}
+{
+  requestId: 'b6vse',
+  statusCode: 200,
+  responseTime: '17ms',
+  timestamp: '2025-06-22 06:51:54.250',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'fjvjd',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:51:54.259'
+}
+{
+  requestId: 'fjvjd',
+  statusCode: 200,
+  responseTime: '10ms',
+  timestamp: '2025-06-22 06:51:54.269',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'gqvi1r',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:51:54.275'
+}
+{
+  requestId: 'gqvi1r',
+  statusCode: 200,
+  responseTime: '8ms',
+  timestamp: '2025-06-22 06:51:54.283',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:52:24.351'
+}
+{
+  requestId: '010chc',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:52:43.137'
+}
+{
+  requestId: '010chc',
+  statusCode: 200,
+  responseTime: '8ms',
+  timestamp: '2025-06-22 06:52:43.145',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '151nyk',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:52:43.148'
+}
+{
+  requestId: '151nyk',
+  statusCode: 200,
+  responseTime: '7ms',
+  timestamp: '2025-06-22 06:52:43.155',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'tcf4j',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:52:45.487'
+}
+{
+  requestId: 'tcf4j',
+  statusCode: 200,
+  responseTime: '8ms',
+  timestamp: '2025-06-22 06:52:45.495',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:52:54.347'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:53:24.341'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:53:54.351'
+}
+{
+  requestId: 'sevxs',
+  method: 'POST',
+  path: '/api/queues/status',
+  body: { patientId: '6852275afb5efc4a7ddd3fbe', date: '2025-06-22' },
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:54:13.814'
+}
+{
+  patientId: '6852275afb5efc4a7ddd3fbe',
+  date: '2025-06-22',
+  timestamp: '2025-06-22 06:54:13.815',
+  level: 'info',
+  message: '🔍 환자 대기상태 조회 (POST):'
+}
+{
+  exists: false,
+  status: undefined,
+  timestamp: '2025-06-22 06:54:13.824',
+  level: 'info',
+  message: '✅ 환자 대기상태 조회 완료:'
+}
+{
+  requestId: 'sevxs',
+  statusCode: 200,
+  responseTime: '11ms',
+  timestamp: '2025-06-22 06:54:13.825',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'f2dgs2',
+  method: 'POST',
+  path: '/api/queues',
+  body: {
+    patientId: '6852275afb5efc4a7ddd3fbe',
+    visitType: '초진',
+    symptoms: [],
+    status: 'waiting',
+    registeredAt: '2025-06-21T21:54:13.828Z',
+    date: '2025-06-22',
+    priority: 0,
+    memo: '',
+    isTest: false,
+    forceCreate: false
+  },
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:54:13.829'
+}
+{
+  requestId: 'f2dgs2',
+  statusCode: 201,
+  responseTime: '39ms',
+  timestamp: '2025-06-22 06:54:13.868',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '45aa79',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:54:13.879'
+}
+{
+  requestId: '45aa79',
+  statusCode: 200,
+  responseTime: '27ms',
+  timestamp: '2025-06-22 06:54:13.906',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:54:24.351'
+}
+{
+  requestId: 'k9knr9',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:54:24.573'
+}
+{
+  requestId: 'k9knr9',
+  statusCode: 200,
+  responseTime: '12ms',
+  timestamp: '2025-06-22 06:54:24.585',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:54:54.350'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:55:24.349'
+}
+{
+  requestId: 'i89c08',
+  method: 'POST',
+  path: '/api/queues/status',
+  body: { patientId: '68520fab87c865fd532d497f', date: '2025-06-22' },
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:55:48.749'
+}
+{
+  patientId: '68520fab87c865fd532d497f',
+  date: '2025-06-22',
+  timestamp: '2025-06-22 06:55:48.750',
+  level: 'info',
+  message: '🔍 환자 대기상태 조회 (POST):'
+}
+{
+  exists: false,
+  status: undefined,
+  timestamp: '2025-06-22 06:55:48.756',
+  level: 'info',
+  message: '✅ 환자 대기상태 조회 완료:'
+}
+{
+  requestId: 'i89c08',
+  statusCode: 200,
+  responseTime: '8ms',
+  timestamp: '2025-06-22 06:55:48.757',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'bsl5go',
+  method: 'POST',
+  path: '/api/queues',
+  body: {
+    patientId: '68520fab87c865fd532d497f',
+    visitType: '초진',
+    symptoms: [],
+    status: 'waiting',
+    registeredAt: '2025-06-21T21:55:48.760Z',
+    date: '2025-06-22',
+    priority: 0,
+    memo: '',
+    isTest: false,
+    forceCreate: false
+  },
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:55:48.762'
+}
+{
+  requestId: 'bsl5go',
+  statusCode: 201,
+  responseTime: '18ms',
+  timestamp: '2025-06-22 06:55:48.780',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'pokh4g',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:55:48.788'
+}
+{
+  requestId: 'pokh4g',
+  statusCode: 200,
+  responseTime: '20ms',
+  timestamp: '2025-06-22 06:55:48.808',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'sersth',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:55:54.274'
+}
+{
+  requestId: 'sersth',
+  statusCode: 200,
+  responseTime: '20ms',
+  timestamp: '2025-06-22 06:55:54.294',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:55:54.354'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:56:24.338'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:56:54.340'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:57:24.343'
+}
+{
+  requestId: 's7865l',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:57:46.367'
+}
+{
+  requestId: 's7865l',
+  statusCode: 200,
+  responseTime: '11ms',
+  timestamp: '2025-06-22 06:57:46.378',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'l5b853',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:57:46.381'
+}
+{
+  requestId: 'l5b853',
+  statusCode: 200,
+  responseTime: '9ms',
+  timestamp: '2025-06-22 06:57:46.390',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 's8208p',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:57:46.394'
+}
+{
+  requestId: 's8208p',
+  statusCode: 200,
+  responseTime: '10ms',
+  timestamp: '2025-06-22 06:57:46.404',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:57:54.347'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-22 06:58:33.866'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-22 06:58:33.875'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-22 06:58:33.877'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-22 06:58:33.897'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-22 06:58:33.904'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 06:58:33.991'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 06:58:34.013'
+}
+{
+  requestId: '99wpg',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:58:45.315'
+}
+{
+  requestId: '99wpg',
+  statusCode: 200,
+  responseTime: '24ms',
+  timestamp: '2025-06-22 06:58:45.339',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '0s37q',
+  method: 'PUT',
+  path: '/api/queues/68572a055353fe204cfc49d6/call',
+  body: {
+    changedBy: 'reception',
+    previousStatus: 'waiting',
+    newStatus: 'called'
+  },
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:58:47.376'
+}
+{
+  requestId: '0s37q',
+  statusCode: 200,
+  responseTime: '30ms',
+  timestamp: '2025-06-22 06:58:47.406',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PATIENT_CALLED_TO_DOCTOR',
+  patient: {
+    _id: '68572a055353fe204cfc49d6',
+    patientId: {
+      basicInfo: {
+        name: '권창준',
+        gender: 'male',
+        residentNumber: '620726-1122222',
+        birthDate: '1962-07-26T00:00:00.000Z',
+        visitType: '초진',
+        personality: '보통',
+        workIntensity: '보통',
+        height: '177',
+        weight: '75',
+        bmi: '23.9',
+        phone: '010-3800-3467'
+      },
+      medication: { current: [], history: [], medications: [], preferences: [] },
+      _id: '6852275afb5efc4a7ddd3fbe',
+      patientId: 'P2506189565412',
+      status: 'active',
+      symptoms: [],
+      records: [
+        {
+          pulseWave: {
+            BV: 9.46,
+            PVC: 27.22,
+            SV: 8.13,
+            'a-b': 92,
+            'a-c': 156,
+            'a-d': 201,
+            'a-e': 270,
+            'b/a': -0.76,
+            'c/a': -0.43,
+            'd/a': -0.31,
+            diastolicBP: 85,
+            'e/a': 0.19,
+            elasticityScore: 0.6,
+            heartRate: 77,
+            lastUpdated: '2025-06-20T01:37:34.641Z',
+            pulsePressure: 37,
+            systolicBP: 122
+          },
+          symptoms: [],
+          _id: '68572b158be3b290969a2349',
+          date: '2025-06-21T21:58:45.330Z'
+        }
+      ],
+      memo: '88999999',
+      activityLog: [
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T01:37:40.450Z',
+          _id: '6854bb64632d58b7918146a9'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T03:24:27.232Z',
+          _id: '6854d46b6e09cf103196435a'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T03:38:43.150Z',
+          _id: '6854d7c3a0217e36caf1e076'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T03:40:52.206Z',
+          _id: '6854d844a0217e36caf1e08d'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T03:42:09.393Z',
+          _id: '6854d891a0217e36caf1e0a8'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T03:44:26.376Z',
+          _id: '6854d91aa56878f9f2b98c40'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T03:59:28.864Z',
+          _id: '6854dca0693e766815b773af'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-20T08:10:07.081Z',
+          _id: '6855175f2231977b501e7231'
+        },
+        {
+          action: 'updated',
+          description: '환자 정보가 수정되었습니다.',
+          userId: '68539c2ee7569ac4475e2307',
+          timestamp: '2025-06-21T00:21:34.013Z',
+          _id: '6855fb0e06c457fcae75e85f'
+        }
+      ],
+      createdAt: '2025-06-18T02:41:30.964Z',
+      updatedAt: '2025-06-21T00:21:34.014Z',
+      latestPulseWave: {
+        BV: 9.46,
+        PVC: 27.22,
+        SV: 8.13,
+        'a-b': 92,
+        'a-c': 156,
+        'a-d': 201,
+        'a-e': 270,
+        'b/a': -0.76,
+        'c/a': -0.43,
+        'd/a': -0.31,
+        diastolicBP: 85,
+        'e/a': 0.19,
+        elasticityScore: 0.6,
+        heartRate: 77,
+        lastUpdated: '2025-06-20T01:37:34.641Z',
+        pulsePressure: 37,
+        systolicBP: 122
+      }
+    },
+    queueNumber: 'Q20250622-001',
+    status: 'called',
+    symptoms: [],
+    memo: '',
+    stress: '',
+    pulseAnalysis: '',
+    registeredAt: '2025-06-21T21:54:13.851Z',
+    calledAt: '2025-06-21T21:58:47.414Z'
+  },
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:58:47.416'
+}
+{
+  patientId: '6852275afb5efc4a7ddd3fbe',
+  patientName: '권창준',
+  queueId: '68572a055353fe204cfc49d6',
+  level: 'info',
+  message: '👨‍⚕️ 진료실로 환자 호출:',
+  timestamp: '2025-06-22 06:58:47.420'
+}
+{
+  level: 'info',
+  message: '✅ 진료실 환자 호출 전송 완료',
+  timestamp: '2025-06-22 06:58:47.421'
+}
+{
+  requestId: 'w7kour',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:58:47.422'
+}
+{
+  requestId: 'w7kour',
+  statusCode: 200,
+  responseTime: '14ms',
+  timestamp: '2025-06-22 06:58:47.436',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'gimj3',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 06:58:55.560'
+}
+{
+  requestId: 'gimj3',
+  statusCode: 200,
+  responseTime: '23ms',
+  timestamp: '2025-06-22 06:58:55.583',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:59:03.997'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 06:59:34.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:00:04.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:00:34.885'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:01:04.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:01:34.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:02:04.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:02:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:03:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:04:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:05:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:06:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:07:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:08:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:09:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:10:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:11:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:12:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:13:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:14:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:15:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:16:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:17:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:18:41.868'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:19:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:20:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:21:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:22:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:23:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:24:41.888'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:25:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:26:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:27:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:28:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:29:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:30:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:31:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:32:12.204'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:32:34.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:33:04.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:33:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:34:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:35:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:36:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:37:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:38:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:39:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:40:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:41:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:42:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:43:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:44:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:45:41.868'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:46:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:47:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:48:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:49:41.886'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:50:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:51:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:52:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:53:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:54:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:55:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:56:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:57:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:58:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 07:59:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:00:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:01:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:02:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:03:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:04:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:05:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:06:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:07:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:08:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:09:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:10:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:11:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:12:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:13:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:14:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:15:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:16:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:17:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:18:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:19:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:20:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:21:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:22:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:23:41.868'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:24:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:25:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:26:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:27:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:28:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:29:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:30:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:31:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:32:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:33:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:34:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:35:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:36:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:37:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:38:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:39:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:40:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:41:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:42:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:43:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:44:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:45:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:46:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:47:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:48:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:49:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:50:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:51:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:52:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:53:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:54:41.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:55:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:56:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:57:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:58:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 08:59:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:00:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:01:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:02:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:03:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:04:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:05:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:06:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:07:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:08:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:09:41.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:10:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:11:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:12:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:13:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:14:41.868'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:15:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:16:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:17:41.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:18:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:19:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:20:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:21:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:22:41.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:23:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:24:41.882'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:25:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:26:41.872'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:27:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:28:41.875'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:29:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:30:41.879'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:31:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:32:41.870'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:33:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:34:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:35:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:36:41.874'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:37:41.883'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:38:41.881'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:39:04.008'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:39:34.007'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:40:03.999'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:40:34.000'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:41:03.993'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:41:34.000'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:42:03.995'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:42:33.997'
+}
+{
+  requestId: 'lo68ni',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:42:37.127'
+}
+{
+  requestId: 'lo68ni',
+  statusCode: 200,
+  responseTime: '30ms',
+  timestamp: '2025-06-22 09:42:37.157',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:43:03.994'
+}
+{
+  requestId: '1j73zd',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:43:31.846'
+}
+{
+  requestId: '1j73zd',
+  statusCode: 200,
+  responseTime: '16ms',
+  timestamp: '2025-06-22 09:43:31.862',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '9kifrf',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:43:31.865'
+}
+{
+  requestId: '9kifrf',
+  statusCode: 200,
+  responseTime: '17ms',
+  timestamp: '2025-06-22 09:43:31.882',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:43:34.007'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:44:03.999'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:44:33.995'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:45:03.998'
+}
+{
+  requestId: 'ly9o44',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:45:22.535'
+}
+{
+  requestId: 'ly9o44',
+  statusCode: 200,
+  responseTime: '20ms',
+  timestamp: '2025-06-22 09:45:22.555',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:45:33.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:46:03.996'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:46:33.993'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:47:04.002'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:47:33.995'
+}
+{
+  requestId: 'bil3v',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:47:44.665'
+}
+{
+  requestId: 'bil3v',
+  statusCode: 200,
+  responseTime: '15ms',
+  timestamp: '2025-06-22 09:47:44.680',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'uw1dgb',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:47:44.689'
+}
+{
+  requestId: 'uw1dgb',
+  statusCode: 200,
+  responseTime: '25ms',
+  timestamp: '2025-06-22 09:47:44.713',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:48:03.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:48:34.010'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:49:03.997'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:49:33.999'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:50:04.873'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:50:34.879'
+}
+{
+  requestId: 'zgh6ca',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:51:02.226'
+}
+{
+  requestId: 'zgh6ca',
+  statusCode: 200,
+  responseTime: '16ms',
+  timestamp: '2025-06-22 09:51:02.242',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:51:03.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:51:34.001'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:52:04.000'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:52:34.005'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:53:03.999'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:53:33.995'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:54:03.997'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:54:34.004'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:55:04.868'
+}
+{
+  requestId: 'ha3m0lp',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 09:55:15.232'
+}
+{
+  requestId: 'ha3m0lp',
+  statusCode: 200,
+  responseTime: '28ms',
+  timestamp: '2025-06-22 09:55:15.260',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:55:34.007'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:56:03.996'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:56:34.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:57:04.878'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:57:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:58:04.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:58:33.993'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:59:03.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 09:59:33.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:00:04.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:00:33.998'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:01:04.008'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:01:34.876'
+}
+{
+  requestId: 'pjmgpq',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:01:45.836'
+}
+{
+  requestId: 'pjmgpq',
+  statusCode: 200,
+  responseTime: '13ms',
+  timestamp: '2025-06-22 10:01:45.849',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '79z7kq',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:01:53.619'
+}
+{
+  requestId: '79z7kq',
+  statusCode: 200,
+  responseTime: '16ms',
+  timestamp: '2025-06-22 10:01:53.635',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:02:03.994'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:02:33.999'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:03:03.995'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:03:34.005'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:04:04.001'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-22 10:04:24.162'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-22 10:04:24.183'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-22 10:04:24.185'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-22 10:04:24.238'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-22 10:04:24.246'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 10:04:28.883'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 10:04:28.909'
+}
+{
+  requestId: 'xlyonq',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:04:28.931'
+}
+{
+  requestId: 'xlyonq',
+  statusCode: 200,
+  responseTime: '44ms',
+  timestamp: '2025-06-22 10:04:28.975',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'wolh',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:04:55.687'
+}
+{
+  requestId: 'wolh',
+  statusCode: 200,
+  responseTime: '19ms',
+  timestamp: '2025-06-22 10:04:55.706',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:04:58.886'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:05:29.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:05:59.876'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:06:29.874'
+}
+{
+  requestId: 'm1qyjh',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:06:42.507'
+}
+{
+  requestId: 'm1qyjh',
+  statusCode: 200,
+  responseTime: '17ms',
+  timestamp: '2025-06-22 10:06:42.524',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:06:58.887'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:07:28.893'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:07:58.894'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-22 10:08:26.164'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-22 10:08:26.171'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-22 10:08:26.173'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-22 10:08:26.202'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-22 10:08:26.207'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 10:08:26.238'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 10:08:26.255'
+}
+{
+  requestId: 'c5dkl',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:08:26.268'
+}
+{
+  requestId: 'c5dkl',
+  statusCode: 200,
+  responseTime: '21ms',
+  timestamp: '2025-06-22 10:08:26.289',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:08:56.256'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:09:26.252'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:09:56.246'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:10:26.244'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-06-22 10:10:44.952'
+}
+{
+  level: 'info',
+  message: '서버 시작',
+  timestamp: '2025-06-22 10:10:44.961'
+}
+{
+  uri: 'mongodb://127.0.0.1:27017/maekcord',
+  level: 'info',
+  message: 'MongoDB 연결 시도:',
+  timestamp: '2025-06-22 10:10:44.962'
+}
+{
+  level: 'info',
+  message: '✅ MongoDB 연결 성공',
+  timestamp: '2025-06-22 10:10:44.991'
+}
+{
+  level: 'info',
+  message: '🚀 서버가 5000번 포트에서 실행 중입니다.',
+  timestamp: '2025-06-22 10:10:44.995'
+}
+{
+  ip: '::ffff:127.0.0.1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 10:10:45.238'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 10:10:45.256'
+}
+{
+  requestId: 'wwy8n',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:10:45.266'
+}
+{
+  requestId: 'wwy8n',
+  statusCode: 200,
+  responseTime: '22ms',
+  timestamp: '2025-06-22 10:10:45.288',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:11:15.248'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:11:45.243'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:12:15.251'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:12:45.242'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:13:15.241'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:13:45.246'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:14:15.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:14:45.880'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:15:41.871'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:16:41.884'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:17:41.877'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:18:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:19:41.869'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-22 10:20:41.878'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-22 10:20:53.700'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 10:20:55.099'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 10:20:55.127'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-22 10:23:03.679'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-22 10:23:06.228'
+}
+{
+  requestId: '65uigm',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:23:06.240'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-22 10:23:06.256'
+}
+{
+  requestId: '65uigm',
+  statusCode: 200,
+  responseTime: '45ms',
+  timestamp: '2025-06-22 10:23:06.285',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'kvfmxr',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-22 10:23:06.295'
+}
+{
+  requestId: 'kvfmxr',
+  statusCode: 200,
+  responseTime: '29ms',
+  timestamp: '2025-06-22 10:23:06.324',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  code: 1006,
+  reason: '',
+  level: 'info',
+  message: '🔌 WebSocket 연결 종료',
+  timestamp: '2025-06-22 10:23:08.601'
+}
+{
+  ip: '::1',
+  url: '/',
+  level: 'info',
+  message: '🔌 새로운 WebSocket 연결',
+  timestamp: '2025-06-23 08:40:26.549'
+}
+{
+  count: 14,
+  level: 'info',
+  message: '✅ 초기 큐 데이터 전송 완료:',
+  timestamp: '2025-06-23 08:40:26.570'
+}
+{
+  requestId: '7t6x5b',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-06-23 08:40:27.104'
+}
+{
+  requestId: '7t6x5b',
+  statusCode: 200,
+  responseTime: '6ms',
+  timestamp: '2025-06-23 08:40:27.110',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:40:57.468'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:41:30.164'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:42:00.165'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:42:30.159'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:43:00.160'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:43:30.154'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:44:00.156'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:44:42.155'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:45:42.159'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:46:42.156'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:47:42.151'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:48:42.152'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:49:42.149'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:50:42.157'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:51:42.156'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:52:42.161'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:53:42.161'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:54:42.155'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:55:42.157'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:56:42.178'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:57:42.155'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:58:42.157'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 08:59:42.151'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 09:00:42.157'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 09:01:30.863'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 09:02:00.150'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 09:02:30.148'
+}
+{
+  type: 'PING',
+  level: 'info',
+  message: '📨 WebSocket 메시지 수신:',
+  timestamp: '2025-06-23 09:03:31.157'
+}

@@ -1,0 +1,307 @@
+.pulse-info-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.pulse-info-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.pulse-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.pulse-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.pulse-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 2rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.hanja {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.physiology-section,
+.description-section,
+.origin-section,
+.effects-section,
+.diseases-section,
+.systemic-impacts-section,
+.management-section,
+.notes-section,
+.references-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+}
+
+.physiology-section h4,
+.description-section h4,
+.origin-section h4,
+.effects-section h4,
+.diseases-section h4,
+.systemic-impacts-section h4,
+.management-section h4,
+.notes-section h4,
+.references-section h4 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.physiology-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.physiology-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.physiology-item .label {
+  font-weight: 500;
+  color: #555;
+}
+
+.physiology-item .value {
+  font-weight: 600;
+  color: #667eea;
+}
+
+.description-section p {
+  margin: 0;
+  line-height: 1.6;
+  color: #444;
+}
+
+.origin-section ul,
+.effects-section ul,
+.diseases-section ul,
+.management-section ul,
+.references-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.origin-section li,
+.effects-section li,
+.diseases-section li,
+.management-section li,
+.references-section li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: #444;
+}
+
+.systemic-impacts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.system-impact {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.system-impact h4 {
+  margin: 0 0 12px 0;
+  color: #667eea;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.system-impact ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.system-impact li {
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #555;
+}
+
+.notes-section p {
+  margin: 0;
+  line-height: 1.6;
+  color: #444;
+  font-style: italic;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .pulse-info-modal {
+    margin: 10px;
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 16px 20px;
+  }
+  
+  .modal-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modal-content {
+    padding: 16px;
+  }
+  
+  .pulse-header h3 {
+    font-size: 1.6rem;
+  }
+  
+  .physiology-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .systemic-impacts-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .physiology-section,
+  .description-section,
+  .origin-section,
+  .effects-section,
+  .diseases-section,
+  .systemic-impacts-section,
+  .management-section,
+  .notes-section,
+  .references-section {
+    padding: 16px;
+  }
+}
+
+/* 스크롤바 스타일링 */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+} 
