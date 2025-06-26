@@ -9,7 +9,7 @@ const RecordSchema = new mongoose.Schema({
   stress: {
     level: {
       type: String,
-      enum: ['low', 'normal', 'high', '낮음', '보통', '높음'],
+      enum: ['low', 'normal', 'high', '낮음', '보통', '높음', '중간'],
       default: 'normal'
     },
     score: {
@@ -121,7 +121,7 @@ const patientSchema = new mongoose.Schema({
   stress: {
     level: {
       type: String,
-      enum: ['low', 'normal', 'high', '낮음', '보통', '높음'],
+      enum: ['low', 'normal', 'high', '낮음', '보통', '높음', '중간'],
       default: 'normal'
     },
     score: {

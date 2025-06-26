@@ -136,7 +136,7 @@ const PatientDataTable = () => {
   const handleExportData = async () => {
     setExportLoading(true);
     try {
-      const response = await axios.post('/api/data-export/export/excel', {
+      const response = await axios.post('/api/data-export/export/patient-data', {
         startDate: '',
         endDate: '',
         visitType: visitTypeFilter,

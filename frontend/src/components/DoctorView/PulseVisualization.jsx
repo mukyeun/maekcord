@@ -52,6 +52,35 @@ const classifyPulse = (pulseData) => {
   };
 };
 
+// 평균값 기반 분류 함수
+function classifyPulseByAverage(values, labels) {
+  if (!Array.isArray(values) || values.length === 0) return 'N/A';
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  // 단일값만 있으면 기존 방식과 동일하게
+  if (values.length === 1) {
+    const v = values[0];
+    if (v < avg) return labels[0];
+    if (v === avg) return labels[1];
+    return labels[2];
+  }
+  // 여러 값이면 각 값의 분류도 보여줄 수 있음
+  return {
+    avg,
+    type: values.map(v => {
+      if (v < avg) return labels[0];
+      if (v === avg) return labels[1];
+      return labels[2];
+    }),
+    summary: (avg < values[0]) ? labels[0] : (avg > values[0]) ? labels[2] : labels[1]
+  };
+}
+
+// 81맥상 표기 변환 함수
+function to81PulseName(types) {
+  const baseNames = types.map(t => t.replace('맥', ''));
+  return baseNames.join('') + '맥';
+}
+
 const PulseVisualization = ({ pulseData = {} }) => {
   const {
     'a-b': a_b, 'a-c': a_c, 'a-d': a_d, 'a-e': a_e,
@@ -90,38 +119,45 @@ const PulseVisualization = ({ pulseData = {} }) => {
 
   const pulseTypes = classifyPulse(pulseData);
 
+  // 현재 구조에 맞게 단일값을 배열로 변환하여 평균 기반 분류 계산
+  const pvcResult = classifyPulseByAverage(PVC ? [PVC] : [], ['부맥', '중맥', '침맥']);
+  const bvResult = classifyPulseByAverage(BV ? [BV] : [], ['활맥', '중맥', '삽맥']);
+  const svResult = classifyPulseByAverage(SV ? [SV] : [], ['허맥', '중맥', '실맥']);
+  const hrResult = classifyPulseByAverage(HR ? [HR] : [], ['지맥', '중맥', '삭맥']);
+
   const calculateCombinedPulse = (types) => {
-    const significantRaw = ['PVC', 'BV', 'SV', 'HR']
+    const order = ['PVC', 'BV', 'SV', 'HR'];
+    const significantRaw = order
       .map(key => types[key])
       .filter(type => type && !type.includes('평맥'));
 
     if (significantRaw.length === 0) return '평맥';
 
     const pulseMap = new Map([
-      [["부맥", "허맥"].sort().join(), "부허맥"],
-      [["부맥", "삭맥", "활맥", "실맥"].sort().join(), "부삭활실맥"],
-      [["부맥", "삭맥", "활맥", "허맥"].sort().join(), "부삭활허맥"],
-      [["부맥", "삭맥", "삽맥", "실맥"].sort().join(), "부삭삽실맥"],
-      [["부맥", "삭맥", "삽맥", "허맥"].sort().join(), "부삭삽허맥"],
-      [["부맥", "지맥", "활맥", "실맥"].sort().join(), "부지활실맥"],
-      [["부맥", "지맥", "활맥", "허맥"].join(), "부지활허맥"],
-      [["부맥", "지맥", "삽맥", "실맥"].sort().join(), "부지삽실맥"],
-      [["부맥", "지맥", "삽맥", "허맥"].sort().join(), "부지삽허맥"],
-      [["침맥", "삭맥", "활맥", "실맥"].sort().join(), "침삭활실맥"],
-      [["침맥", "삭맥", "활맥", "허맥"].sort().join(), "침삭활허맥"],
-      [["침맥", "삭맥", "삽맥", "실맥"].sort().join(), "침삭삽실맥"],
-      [["침맥", "삭맥", "삽맥", "허맥"].sort().join(), "침삭삽허맥"],
-      [["침맥", "지맥", "활맥", "실맥"].sort().join(), "침지활실맥"],
-      [["침맥", "지맥", "활맥", "허맥"].sort().join(), "침지활허맥"],
-      [["침맥", "지맥", "삽맥", "실맥"].sort().join(), "침지삽실맥"],
-      [["침맥", "지맥", "삽맥", "허맥"].sort().join(), "침지삽허맥"],
-      [["부맥", "삽맥", "허맥"].sort().join(), "부삽허맥"],
-      [["부맥", "삽맥", "지맥", "허맥"].sort().join(), "부삽허지맥"],
-      [["부맥", "활맥"].sort().join(), "부활맥"],
-      [["부맥", "삽맥"].sort().join(), "부삽맥"],
+      [['부맥', '허맥'].join(), "부허맥"],
+      [['부맥', '삭맥', '활맥', '실맥'].join(), "부삭활실맥"],
+      [['부맥', '삭맥', '활맥', '허맥'].join(), "부삭활허맥"],
+      [['부맥', '삭맥', '삽맥', '실맥'].join(), "부삭삽실맥"],
+      [['부맥', '삭맥', '삽맥', '허맥'].join(), "부삭삽허맥"],
+      [['부맥', '지맥', '활맥', '실맥'].join(), "부지활실맥"],
+      [['부맥', '지맥', '활맥', '허맥'].join(), "부지활허맥"],
+      [['부맥', '지맥', '삽맥', '실맥'].join(), "부지삽실맥"],
+      [['부맥', '지맥', '삽맥', '허맥'].join(), "부지삽허맥"],
+      [['침맥', '삭맥', '활맥', '실맥'].join(), "침삭활실맥"],
+      [['침맥', '삭맥', '활맥', '허맥'].join(), "침삭활허맥"],
+      [['침맥', '삭맥', '삽맥', '실맥'].join(), "침삭삽실맥"],
+      [['침맥', '삭맥', '삽맥', '허맥'].join(), "침삭삽허맥"],
+      [['침맥', '지맥', '활맥', '실맥'].join(), "침지활실맥"],
+      [['침맥', '지맥', '활맥', '허맥'].join(), "침지활허맥"],
+      [['침맥', '지맥', '삽맥', '실맥'].join(), "침지삽실맥"],
+      [['침맥', '지맥', '삽맥', '허맥'].join(), "침지삽허맥"],
+      [['부맥', '삽맥', '허맥'].join(), "부삽허맥"],
+      [['부맥', '삽맥', '지맥', '허맥'].join(), "부삽허지맥"],
+      [['부맥', '활맥'].join(), "부활맥"],
+      [['부맥', '삽맥'].join(), "부삽맥"],
     ]);
     
-    const key = significantRaw.sort().join();
+    const key = significantRaw.join();
     if (pulseMap.has(key)) {
       return pulseMap.get(key);
     }
@@ -130,7 +166,7 @@ const PulseVisualization = ({ pulseData = {} }) => {
       return significantRaw[0];
     }
 
-    return significantRaw.join('');
+    return to81PulseName(significantRaw);
   };
 
   const combinedPulse = calculateCombinedPulse(pulseTypes);
@@ -223,16 +259,28 @@ const PulseVisualization = ({ pulseData = {} }) => {
           <Title level={4}>팔요맥 분류 결과</Title>
           <Descriptions bordered column={2}>
             <Descriptions.Item label="말초혈관수축도 (PVC)">
-              <Tag color={getTagColor(pulseTypes.PVC)}>{pulseTypes.PVC}</Tag>
+              <Tag color={getTagColor(pvcResult.summary || pvcResult)}>{pvcResult.summary || pvcResult}</Tag>
+              {pvcResult.avg && (
+                <span style={{fontSize:12, color:'#888'}}> (평균: {pvcResult.avg.toFixed(2)})</span>
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="혈관점탄도 (BV)">
-              <Tag color={getTagColor(pulseTypes.BV)}>{pulseTypes.BV}</Tag>
+              <Tag color={getTagColor(bvResult.summary || bvResult)}>{bvResult.summary || bvResult}</Tag>
+              {bvResult.avg && (
+                <span style={{fontSize:12, color:'#888'}}> (평균: {bvResult.avg.toFixed(2)})</span>
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="일회박출량 (SV)">
-              <Tag color={getTagColor(pulseTypes.SV)}>{pulseTypes.SV}</Tag>
+              <Tag color={getTagColor(svResult.summary || svResult)}>{svResult.summary || svResult}</Tag>
+              {svResult.avg && (
+                <span style={{fontSize:12, color:'#888'}}> (평균: {svResult.avg.toFixed(2)})</span>
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="심박동수 (HR)">
-              <Tag color={getTagColor(pulseTypes.HR)}>{pulseTypes.HR}</Tag>
+              <Tag color={getTagColor(hrResult.summary || hrResult)}>{hrResult.summary || hrResult}</Tag>
+              {hrResult.avg && (
+                <span style={{fontSize:12, color:'#888'}}> (평균: {hrResult.avg.toFixed(2)})</span>
+              )}
             </Descriptions.Item>
             <Descriptions.Item label="종합 맥상" span={2}>
               <Space>

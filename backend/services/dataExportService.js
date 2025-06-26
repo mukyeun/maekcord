@@ -149,66 +149,196 @@ class DataExportService {
     } = options;
 
     try {
+      console.log('🔍 환자 데이터 내보내기 시작:', options);
+
       // 쿼리 조건 구성
-      const query = {};
+      const searchConditions = {};
       
       if (startDate && endDate) {
-        query['basicInfo.firstVisitDate'] = {
+        searchConditions['basicInfo.firstVisitDate'] = {
           $gte: new Date(startDate),
           $lte: new Date(endDate)
         };
       }
       
-      if (visitType) query['basicInfo.visitType'] = visitType;
-      if (status) query.status = status;
+      if (visitType) {
+        searchConditions['basicInfo.visitType'] = visitType;
+      }
+      
+      if (status) {
+        searchConditions.status = status;
+      }
 
-      // 데이터 조회
-      const patients = await PatientData.find(query)
-        .populate('metadata.createdBy', 'name role')
-        .populate('metadata.lastUpdatedBy', 'name role')
-        .sort({ 'basicInfo.firstVisitDate': -1 });
+      console.log('🔍 검색 조건:', searchConditions);
+
+      // Patient 모델에서 검색
+      console.log('🔍 Patient 모델에서 검색 시도...');
+      let patientsFromPatient = await Patient.find(searchConditions)
+        .sort({ createdAt: -1 })
+        .lean() || [];
+
+      console.log(`📊 Patient 모델 검색 결과: ${patientsFromPatient.length}개`);
+
+      // PatientData 모델에서도 검색
+      console.log('🔍 PatientData 모델에서 검색 시도...');
+      let patientsFromPatientData = await PatientData.find(searchConditions)
+        .sort({ 'basicInfo.lastVisitDate': -1 })
+        .lean() || [];
+
+      console.log(`📊 PatientData 모델 검색 결과: ${patientsFromPatientData.length}개`);
+
+      // 결과 병합 및 중복 제거
+      let allPatients = [];
+      
+      // Patient 모델 결과를 PatientData 형식으로 변환
+      const patientResults = patientsFromPatient.map(patient => {
+        let latestRecord = Array.isArray(patient.records) && patient.records.length > 0
+          ? patient.records[patient.records.length - 1]
+          : {};
+
+        return {
+          _id: patient._id,
+          basicInfo: {
+            patientId: patient.patientId,
+            name: patient.basicInfo.name,
+            phone: patient.basicInfo.phone,
+            gender: patient.basicInfo.gender,
+            residentNumber: patient.basicInfo.residentNumber,
+            birthDate: patient.basicInfo.birthDate,
+            visitType: patient.basicInfo.visitType,
+            personality: patient.basicInfo.personality,
+            workIntensity: patient.basicInfo.workIntensity,
+            height: patient.basicInfo.height,
+            weight: patient.basicInfo.weight,
+            bmi: patient.basicInfo.bmi,
+            lastVisitDate: patient.updatedAt,
+            firstVisitDate: patient.createdAt,
+            visitCount: patient.records ? patient.records.length : 1
+          },
+          status: patient.status,
+          medication: patient.medication,
+          symptoms: patient.symptoms,
+          pulseWaveInfo: latestRecord
+            ? {
+                symptoms: latestRecord.symptoms,
+                memo: latestRecord.memo,
+                stress: latestRecord.stress,
+                pulseAnalysis: latestRecord.pulseAnalysis,
+                pulseWave: latestRecord.pulseWave
+              }
+            : null,
+          createdAt: patient.createdAt,
+          updatedAt: patient.updatedAt
+        };
+      });
+
+      // PatientData 결과 추가
+      allPatients = [...patientResults, ...patientsFromPatientData];
+
+      // 중복 제거 (patientId 기준)
+      const uniquePatients = allPatients.filter((patient, index, self) => 
+        index === self.findIndex(p => p.basicInfo?.patientId === patient.basicInfo?.patientId)
+      );
+
+      console.log(`📊 최종 결과: ${uniquePatients.length}개 (중복 제거 후)`);
+
+      // 나이 계산
+      const patientsWithAge = uniquePatients.map(patient => {
+        if (patient.basicInfo?.birthDate) {
+          const birthDate = new Date(patient.basicInfo.birthDate);
+          const today = new Date();
+          const age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            return { ...patient, age: age - 1 };
+          }
+          return { ...patient, age };
+        }
+        return patient;
+      });
 
       // 엑셀 데이터 구성
-      const excelData = patients.map(patient => ({
-        '환자 ID': patient.basicInfo.patientId,
-        '환자명': patient.basicInfo.name,
-        '전화번호': patient.basicInfo.phone,
-        '성별': patient.basicInfo.gender,
-        '생년월일': patient.basicInfo.birthDate ? 
-          moment(patient.basicInfo.birthDate).format('YYYY-MM-DD') : 'N/A',
-        '나이': patient.age || 'N/A',
-        '방문 유형': patient.basicInfo.visitType,
-        '첫 방문일': moment(patient.basicInfo.firstVisitDate).format('YYYY-MM-DD'),
-        '마지막 방문일': moment(patient.basicInfo.lastVisitDate).format('YYYY-MM-DD'),
-        '방문 횟수': patient.basicInfo.visitCount,
-        '신장(cm)': patient.basicInfo.height || 'N/A',
-        '체중(kg)': patient.basicInfo.weight || 'N/A',
-        'BMI': patient.basicInfo.bmi || 'N/A',
-        '직업': patient.basicInfo.occupation || 'N/A',
-        '작업 강도': patient.basicInfo.workIntensity || 'N/A',
-        '성격': patient.basicInfo.personality || 'N/A',
-        '주소': patient.basicInfo.address || 'N/A',
-        '비상연락처': patient.basicInfo.emergencyContact ? 
-          `${patient.basicInfo.emergencyContact.name} (${patient.basicInfo.emergencyContact.relationship})` : 'N/A',
-        '주요 증상': patient.symptoms?.mainSymptoms?.map(s => s.symptom).join(', ') || 'N/A',
-        '현재 복용 약물': patient.medication?.currentMedications?.map(m => m.name).join(', ') || 'N/A',
-        '알레르기': patient.medication?.allergies?.map(a => a.medication).join(', ') || 'N/A',
-        '식습관': patient.lifestyle?.diet?.type || 'N/A',
-        '운동 빈도': patient.lifestyle?.exercise?.frequency || 'N/A',
-        '흡연 상태': patient.lifestyle?.smoking?.status || 'N/A',
-        '음주 상태': patient.lifestyle?.alcohol?.status || 'N/A',
-        '스트레스 수준': patient.lifestyle?.stress?.level || 'N/A',
-        '가족력': patient.familyHistory?.hereditaryDiseases?.map(d => d.disease).join(', ') || 'N/A',
-        '과거 질환': patient.medicalHistory?.pastDiseases?.map(d => d.disease).join(', ') || 'N/A',
-        '수술력': patient.medicalHistory?.surgeries?.map(s => s.procedure).join(', ') || 'N/A',
-        '진료 기록 수': patient.medicalRecords?.length || 0,
-        '상태': patient.status,
-        '데이터 품질': patient.metadata?.dataQuality || 'N/A',
-        '생성자': patient.metadata?.createdBy?.name || 'N/A',
-        '최종 수정자': patient.metadata?.lastUpdatedBy?.name || 'N/A',
-        '생성일시': moment(patient.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-        '수정일시': moment(patient.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-      }));
+      const excelData = patientsWithAge.map(patient => {
+        // 복용약물 텍스트 구성
+        const medicationText = (Array.isArray(patient.medication?.current) && patient.medication.current.length > 0
+          ? (typeof patient.medication.current[0] === 'string'
+              ? patient.medication.current.join(', ')
+              : patient.medication.current.map(med => med.name).join(', '))
+          : 'N/A');
+
+        // 증상 텍스트 구성 (배열이면 join)
+        let symptomsText = 'N/A';
+        if (Array.isArray(patient.pulseWaveInfo?.symptoms)) {
+          symptomsText = patient.pulseWaveInfo.symptoms.join(', ');
+        } else if (typeof patient.pulseWaveInfo?.symptoms === 'string') {
+          symptomsText = patient.pulseWaveInfo.symptoms;
+        } else if (Array.isArray(patient.symptoms?.mainSymptoms) && patient.symptoms.mainSymptoms.length > 0) {
+          symptomsText = patient.symptoms.mainSymptoms.map(s => s.symptom).join(', ');
+        }
+
+        // 스트레스 텍스트 구성
+        const stressText = patient.pulseWaveInfo?.stress
+          ? `${patient.pulseWaveInfo.stress.level} (${patient.pulseWaveInfo.stress.score}점)`
+          : 'N/A';
+
+        // 맥파분석 텍스트 구성
+        const pulseWaveText = patient.pulseWaveInfo?.pulseWave
+          ? [
+              `수축기:${patient.pulseWaveInfo.pulseWave.systolicBP ?? 'N/A'}`,
+              `이완기:${patient.pulseWaveInfo.pulseWave.diastolicBP ?? 'N/A'}`,
+              `심박수:${patient.pulseWaveInfo.pulseWave.heartRate ?? 'N/A'}`,
+              `맥압:${patient.pulseWaveInfo.pulseWave.pulsePressure ?? 'N/A'}`,
+              `a-b:${patient.pulseWaveInfo.pulseWave['a-b'] ?? 'N/A'}`,
+              `a-c:${patient.pulseWaveInfo.pulseWave['a-c'] ?? 'N/A'}`,
+              `a-d:${patient.pulseWaveInfo.pulseWave['a-d'] ?? 'N/A'}`,
+              `a-e:${patient.pulseWaveInfo.pulseWave['a-e'] ?? 'N/A'}`,
+              `b/a:${patient.pulseWaveInfo.pulseWave['b/a'] ?? 'N/A'}`,
+              `c/a:${patient.pulseWaveInfo.pulseWave['c/a'] ?? 'N/A'}`,
+              `d/a:${patient.pulseWaveInfo.pulseWave['d/a'] ?? 'N/A'}`,
+              `e/a:${patient.pulseWaveInfo.pulseWave['e/a'] ?? 'N/A'}`,
+              `탄성:${patient.pulseWaveInfo.pulseWave.elasticityScore ?? 'N/A'}`
+            ].join(', ')
+          : 'N/A';
+
+        // 메모 텍스트 구성
+        const memoText = patient.pulseWaveInfo?.memo || patient.symptoms?.symptomMemo || 'N/A';
+
+        // 진료기록(최근 3개)
+        let recordColumns = {};
+        if (Array.isArray(patient.records) && patient.records.length > 0) {
+          const lastRecords = patient.records.slice(-3).reverse();
+          lastRecords.forEach((rec, idx) => {
+            recordColumns[`진료기록${idx+1}_날짜`] = rec.date ? moment(rec.date).format('YYYY-MM-DD') : 'N/A';
+            recordColumns[`진료기록${idx+1}_증상`] = Array.isArray(rec.symptoms) ? rec.symptoms.join(', ') : (rec.symptoms || 'N/A');
+            recordColumns[`진료기록${idx+1}_맥파분석`] = rec.pulseAnalysis || 'N/A';
+            recordColumns[`진료기록${idx+1}_메모`] = rec.memo || 'N/A';
+          });
+        }
+
+        return {
+          '환자 ID': patient.basicInfo?.patientId || 'N/A',
+          '이름': patient.basicInfo?.name || 'N/A',
+          '주민등록번호': patient.basicInfo?.residentNumber || 'N/A',
+          '성별': patient.basicInfo?.gender || 'N/A',
+          '생년월일': patient.basicInfo?.birthDate ? 
+            moment(patient.basicInfo.birthDate).format('YYYY-MM-DD') : 'N/A',
+          '나이': patient.age || 'N/A',
+          '작업강도': patient.basicInfo?.workIntensity || 'N/A',
+          '성격': patient.basicInfo?.personality || 'N/A',
+          '신장(cm)': patient.basicInfo?.height || 'N/A',
+          '체중(kg)': patient.basicInfo?.weight || 'N/A',
+          'BMI': patient.basicInfo?.bmi || 'N/A',
+          '복용약물': medicationText,
+          '증상': symptomsText,
+          '스트레스': stressText,
+          '맥파분석': pulseWaveText,
+          '메모': memoText,
+          ...recordColumns
+        };
+      });
+
+      console.log(`📊 엑셀 데이터 구성 완료: ${excelData.length}개 행`);
 
       // 파일명 생성
       const timestamp = moment().format('YYYYMMDD_HHmmss');
@@ -234,27 +364,12 @@ class DataExportService {
         { wch: 10 }, // 신장
         { wch: 10 }, // 체중
         { wch: 8 },  // BMI
-        { wch: 15 }, // 직업
-        { wch: 12 }, // 작업 강도
-        { wch: 15 }, // 성격
-        { wch: 20 }, // 주소
-        { wch: 20 }, // 비상연락처
-        { wch: 30 }, // 주요 증상
-        { wch: 25 }, // 현재 복용 약물
-        { wch: 20 }, // 알레르기
-        { wch: 12 }, // 식습관
-        { wch: 12 }, // 운동 빈도
-        { wch: 12 }, // 흡연 상태
-        { wch: 12 }, // 음주 상태
-        { wch: 12 }, // 스트레스 수준
-        { wch: 20 }, // 가족력
-        { wch: 20 }, // 과거 질환
-        { wch: 20 }, // 수술력
-        { wch: 12 }, // 진료 기록 수
+        { wch: 30 }, // 복용약물
+        { wch: 30 }, // 증상
+        { wch: 15 }, // 스트레스
+        { wch: 30 }, // 맥파분석
+        { wch: 30 }, // 메모
         { wch: 10 }, // 상태
-        { wch: 12 }, // 데이터 품질
-        { wch: 12 }, // 생성자
-        { wch: 12 }, // 최종 수정자
         { wch: 20 }, // 생성일시
         { wch: 20 }  // 수정일시
       ];
@@ -265,11 +380,13 @@ class DataExportService {
       // 파일 저장
       xlsx.writeFile(workbook, filePath);
 
+      console.log(`✅ 환자 데이터 엑셀 파일 생성 완료: ${fileName}`);
+
       return {
         success: true,
         fileName,
         filePath,
-        recordCount: patients.length,
+        recordCount: patientsWithAge.length,
         exportDate: moment().format('YYYY-MM-DD HH:mm:ss')
       };
 
