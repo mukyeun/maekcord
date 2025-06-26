@@ -52,9 +52,10 @@ const MedicationSection = ({ data, onChange, errors }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const handleMedicationChange = (values) => {
+    console.log('[MedicationSection] 선택된 약물:', values);
     onChange({
       ...data,
-      medications: values
+      current: values
     });
   };
 
@@ -99,10 +100,10 @@ const MedicationSection = ({ data, onChange, errors }) => {
               <FieldLabel>복용 중인 약물</FieldLabel>
               <StyledSelect
                 mode="multiple"
-                value={data.medications || []}
+                value={data.current || []}
                 onChange={handleMedicationChange}
                 placeholder="약물을 선택하세요"
-                status={errors?.medications ? 'error' : ''}
+                status={errors?.current ? 'error' : ''}
                 allowClear
                 showSearch
                 optionFilterProp="children"
@@ -113,8 +114,8 @@ const MedicationSection = ({ data, onChange, errors }) => {
                   </Option>
                 ))}
               </StyledSelect>
-              {errors?.medications && (
-                <ErrorMessage>{errors.medications}</ErrorMessage>
+              {errors?.current && (
+                <ErrorMessage>{errors.current}</ErrorMessage>
               )}
             </FormItem>
           </Col>

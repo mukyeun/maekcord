@@ -89,7 +89,7 @@ const StatusBadge = styled.span`
 `;
 
 // ✅ 2. motion components 선언
-const MotionCard = motion(StyledCard);
+const MotionCard = motion.create(StyledCard);
 
 const QueueDisplay = ({ visible, onClose }) => {
   const [queueList, setQueueList] = useState([]);

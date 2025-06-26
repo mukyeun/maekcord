@@ -39,6 +39,7 @@ const DoctorView = ({ visible, onClose }) => {
   const [stress, setStress] = useState('');
   const [pulseAnalysis, setPulseAnalysis] = useState('');
   const [status, setStatus] = useState('waiting');
+  const [medication, setMedication] = useState([]);
   
   const [pulseData, setPulseData] = useState({
     systolicBP: '', diastolicBP: '', heartRate: '', pulsePressure: '',
@@ -78,23 +79,39 @@ const DoctorView = ({ visible, onClose }) => {
       const todayQueueListResponse = await queueApi.getTodayQueueList();
       const queueList = todayQueueListResponse.data || [];
       
+      console.log('🩺 loadCurrentPatient - 큐 목록:', queueList.map(q => ({
+        id: q._id,
+        name: q.patientId?.basicInfo?.name,
+        status: q.status,
+        queueNumber: q.queueNumber
+      })));
+      
+      // 먼저 호출된 환자 확인
       const calledQueue = queueList.find(q => q.status === 'called');
       if (calledQueue) {
+        console.log('🩺 호출된 환자 발견:', calledQueue.patientId?.basicInfo?.name);
         setCurrentPatient(calledQueue);
         setStatus('called');
         return;
       }
       
+      // 진료 중인 환자 확인 (가장 최근에 진료를 시작한 환자)
       const consultingList = queueList.filter(q => q.status === 'consulting');
-      const consultingQueue = consultingList.find(q => q._id === currentPatient?._id) || consultingList[0];
-      if (consultingQueue) {
-        setCurrentPatient(consultingQueue);
+      if (consultingList.length > 0) {
+        // 가장 최근에 진료를 시작한 환자를 선택 (updatedAt 기준)
+        const latestConsultingQueue = consultingList.reduce((latest, current) => {
+          const latestTime = new Date(latest.updatedAt || latest.createdAt || 0);
+          const currentTime = new Date(current.updatedAt || current.createdAt || 0);
+          return currentTime > latestTime ? current : latest;
+        });
+        
+        console.log('🩺 진료 중인 환자 발견:', latestConsultingQueue.patientId?.basicInfo?.name);
+        setCurrentPatient(latestConsultingQueue);
         setStatus('consulting');
       } else {
-        if (!currentPatient) {
-          setCurrentPatient(null);
-          setStatus('waiting');
-        }
+        console.log('🩺 현재 환자 없음');
+        setCurrentPatient(null);
+        setStatus('waiting');
       }
     } catch (error) {
       console.error('현재 환자 정보 로드 실패:', error);
@@ -124,9 +141,11 @@ const DoctorView = ({ visible, onClose }) => {
         const patientData = data.patient;
         console.log('👨‍⚕️ 호출된 환자 정보:', patientData);
         setCurrentPatient(patientData);
+        setStatus('called');
         break;
       }
       case 'QUEUE_UPDATE':
+        console.log('🔄 큐 업데이트 - 현재 환자 정보 다시 로드');
         loadCurrentPatient();
         break;
       case 'PONG':
@@ -155,11 +174,126 @@ const DoctorView = ({ visible, onClose }) => {
     console.log('🩺 DoctorView - currentPatient state updated:', JSON.stringify(currentPatient, null, 2));
 
     if (currentPatient && currentPatient.patientId) {
-      const queueSymptoms = currentPatient.symptoms || [];
-      const patientSymptoms = currentPatient.patientId?.symptoms || [];
-      setSymptoms(queueSymptoms.length > 0 ? queueSymptoms : patientSymptoms);
-      setMemo(currentPatient.memo || '');
-      setStress(currentPatient.stress || '');
+      const latestRecord = currentPatient.patientId.records?.[0] || {};
+
+      console.log('🩺 DoctorView - 데이터 디버깅:', {
+        patientName: currentPatient.patientId?.basicInfo?.name,
+        latestRecord,
+        patientMedication: currentPatient.patientId.medication,
+        queueMedication: currentPatient.medication,
+        patientStress: currentPatient.patientId.stress,
+        recordStress: latestRecord.stress,
+        allRecords: currentPatient.patientId.records,
+        fullPatientData: currentPatient.patientId
+      });
+
+      // 복용약물 (우선순위: records[0].medications → patient.medication.current → queue.medication → [])
+      const medicationFromRecord = latestRecord.medications || latestRecord.medication?.current || [];
+      const medicationFromPatient = currentPatient.patientId.medication?.current;
+      const medicationFromQueue = currentPatient.medication;
+      
+      console.log('💊 약물 데이터 소스 분석:', {
+        medicationFromRecord,
+        medicationFromPatient,
+        medicationFromQueue,
+        recordKeys: Object.keys(latestRecord),
+        recordMedication: latestRecord.medication
+      });
+      
+      let medicationValue = [];
+      if (medicationFromRecord && medicationFromRecord.length > 0) {
+        medicationValue = medicationFromRecord;
+        console.log('💊 약물 데이터 (records):', medicationFromRecord);
+      } else if (medicationFromPatient && medicationFromPatient.length > 0) {
+        medicationValue = medicationFromPatient;
+        console.log('💊 약물 데이터 (patient):', medicationFromPatient);
+      } else if (medicationFromQueue && medicationFromQueue.length > 0) {
+        medicationValue = medicationFromQueue;
+        console.log('💊 약물 데이터 (queue):', medicationFromQueue);
+      }
+      
+      // 약물 정보가 없으면 "없음"으로 표시
+      const medicationText = medicationValue.length > 0 ? medicationValue.join(', ') : '없음';
+      setMedication(medicationText);
+
+      // 증상 (우선순위: records[0].symptoms → patient.symptoms → queue.symptoms → [])
+      const symptomsFromRecord = latestRecord.symptoms;
+      const symptomsFromPatient = currentPatient.patientId.symptoms;
+      const symptomsFromQueue = currentPatient.symptoms;
+      
+      let symptoms = [];
+      if (symptomsFromRecord && symptomsFromRecord.length > 0) {
+        symptoms = symptomsFromRecord;
+      } else if (symptomsFromPatient && symptomsFromPatient.length > 0) {
+        symptoms = symptomsFromPatient;
+      } else if (symptomsFromQueue && symptomsFromQueue.length > 0) {
+        symptoms = symptomsFromQueue;
+      }
+      
+      setSymptoms(symptoms);
+
+      // 스트레스 (우선순위: records[0].stress → patient.stress → '')
+      const stressData = latestRecord.stress?.records?.stress || latestRecord.stress || currentPatient.patientId.stress || '';
+      let stressText = '';
+      
+      console.log('😰 스트레스 데이터 분석:', {
+        stressData,
+        type: typeof stressData,
+        isObject: typeof stressData === 'object' && stressData !== null,
+        recordStress: latestRecord.stress,
+        recordStressRecords: latestRecord.stress?.records?.stress,
+        patientStress: currentPatient.patientId.stress
+      });
+      
+      if (typeof stressData === 'object' && stressData !== null) {
+        const level = stressData.level || 'normal';
+        const score = typeof stressData.score === 'number'
+          ? stressData.score
+          : stressData.totalScore || 0;
+        const levelText = {
+          'low': '낮음',
+          'normal': '보통',
+          'high': '높음',
+          'very_high': '매우 높음',
+          '낮음': '낮음',
+          '보통': '보통',
+          '중간': '중간',
+          '높음': '높음',
+          '매우 높음': '매우 높음'
+        }[level] || level;
+        stressText = `${levelText} (${score}점)`;
+      } else if (typeof stressData === 'string' && stressData) {
+        const levelText = {
+          'low': '낮음',
+          'normal': '보통',
+          'high': '높음',
+          'very_high': '매우 높음',
+          '낮음': '낮음',
+          '보통': '보통',
+          '중간': '중간',
+          '높음': '높음',
+          '매우 높음': '매우 높음'
+        }[stressData] || stressData;
+        const score = currentPatient.patientId.stress?.score || currentPatient.patientId.stress?.totalScore || 0;
+        stressText = `${levelText} (${score}점)`;
+      } else {
+        stressText = 'N/A';
+      }
+      
+      setStress(stressText);
+
+      console.log('🩺 DoctorView - 데이터 로딩 완료:', {
+        patientName: currentPatient.patientId?.basicInfo?.name,
+        symptoms,
+        medicationValue,
+        medicationText,
+        stressText,
+        stressData: latestRecord.stress || currentPatient.patientId.stress
+      });
+
+      // 메모 (우선순위: records[0] → patient.memo → '')
+      const memo = latestRecord.memo || currentPatient.patientId.memo || '';
+      setMemo(memo);
       setPulseAnalysis(currentPatient.pulseAnalysis || '');
 
       let lastRecord = null;
@@ -199,6 +333,9 @@ const DoctorView = ({ visible, onClose }) => {
         SV: savedPulse.SV || '',
         HR: savedPulse.HR || savedPulse.heartRate || ''
       });
+
+      console.log('latestRecord', latestRecord);
+      console.log('medicationFromRecord', medicationFromRecord);
     } else {
       setSymptoms([]);
       setMemo('');
@@ -235,7 +372,7 @@ const DoctorView = ({ visible, onClose }) => {
     setLoading(true);
     try {
       await queueApi.saveNote(currentPatient._id, { symptoms, memo, stress, pulseAnalysis });
-      await queueApi.updateQueueStatus(currentPatient._id, 'completed');
+      await queueApi.updateQueueStatus(currentPatient._id, 'done');
       
       setStatus('waiting');
       setCurrentPatient(null);
@@ -330,7 +467,18 @@ const DoctorView = ({ visible, onClose }) => {
       <TabPane tab="진료 요약" key="1" disabled={!currentPatient}>
         <StyledCard title="환자 기본 정보">
           <Descriptions column={2} bordered>
-            {getBasicInfoData(currentPatient).map((item, index) => <Descriptions.Item key={index} label={item.label}>{item.value}</Descriptions.Item>)}
+            {getBasicInfoData(currentPatient).map((item, index) => (
+              <Descriptions.Item key={index} label={item.label}>{item.value}</Descriptions.Item>
+            ))}
+            <Descriptions.Item label="복용약물" span={2}>
+              {medication && medication.length > 0 ? medication : '없음'}
+            </Descriptions.Item>
+            <Descriptions.Item label="주요 증상" span={2}>
+              {(symptoms && symptoms.length > 0) ? symptoms.join(', ') : 'N/A'}
+            </Descriptions.Item>
+            <Descriptions.Item label="스트레스" span={2}>
+              {stress ? stress : 'N/A'}
+            </Descriptions.Item>
           </Descriptions>
         </StyledCard>
       </TabPane>

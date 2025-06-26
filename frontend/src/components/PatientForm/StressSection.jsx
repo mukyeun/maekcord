@@ -16,12 +16,31 @@ import { 스트레스카테고리, evaluateStressLevel } from '../../data/stress
 
 const StressSection = ({ formData = {}, onStressChange }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(formData.stress?.items || []);
   const [totalScore, setTotalScore] = useState(0);
   const [stressLevel, setStressLevel] = useState('낮음');
   const [description, setDescription] = useState('');
+  const [details, setDetails] = useState(formData.stress?.details || '');
 
-  const details = formData?.records?.stress?.details || '';
+  useEffect(() => {
+    // formData.stress가 undefined거나 null이면 아무것도 하지 않음
+    if (!formData.stress) return;
+
+    // items가 다를 때만 set
+    if (
+      JSON.stringify(formData.stress.items) !== JSON.stringify(selectedItems)
+    ) {
+      setSelectedItems(formData.stress.items || []);
+    }
+
+    // details가 다를 때만 set
+    if (
+      (formData.stress.details || '') !== details
+    ) {
+      setDetails(formData.stress.details || '');
+    }
+    // eslint-disable-next-line
+  }, [formData.stress]);
 
   useEffect(() => {
     const score = selectedItems.reduce((sum, i) => sum + (i.score || 0), 0);
@@ -30,19 +49,24 @@ const StressSection = ({ formData = {}, onStressChange }) => {
     setStressLevel(evaluation.level);
     setDescription(evaluation.description);
 
-    onStressChange({
-      records: {
-        ...formData.records,
-        stress: {
-          items: selectedItems,
-          totalScore: score,
-          level: evaluation.level,
-          description: evaluation.description,
-          details
-        }
-      }
+    console.log('[StressSection] onStressChange 전달값:', {
+      items: selectedItems,
+      totalScore: score,
+      score,
+      level: evaluation.level,
+      description: evaluation.description,
+      details
     });
-  }, [selectedItems]);
+
+    onStressChange({
+      items: selectedItems,
+      totalScore: score,
+      score,
+      level: evaluation.level,
+      description: evaluation.description,
+      details
+    });
+  }, [selectedItems, details]);
 
   const handleCategorySelect = (value) => {
     setSelectedCategory(value);
@@ -59,21 +83,7 @@ const StressSection = ({ formData = {}, onStressChange }) => {
   };
 
   const handleDetailsChange = (e) => {
-    const updatedDetails = e.target.value;
-    setDescription(updatedDetails);
-
-    onStressChange({
-      records: {
-        ...formData.records,
-        stress: {
-          items: selectedItems,
-          totalScore,
-          level: stressLevel,
-          description,
-          details: updatedDetails
-        }
-      }
-    });
+    setDetails(e.target.value);
   };
 
   return (

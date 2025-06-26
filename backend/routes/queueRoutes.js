@@ -16,7 +16,8 @@ const {
   checkPatientStatus,
   getCurrentPatient,
   callQueue,
-  callNextPatient
+  callNextPatient,
+  saveQueueNote
 } = require('../controllers/queueController');
 const { validateObjectId } = require('../middleware/validation');
 
@@ -222,7 +223,7 @@ router.put('/:queueId/status', async (req, res) => {
     const { status } = req.body;
     const userId = req.user?.id || 'SYSTEM';
 
-    if (!['waiting', 'called', 'consulting', 'done', 'cancelled'].includes(status)) {
+    if (!['waiting', 'called', 'consulting', 'done', 'completed', 'cancelled'].includes(status)) {
       return res.status(400).json({
         success: false,
         message: '유효하지 않은 상태값입니다.'
@@ -549,6 +550,9 @@ router.post('/next', async (req, res) => {
     });
   }
 });
+
+// PUT /api/queues/:queueId/note - 진단 저장
+router.put('/:queueId/note', saveQueueNote);
 
 // 에러 핸들링 미들웨어
 router.use((err, req, res, next) => {

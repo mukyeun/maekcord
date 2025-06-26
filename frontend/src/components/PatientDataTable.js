@@ -29,7 +29,8 @@ import {
   CardContent,
   Alert,
   CircularProgress,
-  Tooltip
+  Tooltip,
+  Checkbox
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -57,6 +58,7 @@ const PatientDataTable = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [selectedIds, setSelectedIds] = useState([]);
 
   // 환자 데이터 조회
   const fetchPatients = async () => {
@@ -204,6 +206,36 @@ const PatientDataTable = () => {
     );
   };
 
+  // 체크박스 전체 선택/해제
+  const handleSelectAll = (event) => {
+    if (event.target.checked) {
+      setSelectedIds(patients.map((p) => p._id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  // 개별 체크박스 선택/해제
+  const handleSelectOne = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    );
+  };
+
+  // 선택 삭제
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm('선택한 환자 데이터를 삭제하시겠습니까?')) return;
+    try {
+      await axios.post('/api/patients/delete-multiple', { ids: selectedIds });
+      setMessage({ type: 'success', text: '선택한 환자 데이터가 삭제되었습니다.' });
+      setSelectedIds([]);
+      fetchPatients();
+    } catch (error) {
+      setMessage({ type: 'error', text: '삭제 중 오류가 발생했습니다.' });
+    }
+  };
+
   // 테이블 컬럼 정의
   const columns = [
     { field: 'patientId', headerName: '환자 ID', flex: 1, valueGetter: (params) => params.row.basicInfo?.patientId || 'N/A' },
@@ -246,7 +278,10 @@ const PatientDataTable = () => {
         }
         return params.row.medication.current.map(med => med.name).join(', ');
       },
-      renderCell: (params) => renderTruncatedCell(params.value),
+      renderCell: (params) => {
+        console.log('테이블 row 데이터:', params.row);
+        return renderTruncatedCell(params.value);
+      },
     },
     {
       field: 'symptoms',
@@ -259,15 +294,46 @@ const PatientDataTable = () => {
       field: 'stress',
       headerName: '스트레스',
       flex: 1,
-      valueGetter: (params) => params.row.pulseWaveInfo?.stress?.text || 'N/A',
-      renderCell: (params) => renderTruncatedCell(params.value),
+      valueGetter: (params) => {
+        if (!params.row.pulseWaveInfo || !params.row.pulseWaveInfo.stress) {
+          return 'N/A';
+        }
+        if (typeof params.row.pulseWaveInfo.stress === 'object') {
+          return `${params.row.pulseWaveInfo.stress.level} (${params.row.pulseWaveInfo.stress.score}점)`;
+        }
+        return params.row.pulseWaveInfo.stress;
+      },
+      renderCell: (params) => {
+        console.log('테이블 row 데이터:', params.row);
+        return renderTruncatedCell(params.value);
+      },
     },
     {
       field: 'pulseAnalysis',
       headerName: '맥파분석',
       flex: 1.5,
       valueGetter: (params) => params.row.pulseWaveInfo?.pulseAnalysis?.text || 'N/A',
-      renderCell: (params) => renderTruncatedCell(params.value),
+      renderCell: (params) => {
+        console.log('테이블 row 데이터:', params.row);
+        const pulseWaveText = params.row.pulseWaveInfo?.pulseWave
+          ? [
+              `수축기:${params.row.pulseWaveInfo.pulseWave.systolicBP ?? 'N/A'}`,
+              `이완기:${params.row.pulseWaveInfo.pulseWave.diastolicBP ?? 'N/A'}`,
+              `심박수:${params.row.pulseWaveInfo.pulseWave.heartRate ?? 'N/A'}`,
+              `맥압:${params.row.pulseWaveInfo.pulseWave.pulsePressure ?? 'N/A'}`,
+              `a-b:${params.row.pulseWaveInfo.pulseWave['a-b'] ?? 'N/A'}`,
+              `a-c:${params.row.pulseWaveInfo.pulseWave['a-c'] ?? 'N/A'}`,
+              `a-d:${params.row.pulseWaveInfo.pulseWave['a-d'] ?? 'N/A'}`,
+              `a-e:${params.row.pulseWaveInfo.pulseWave['a-e'] ?? 'N/A'}`,
+              `b/a:${params.row.pulseWaveInfo.pulseWave['b/a'] ?? 'N/A'}`,
+              `c/a:${params.row.pulseWaveInfo.pulseWave['c/a'] ?? 'N/A'}`,
+              `d/a:${params.row.pulseWaveInfo.pulseWave['d/a'] ?? 'N/A'}`,
+              `e/a:${params.row.pulseWaveInfo.pulseWave['e/a'] ?? 'N/A'}`,
+              `탄성:${params.row.pulseWaveInfo.pulseWave.elasticityScore ?? 'N/A'}`
+            ].join(', ')
+          : 'N/A';
+        return renderTruncatedCell(pulseWaveText, 50);
+      },
     },
     {
       field: 'memo',
@@ -293,7 +359,7 @@ const PatientDataTable = () => {
       renderCell: (params) => (
         <Box>
           <Tooltip title="상세보기">
-            <IconButton onClick={() => handleViewPatient(params.row.basicInfo.patientId)}>
+            <IconButton onClick={() => handleViewPatient(params.row._id)}>
               <ViewIcon />
             </IconButton>
           </Tooltip>
@@ -402,6 +468,15 @@ const PatientDataTable = () => {
                 >
                   엑셀 내보내기
                 </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDeleteSelected}
+                  disabled={selectedIds.length === 0}
+                >
+                  선택 삭제
+                </Button>
               </Box>
             </Grid>
           </Grid>
@@ -413,6 +488,13 @@ const PatientDataTable = () => {
         <Table sx={{ minWidth: 650 }} aria-label="환자 데이터 테이블">
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  indeterminate={selectedIds.length > 0 && selectedIds.length < patients.length}
+                  checked={patients.length > 0 && selectedIds.length === patients.length}
+                  onChange={handleSelectAll}
+                />
+              </TableCell>
               <TableCell>환자 ID</TableCell>
               <TableCell>이름</TableCell>
               <TableCell>성별</TableCell>
@@ -445,13 +527,18 @@ const PatientDataTable = () => {
               </TableRow>
             ) : (
               patients.map((patient) => {
+                if (patient.basicInfo?.name === '박종화') {
+                  console.log('박종화 pulseWaveInfo:', patient.pulseWaveInfo);
+                }
+                console.log('환자 row 데이터:', patient);
                 const statusInfo = getStatusDisplay(patient.status);
 
-                const medicationText = (
-                  (Array.isArray(patient.medication?.currentMedications) && patient.medication.currentMedications.length > 0 && patient.medication.currentMedications.map(med => med.name).join(', ')) ||
-                  (Array.isArray(patient.medication?.current) && patient.medication.current.length > 0 && patient.medication.current.map(med => med.name).join(', ')) ||
-                  'N/A'
-                );
+                const medicationText =
+                  (Array.isArray(patient.medication?.current) && patient.medication.current.length > 0
+                    ? (typeof patient.medication.current[0] === 'string'
+                        ? patient.medication.current.join(', ')
+                        : patient.medication.current.map(med => med.name).join(', '))
+                    : 'N/A');
 
                 const symptomsText = (
                   patient.pulseWaveInfo?.symptoms ||
@@ -459,12 +546,40 @@ const PatientDataTable = () => {
                   'N/A'
                 );
 
-                const stressText = patient.pulseWaveInfo?.stress?.text || patient.lifestyle?.stress?.level || 'N/A';
-                const analysisText = patient.pulseWaveInfo?.pulseAnalysis?.text || 'N/A';
+                const stressText =
+                  patient.pulseWaveInfo?.stress
+                    ? `${patient.pulseWaveInfo.stress.level} (${patient.pulseWaveInfo.stress.score}점)`
+                    : 'N/A';
+
+                const pulseWaveText = patient.pulseWaveInfo?.pulseWave
+                  ? [
+                      `수축기:${patient.pulseWaveInfo.pulseWave.systolicBP ?? 'N/A'}`,
+                      `이완기:${patient.pulseWaveInfo.pulseWave.diastolicBP ?? 'N/A'}`,
+                      `심박수:${patient.pulseWaveInfo.pulseWave.heartRate ?? 'N/A'}`,
+                      `맥압:${patient.pulseWaveInfo.pulseWave.pulsePressure ?? 'N/A'}`,
+                      `a-b:${patient.pulseWaveInfo.pulseWave['a-b'] ?? 'N/A'}`,
+                      `a-c:${patient.pulseWaveInfo.pulseWave['a-c'] ?? 'N/A'}`,
+                      `a-d:${patient.pulseWaveInfo.pulseWave['a-d'] ?? 'N/A'}`,
+                      `a-e:${patient.pulseWaveInfo.pulseWave['a-e'] ?? 'N/A'}`,
+                      `b/a:${patient.pulseWaveInfo.pulseWave['b/a'] ?? 'N/A'}`,
+                      `c/a:${patient.pulseWaveInfo.pulseWave['c/a'] ?? 'N/A'}`,
+                      `d/a:${patient.pulseWaveInfo.pulseWave['d/a'] ?? 'N/A'}`,
+                      `e/a:${patient.pulseWaveInfo.pulseWave['e/a'] ?? 'N/A'}`,
+                      `탄성:${patient.pulseWaveInfo.pulseWave.elasticityScore ?? 'N/A'}`
+                    ].join(', ')
+                  : 'N/A';
+
+                const analysisText = patient.pulseWaveInfo?.pulseAnalysis || 'N/A';
                 const memoText = patient.pulseWaveInfo?.memo || patient.symptoms?.symptomMemo || 'N/A';
                 
                 return (
-                  <TableRow key={patient._id} hover>
+                  <TableRow key={patient._id} hover selected={selectedIds.includes(patient._id)}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        checked={selectedIds.includes(patient._id)}
+                        onChange={() => handleSelectOne(patient._id)}
+                      />
+                    </TableCell>
                     <TableCell>{patient.basicInfo?.patientId}</TableCell>
                     <TableCell>{patient.basicInfo?.name}</TableCell>
                     <TableCell>{getGenderDisplay(patient.basicInfo?.gender)}</TableCell>
@@ -480,7 +595,7 @@ const PatientDataTable = () => {
                     <TableCell>{renderTruncatedCell(medicationText)}</TableCell>
                     <TableCell>{renderTruncatedCell(symptomsText)}</TableCell>
                     <TableCell>{renderTruncatedCell(stressText)}</TableCell>
-                    <TableCell>{renderTruncatedCell(analysisText)}</TableCell>
+                    <TableCell>{renderTruncatedCell(pulseWaveText, 50)}</TableCell>
                     <TableCell>{renderTruncatedCell(memoText)}</TableCell>
                     <TableCell>
                       <Chip 
@@ -492,7 +607,7 @@ const PatientDataTable = () => {
                     <TableCell>
                       <IconButton
                         size="small"
-                        onClick={() => handleViewPatient(patient.basicInfo?.patientId)}
+                        onClick={() => handleViewPatient(patient._id)}
                         title="상세보기"
                       >
                         <ViewIcon />

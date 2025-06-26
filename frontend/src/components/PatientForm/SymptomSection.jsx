@@ -93,7 +93,7 @@ const TagContainer = styled.div`
   }
 `;
 
-const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange, errors }) => {
+const SymptomSection = ({ data = [], onChange, errors }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
 
@@ -108,21 +108,15 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
 
   const handleSymptomSelect = (value) => {
     if (!value) return;
-    const updatedSymptoms = data.symptoms || [];
-    if (!updatedSymptoms.includes(value)) {
-      onChange({
-        ...data,
-        symptoms: [...updatedSymptoms, value]
-      });
+    if (!data.includes(value)) {
+      const newSymptoms = [...data, value];
+      console.log('[SymptomSection] 선택된 증상:', newSymptoms);
+      onChange(newSymptoms);
     }
   };
 
   const handleSymptomRemove = (symptomToRemove) => {
-    const updatedSymptoms = (data.symptoms || []).filter(s => s !== symptomToRemove);
-    onChange({
-      ...data,
-      symptoms: updatedSymptoms
-    });
+    onChange(data.filter(s => s !== symptomToRemove));
   };
 
   return (
@@ -198,11 +192,11 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
         </SelectWrapper>
       </SelectContainer>
 
-      {data.symptoms?.length > 0 && (
+      {data.length > 0 && (
         <FormItem>
           <div className="label">선택된 증상</div>
           <TagContainer>
-            {data.symptoms.map((symptom, index) => (
+            {data.map((symptom, index) => (
               <Tag key={index} closable onClose={() => handleSymptomRemove(symptom)}>{symptom}</Tag>
             ))}
           </TagContainer>
@@ -212,8 +206,6 @@ const SymptomSection = ({ data = { symptoms: [], symptomDetails: '' }, onChange,
       <FormItem style={{ width: '100%' }}>
         <div className="label">증상 상세</div>
         <StyledTextArea
-          value={data.symptomDetails}
-          onChange={(e) => onChange({ ...data, symptomDetails: e.target.value })}
           placeholder="증상에 대해 자세히 설명해주세요"
           rows={4}
           status={errors?.symptomDetails ? 'error' : ''}

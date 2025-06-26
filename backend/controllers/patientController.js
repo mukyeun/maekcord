@@ -252,30 +252,126 @@ const patientController = {
       }
 
       const patientId = await Patient.generateUniqueId();
-      const patientData = { ...formData, patientId, status: 'active' };
+      
+      // 스트레스 데이터 정제 및 검증
+      let stressData = null;
+      try {
+        if (formData.stress) {
+          stressData = {
+            level: formData.stress.level || 'normal',
+            score: Number(formData.stress.score || formData.stress.totalScore || 0),
+            items: Array.isArray(formData.stress.items) 
+              ? formData.stress.items.map(item => ({
+                  name: typeof item === 'string' ? item : (item?.name || ''),
+                  score: typeof item === 'object' ? Number(item?.score || 0) : 0
+                }))
+              : [],
+            measuredAt: formData.stress.measuredAt || new Date()
+          };
+        } else if (formData.records?.stress) {
+          // records.stress에서도 찾기
+          stressData = {
+            level: formData.records.stress.level || 'normal',
+            score: Number(formData.records.stress.score || formData.records.stress.totalScore || 0),
+            items: Array.isArray(formData.records.stress.items) 
+              ? formData.records.stress.items.map(item => ({
+                  name: typeof item === 'string' ? item : (item?.name || ''),
+                  score: typeof item === 'object' ? Number(item?.score || 0) : 0
+                }))
+              : [],
+            measuredAt: formData.records.stress.measuredAt || new Date()
+          };
+        }
+      } catch (stressError) {
+        console.error('❌ 스트레스 데이터 정제 오류:', stressError);
+        stressData = {
+          level: 'normal',
+          score: 0,
+          items: [],
+          measuredAt: new Date()
+        };
+      }
+      
+      const patientData = {
+        ...formData,
+        patientId,
+        status: 'active',
+        symptoms: Array.isArray(formData.symptoms) ? formData.symptoms : [],
+        medication: formData.medication || {},
+        stress: stressData || {
+          level: 'normal',
+          score: 0,
+          items: [],
+          measuredAt: new Date()
+        },
+      };
       
       const initialRecord = {};
       let hasRecordData = false;
       
-      const recordFields = ['symptoms', 'memo', 'stress', 'pulseAnalysis'];
-      recordFields.forEach(field => {
-        if (formData[field]) {
-          initialRecord[field] = formData[field];
-          hasRecordData = true;
-          delete patientData[field];
-        }
-      });
-      
-      if (formData.records?.pulseWave) {
-        initialRecord.pulseWave = formData.records.pulseWave;
+      if (Array.isArray(formData.symptoms) && formData.symptoms.length > 0) {
+        initialRecord.symptoms = formData.symptoms;
         hasRecordData = true;
       }
+      
+      if (formData.memo) {
+        initialRecord.memo = formData.memo;
+        hasRecordData = true;
+      }
+      
+      // 스트레스 데이터는 항상 저장 (정제된 데이터 사용)
+      if (stressData) {
+        initialRecord.stress = stressData;
+        hasRecordData = true;
+      }
+      
+      if (formData.records?.pulseWave) {
+        try {
+          initialRecord.pulseWave = {
+            systolicBP: Number(formData.records.pulseWave.systolicBP) || 0,
+            diastolicBP: Number(formData.records.pulseWave.diastolicBP) || 0,
+            heartRate: Number(formData.records.pulseWave.heartRate) || 0,
+            pulsePressure: Number(formData.records.pulseWave.pulsePressure) || 0,
+            'a-b': Number(formData.records.pulseWave['a-b']) || 0,
+            'a-c': Number(formData.records.pulseWave['a-c']) || 0,
+            'a-d': Number(formData.records.pulseWave['a-d']) || 0,
+            'a-e': Number(formData.records.pulseWave['a-e']) || 0,
+            'b/a': Number(formData.records.pulseWave['b/a']) || 0,
+            'c/a': Number(formData.records.pulseWave['c/a']) || 0,
+            'd/a': Number(formData.records.pulseWave['d/a']) || 0,
+            'e/a': Number(formData.records.pulseWave['e/a']) || 0,
+            elasticityScore: Number(formData.records.pulseWave.elasticityScore) || 0,
+            PVC: Number(formData.records.pulseWave.PVC) || 0,
+            BV: Number(formData.records.pulseWave.BV) || 0,
+            SV: Number(formData.records.pulseWave.SV) || 0,
+            lastUpdated: new Date()
+          };
+          hasRecordData = true;
+        } catch (pulseError) {
+          console.error('❌ 맥파 데이터 정제 오류:', pulseError);
+        }
+      }
+      
       if (formData.records?.macSang) {
         initialRecord.macSang = formData.records.macSang;
         hasRecordData = true;
       }
 
+      // 약물 데이터는 항상 저장 (빈 배열이라도)
+      if (Array.isArray(formData.medication?.current)) {
+        initialRecord.medications = formData.medication.current;
+        hasRecordData = true;
+      }
+      
+      if (Array.isArray(formData.medication?.preferences)) {
+        initialRecord.preferences = formData.medication.preferences;
+        hasRecordData = true;
+      }
+
+      // 증상, 메모, 스트레스, 약물 중 하나라도 있으면 record 생성
       patientData.records = hasRecordData ? [initialRecord] : [];
+      
+      console.log('✅ 저장할 전체 데이터:', JSON.stringify(patientData, null, 2));
       
       const newPatient = new Patient(patientData);
       newPatient.addActivityLog('register', '신규 환자 등록', req.user?.id || 'system');
@@ -289,6 +385,16 @@ const patientController = {
         data: newPatient
       });
     } catch (error) {
+      console.error('❌ 환자 등록 오류:', error);
+      
+      // 상세한 오류 정보 로깅
+      if (error.name === 'ValidationError') {
+        console.error('❌ 검증 오류 상세:', {
+          message: error.message,
+          errors: error.errors
+        });
+      }
+      
       logger.error('Patient creation failed:', error);
       next(error);
     }

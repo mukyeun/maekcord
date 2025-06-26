@@ -718,5 +718,5 @@ module.exports = {
   getCurrentPatient: exports.getCurrentPatient,
   callQueue,  // callQueue 함수만 사용
   callNextPatient: exports.callNextPatient,
-  saveQueueNote: exports.saveQueueNote
+  saveQueueNote,
 };

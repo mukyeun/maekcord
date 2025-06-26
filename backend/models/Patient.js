@@ -4,8 +4,27 @@ const moment = require('moment-timezone');
 const RecordSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   symptoms: [String],
+  medications: [String],
   memo: String,
-  stress: String,
+  stress: {
+    level: {
+      type: String,
+      enum: ['low', 'normal', 'high', '낮음', '보통', '높음'],
+      default: 'normal'
+    },
+    score: {
+      type: Number,
+      default: 0
+    },
+    items: [{
+      name: String,
+      score: Number
+    }],
+    measuredAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
   pulseAnalysis: String,
   pulseWave: {
     systolicBP: Number,
@@ -18,6 +37,7 @@ const RecordSchema = new mongoose.Schema({
     PVC: Number,
     BV: Number,
     SV: Number,
+    lastUpdated: { type: Date, default: Date.now }
   },
   macSang: {
     floating: Boolean, sunken: Boolean, slow: Boolean, rapid: Boolean,
@@ -97,6 +117,25 @@ const patientSchema = new mongoose.Schema({
     history: [String],
     medications: [String],
     preferences: [String]
+  },
+  stress: {
+    level: {
+      type: String,
+      enum: ['low', 'normal', 'high', '낮음', '보통', '높음'],
+      default: 'normal'
+    },
+    score: {
+      type: Number,
+      default: 0
+    },
+    items: [{
+      name: String,
+      score: Number
+    }],
+    measuredAt: {
+      type: Date,
+      default: Date.now
+    }
   },
   records: [RecordSchema],
   memo: {

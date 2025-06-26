@@ -1,6 +1,6 @@
 import api from './axiosInstance';
 
-// ✅ 환자 등록
+// ✅ 환자 등록 (중복 체크 포함)
 export const registerPatient = async (patientData) => {
   try {
     // 1. 주민번호로 기존 환자 체크
@@ -53,14 +53,16 @@ export const updatePatient = async (patientId, patientData) => {
   }
 };
 
-// ✅ 환자 검색
+// ✅ 환자 검색 (페이지네이션 포함)
 export const searchPatient = async (searchParams) => {
   try {
     const response = await api.get('/api/patients/data', { 
       params: {
         search: searchParams.search,
         limit: searchParams.limit || 10,
-        page: 1
+        page: searchParams.page || 1,
+        visitType: searchParams.visitType || '',
+        status: searchParams.status || ''
       }
     });
     return response.data;
@@ -69,6 +71,78 @@ export const searchPatient = async (searchParams) => {
     return {
       success: false,
       message: error.response?.data?.message || '환자 검색 중 오류가 발생했습니다.'
+    };
+  }
+};
+
+// ✅ 환자 상세 정보 조회
+export const getPatientById = async (patientId) => {
+  try {
+    const response = await api.get(`/api/patients/${patientId}`);
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('환자 상세 조회 실패:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || '환자 상세 조회 중 오류가 발생했습니다.'
+    };
+  }
+};
+
+// ✅ 환자 코드로 조회
+export const findPatientByCode = async (patientCode) => {
+  try {
+    const response = await api.get(`/api/patients/code/${patientCode}`);
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('환자 코드 조회 실패:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || '환자 코드 조회 중 오류가 발생했습니다.'
+    };
+  }
+};
+
+// ✅ 환자 중복 체크 (별도 함수)
+export const checkPatient = async (residentNumber) => {
+  try {
+    const response = await api.post('/api/patients/check', {
+      basicInfo: {
+        residentNumber
+      }
+    });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('❌ 환자 중복 체크 오류:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || '환자 중복 체크 중 오류가 발생했습니다.'
+    };
+  }
+};
+
+// ✅ 환자 목록 조회 (간단한 목록)
+export const getPatientList = async (params = {}) => {
+  try {
+    const response = await api.get('/api/patients', { params });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    console.error('환자 목록 조회 실패:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || '환자 목록 조회 중 오류가 발생했습니다.'
     };
   }
 };
@@ -119,31 +193,5 @@ export const getTodayQueueList = async () => {
   } catch (error) {
     console.error('❌ 오늘의 대기열 조회 실패:', error);
     return { success: false, data: [], message: '오늘 대기열 조회 중 오류 발생' };
-  }
-};
-
-// ✅ 환자 중복 체크 (별도 함수로 분리)
-export const checkPatient = async (residentNumber) => {
-  try {
-    const response = await api.post('/api/patients/check', {
-      basicInfo: {
-        residentNumber
-      }
-    });
-    return response.data;
-  } catch (error) {
-    console.error('❌ 환자 중복 체크 오류:', error);
-    throw error;
-  }
-};
-
-// frontend/src/api/patientApi.js에 추가
-export const findPatientByCode = async (patientCode) => {
-  try {
-    const response = await api.get(`/api/patients/code/${patientCode}`);
-    return response.data;
-  } catch (error) {
-    console.error('환자 조회 실패:', error);
-    throw error;
   }
 };

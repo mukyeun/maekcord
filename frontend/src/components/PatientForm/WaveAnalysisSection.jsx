@@ -163,6 +163,15 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
         body: JSON.stringify({ patientName: formData.basicInfo.name })
       });
 
+      if (!response.ok) {
+        if (response.status === 404) {
+          message.destroy();
+          message.error('백엔드 서버가 실행되지 않았습니다. 서버를 시작한 후 다시 시도해주세요.');
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
       message.destroy();
 
@@ -192,7 +201,12 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
     } catch (error) {
       message.destroy();
       console.error('자동 결과 가져오기 오류:', error);
-      message.error('자동으로 결과를 가져오는 중 오류가 발생했습니다.');
+      
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        message.error('백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
+      } else {
+        message.error('자동으로 결과를 가져오는 중 오류가 발생했습니다.');
+      }
     }
   };
 

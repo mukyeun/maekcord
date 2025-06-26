@@ -147,10 +147,10 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
         visitType: data.basicInfo?.visitType || '초진'
       },
       
-      // 의료 정보 정제
-      medications: {
-        current: Array.isArray(data.medication?.medications) 
-          ? data.medication.medications.filter(Boolean).map(m => m.trim())
+      // 의료 정보 정제 (필드명 변경)
+      medication: {
+        current: Array.isArray(data.medication?.current)
+          ? data.medication.current.filter(Boolean).map(m => m.trim())
           : [],
         preferences: Array.isArray(data.medication?.preferences)
           ? data.medication.preferences.filter(Boolean).map(p => p.trim())
@@ -158,14 +158,17 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
       },
 
       // 스트레스 정보 정제
-      stress: data.records?.stress
+      stress: data.stress
         ? {
-            level: data.records.stress.level || 'normal',
-            score: Number(data.records.stress.score) || 0,
-            items: Array.isArray(data.records.stress.items)
-              ? data.records.stress.items
+            level: data.stress.level || 'normal',
+            score: Number(data.stress.totalScore || data.stress.score || 0),
+            items: Array.isArray(data.stress.items)
+              ? data.stress.items.map(item => ({
+                  name: typeof item === 'string' ? item : item.name || '',
+                  score: typeof item === 'object' ? Number(item.score || 0) : 0
+                }))
               : [],
-            measuredAt: data.records.stress.measuredAt || new Date()
+            measuredAt: data.stress.measuredAt || new Date()
           }
         : null,
 
@@ -192,16 +195,6 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
               lastUpdated: data.records.pulseWave.lastUpdated || new Date()
             }
           : null,
-        stress: data.records?.stress
-          ? {
-              level: data.records.stress.level || 'normal',
-              score: Number(data.records.stress.score) || 0,
-              items: Array.isArray(data.records.stress.items)
-                ? data.records.stress.items
-                : [],
-              measuredAt: data.records.stress.measuredAt || new Date()
-            }
-          : null
       },
 
       // 증상 정보 정제
@@ -220,9 +213,25 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
       }
     };
 
-    console.log('📝 정제된 환자 데이터:', JSON.stringify(sanitizedData, null, 2));
-    
-    return sanitizedData;
+    // records[0]에 약물 정보도 포함
+    const initialRecord = {};
+    if (Array.isArray(sanitizedData.symptoms)) initialRecord.symptoms = sanitizedData.symptoms;
+    if (sanitizedData.memo) initialRecord.memo = sanitizedData.memo;
+    if (Array.isArray(sanitizedData.medication.current)) initialRecord.medications = sanitizedData.medication.current;
+    if (Array.isArray(sanitizedData.medication.preferences)) initialRecord.preferences = sanitizedData.medication.preferences;
+    if (data.records?.pulseWave) initialRecord.pulseWave = sanitizedData.records.pulseWave;
+    if (data.records?.macSang) initialRecord.macSang = sanitizedData.records.macSang;
+    if (sanitizedData.stress) initialRecord.stress = sanitizedData.stress;
+
+    sanitizedData.records = Object.keys(initialRecord).length > 0 ? [initialRecord] : [];
+
+    // 반드시 아래처럼 반환!
+    return {
+      ...sanitizedData,
+      medication: sanitizedData.medication,
+      symptoms: sanitizedData.symptoms,
+      records: sanitizedData.records
+    };
   };
 
   const extractPatientId = (response) => {
@@ -238,6 +247,9 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
   };
 
   const handleSave = async () => {
+    // 저장 버튼 클릭 시 formData를 콘솔에 출력
+    console.log('[PatientFormWrapper] 저장 직전 formData:', formData);
+    console.log('[PatientFormWrapper] 저장 직전 formData.stress:', formData.stress);
     try {
       const errors = validateFormData(formData);
       if (errors.length > 0) {
@@ -246,21 +258,25 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
       }
       console.log('🟡 저장 시작 - 폼 데이터:', formData);
 
+      console.log('🔍 스트레스 데이터:', {
+        stressData: formData.stress,
+        totalScore: formData.stress?.totalScore,
+        score: formData.stress?.score
+      });
+
       const sanitized = sanitizeFormData(formData);
       console.log("🧼 정제 후 데이터:", sanitized);
-
-      // 환자 등록
       const res = await registerPatient(sanitized);
-      console.log('👤 환자 등록 응답:', res);
 
       let patientId;
       if (res.success === false && res.patientId) {
         // 이미 등록된 환자인 경우, 주민번호로 checkPatient 호출
         const checkResponse = await checkPatient(sanitized.basicInfo.residentNumber);
-        if (!checkResponse || !checkResponse._id) {
+        console.log('checkPatient 응답:', checkResponse);
+        if (!checkResponse.success || !checkResponse.data || !checkResponse.data._id) {
           throw new Error("환자 ID를 찾을 수 없습니다");
         }
-        patientId = checkResponse._id;
+        patientId = checkResponse.data._id;
         
         // 환자 정보 업데이트 시도
         try {
@@ -436,6 +452,14 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
     }
   }, [handleClose, form]);
 
+  // onStressChange를 useCallback으로 메모이제이션
+  const handleStressChange = (newStress) => {
+    setFormData(prev => ({
+      ...prev,
+      stress: newStress
+    }));
+  };
+
   const sections = [
     {
       title: '기본 정보',
@@ -460,7 +484,7 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
       content: (
         <SymptomSection
           data={formData.symptoms}
-          onChange={(newData) => handleSectionChange('symptoms', newData)}
+          onChange={(newSymptoms) => handleSectionChange('symptoms', newSymptoms)}
         />
       )
     },
@@ -469,15 +493,7 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
       content: (
         <StressSection
           formData={formData}
-          onStressChange={(updatedStress) =>
-            setFormData((prev) => ({
-              ...prev,
-              records: {
-                ...prev.records,
-                stress: updatedStress
-              }
-            }))
-          }
+          onStressChange={handleStressChange}
         />
       )
     },
