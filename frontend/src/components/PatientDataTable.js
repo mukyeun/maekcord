@@ -237,7 +237,7 @@ const PatientDataTable = () => {
 
   // 홈으로 돌아가기
   const handleClose = () => {
-    navigate('/');
+    navigate(-1); // 이전 페이지로 돌아가기
   };
 
   // 긴 텍스트를 위한 헬퍼 함수

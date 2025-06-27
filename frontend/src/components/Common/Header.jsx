@@ -245,7 +245,7 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
         )}
         <Button
           icon={<TableOutlined />}
-          onClick={() => window.open('/patient-data', '_blank')}
+          onClick={() => navigate('/patient-data')}
           style={{ marginRight: 8 }}
         >
           환자 데이터 테이블 보기
