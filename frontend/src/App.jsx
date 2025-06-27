@@ -35,6 +35,7 @@ const PatientFormPage = lazy(() => import('./routes/PatientFormPage'));
 const ReceptionDashboardPage = lazy(() => import('./routes/ReceptionDashboardPage'));
 const QueueDisplayPage = lazy(() => import('./routes/QueueDisplayPage'));
 const DoctorViewPage = lazy(() => import('./routes/DoctorViewPage'));
+const PatientDataTable = lazy(() => import('./components/PatientDataTable'));
 
 const { Content } = Layout;
 
@@ -83,6 +84,11 @@ const App = () => {
                       <Route path="/doctor" element={
                         <ProtectedRoute requiredRoles={['admin', 'doctor']}>
                           <DoctorViewPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/patient-data" element={
+                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                          <PatientDataTable />
                         </ProtectedRoute>
                       } />
                     </Routes>
