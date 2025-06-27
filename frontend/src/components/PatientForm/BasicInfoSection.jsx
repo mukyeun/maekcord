@@ -140,6 +140,19 @@ const SearchResultItem = styled.div`
   }
 `;
 
+const SectionCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
+`;
+
 const PERSONALITY_OPTIONS = ['매우급함', '급함', '보통', '느긋', '매우 느긋'];
 const WORK_INTENSITY_OPTIONS = ['매우 심함', '심함', '보통', '적음', '매우 적음'];
 
@@ -362,7 +375,7 @@ const BasicInfoSection = ({ data, onChange }) => {
   }, [data.height, data.weight]);
 
   return (
-    <div>
+    <SectionCard>
       <SectionHeader>
         <img src={userInfoIcon} alt="기본정보" className="section-icon" />
         <Title level={4}>기본 정보</Title>
@@ -563,7 +576,7 @@ const BasicInfoSection = ({ data, onChange }) => {
           </div>
         )}
       </Modal>
-    </div>
+    </SectionCard>
   );
 };
 

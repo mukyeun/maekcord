@@ -11,3 +11,167 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* 인쇄용 스타일 */
+.print-only { display: none !important; }
+@media print {
+  body {
+    background: #fff !important;
+    color: #222 !important;
+    font-size: 1.1em !important;
+    padding: 24px !important;
+  }
+  .print-hide, .ant-modal-footer, .ant-modal-close {
+    display: none !important;
+  }
+  .ant-card, .ant-descriptions-bordered {
+    box-shadow: none !important;
+    border: 1.5px solid #bbb !important;
+  }
+  .ant-card-head-title, .ant-typography, .ant-descriptions-item-label, .ant-descriptions-item-content {
+    font-size: 1.2em !important;
+    font-weight: 500 !important;
+  }
+  .ant-tag {
+    font-size: 1.1em !important;
+    padding: 2px 10px !important;
+  }
+  .ant-row, .ant-col {
+    page-break-inside: avoid;
+  }
+  .pulse-bar-label {
+    font-size: 1.2em !important;
+    font-weight: bold !important;
+  }
+  /* 여백 및 구분선 */
+  .ant-card {
+    margin-bottom: 24px !important;
+  }
+  .print-only { display: block !important; }
+}
+
+/* 반응형 스타일 */
+@media (max-width: 1200px) {
+  .ant-card {
+    margin-bottom: 16px !important;
+  }
+  .ant-table {
+    font-size: 0.9em !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .ant-col {
+    margin-bottom: 16px !important;
+  }
+  .ant-descriptions-item-label {
+    font-size: 0.9em !important;
+  }
+  .ant-descriptions-item-content {
+    font-size: 0.9em !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .ant-table, .ant-table-content, .ant-table-body, .ant-table-wrapper {
+    overflow-x: auto !important;
+    display: block !important;
+  }
+  button, .ant-btn, input, .ant-input {
+    min-height: 40px !important;
+    font-size: 1em !important;
+  }
+  .ant-card-body {
+    padding: 12px !important;
+  }
+  .ant-modal {
+    margin: 8px !important;
+    max-width: calc(100vw - 16px) !important;
+  }
+  .ant-modal-content {
+    padding: 16px !important;
+  }
+  .ant-descriptions-bordered .ant-descriptions-item-label,
+  .ant-descriptions-bordered .ant-descriptions-item-content {
+    padding: 8px 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 0.9em !important;
+  }
+  .ant-typography {
+    font-size: 0.9em !important;
+  }
+  .ant-btn {
+    padding: 4px 8px !important;
+    font-size: 0.9em !important;
+  }
+  .ant-input {
+    font-size: 0.9em !important;
+  }
+}
+
+/* 접근성 스타일 */
+:focus-visible, .ant-btn:focus, .ant-input:focus {
+  outline: 2px solid #1890ff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px #bae7ff !important;
+}
+
+/* 키보드 네비게이션 지원 */
+.ant-btn:focus-visible,
+.ant-input:focus-visible,
+.ant-select:focus-visible {
+  outline: 2px solid #1890ff !important;
+  outline-offset: 2px !important;
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .ant-card {
+    border: 2px solid #000 !important;
+  }
+  .ant-btn {
+    border: 2px solid #000 !important;
+  }
+  .ant-input {
+    border: 2px solid #000 !important;
+  }
+}
+
+/* 다크모드 지원 */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #1f1f1f !important;
+    color: #fff !important;
+  }
+}
+
+/* 애니메이션 최적화 */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 스크롤바 스타일링 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 모달 접근성: 이미 Ant Design 모달은 role="dialog"와 aria-modal 적용됨 */

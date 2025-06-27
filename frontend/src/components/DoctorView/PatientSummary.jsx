@@ -1,7 +1,28 @@
 import React from 'react';
 import { Card, Table, Typography } from 'antd';
+import styled from 'styled-components';
 
 const { Title } = Typography;
+
+const SectionCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
+`;
+
+const SectionTitle = styled.div`
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.primary};
+  margin-bottom: 0.5rem;
+`;
 
 const PatientSummary = ({ data }) => {
   const { basicInfo, medicalInfo, symptoms, memo } = data;
@@ -68,15 +89,33 @@ const PatientSummary = ({ data }) => {
 
   return (
     <>
-      {renderTable('1. 기본 정보', basicInfoData)}
-      {renderTable('2. 복용 약물 및 기호식품', [
-        { label: '복용 약물', value: meds || '없음' },
-        { label: '기호식품', value: prefs || '없음' },
-      ])}
-      {renderTable('3. 증상', [{ label: '선택된 증상', value: symptomTags || '없음' }])}
-      {renderTable('4. 스트레스 평가', [{ label: '스트레스 수준', value: stressLevel }])}
-      {renderTable('5. 맥파 분석', pulseData)}
-      {renderTable('6. 메모', [{ label: '메모 내용', value: memo || '없음' }])}
+      <SectionCard>
+        <SectionTitle>1. 기본 정보</SectionTitle>
+        {renderTable('', basicInfoData)}
+      </SectionCard>
+      <SectionCard>
+        <SectionTitle>2. 복용 약물 및 기호식품</SectionTitle>
+        {renderTable('', [
+          { label: '복용 약물', value: meds || '없음' },
+          { label: '기호식품', value: prefs || '없음' },
+        ])}
+      </SectionCard>
+      <SectionCard>
+        <SectionTitle>3. 증상</SectionTitle>
+        {renderTable('', [{ label: '선택된 증상', value: symptomTags || '없음' }])}
+      </SectionCard>
+      <SectionCard>
+        <SectionTitle>4. 스트레스 평가</SectionTitle>
+        {renderTable('', [{ label: '스트레스 수준', value: stressLevel }])}
+      </SectionCard>
+      <SectionCard>
+        <SectionTitle>5. 맥파 분석</SectionTitle>
+        {renderTable('', pulseData)}
+      </SectionCard>
+      <SectionCard>
+        <SectionTitle>6. 메모</SectionTitle>
+        {renderTable('', [{ label: '메모 내용', value: memo || '없음' }])}
+      </SectionCard>
     </>
   );
 };

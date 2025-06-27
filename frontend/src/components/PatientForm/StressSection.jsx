@@ -13,6 +13,20 @@ import {
 } from './styles';
 import stressIcon from '../../assets/icons/stress.svg';
 import { 스트레스카테고리, evaluateStressLevel } from '../../data/stressEvents';
+import styled from 'styled-components';
+
+const SectionCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
+`;
 
 const StressSection = ({ formData = {}, onStressChange }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -87,100 +101,102 @@ const StressSection = ({ formData = {}, onStressChange }) => {
   };
 
   return (
-    <StyledCard>
-      <SectionTitle>
-        <div className="icon-wrapper">
-          <img src={stressIcon} alt="스트레스" className="icon" />
-        </div>
-        <div className="title-text">
-          스트레스 평가
-          <div className="subtitle">스트레스 항목을 선택하여 수준을 평가하세요</div>
-        </div>
-      </SectionTitle>
+    <SectionCard>
+      <StyledCard>
+        <SectionTitle>
+          <div className="icon-wrapper">
+            <img src={stressIcon} alt="스트레스" className="icon" />
+          </div>
+          <div className="title-text">
+            스트레스 평가
+            <div className="subtitle">스트레스 항목을 선택하여 수준을 평가하세요</div>
+          </div>
+        </SectionTitle>
 
-      <SelectContainer>
-        <SelectWrapper>
+        <SelectContainer>
+          <SelectWrapper>
+            <FormItem>
+              <div className="label">대분류</div>
+              <StyledSelect
+                value={selectedCategory}
+                onChange={handleCategorySelect}
+                placeholder="선택하세요"
+                showSearch
+              >
+                {스트레스카테고리.map((cat) => (
+                  <Select.Option key={cat.대분류} value={cat.대분류}>
+                    {cat.대분류}
+                  </Select.Option>
+                ))}
+              </StyledSelect>
+            </FormItem>
+          </SelectWrapper>
+
+          <SelectWrapper>
+            <FormItem>
+              <div className="label">세부 항목</div>
+              <StyledSelect
+                onChange={handleItemSelect}
+                placeholder="선택하세요"
+                disabled={!selectedCategory}
+                showSearch
+              >
+                {selectedCategory &&
+                  스트레스카테고리
+                    .find((cat) => cat.대분류 === selectedCategory)
+                    ?.중분류.map((item) => (
+                      <Select.Option key={item.name} value={JSON.stringify(item)}>
+                        {item.name} ({item.score}점)
+                      </Select.Option>
+                    ))}
+              </StyledSelect>
+            </FormItem>
+          </SelectWrapper>
+        </SelectContainer>
+
+        {selectedItems.length > 0 && (
           <FormItem>
-            <div className="label">대분류</div>
-            <StyledSelect
-              value={selectedCategory}
-              onChange={handleCategorySelect}
-              placeholder="선택하세요"
-              showSearch
-            >
-              {스트레스카테고리.map((cat) => (
-                <Select.Option key={cat.대분류} value={cat.대분류}>
-                  {cat.대분류}
-                </Select.Option>
+            <div className="label">선택된 항목</div>
+            <TagContainer>
+              {selectedItems.map((item) => (
+                <Tag key={item.name} color="blue">
+                  {item.name} ({item.score}점)
+                </Tag>
               ))}
-            </StyledSelect>
+            </TagContainer>
           </FormItem>
-        </SelectWrapper>
+        )}
 
-        <SelectWrapper>
-          <FormItem>
-            <div className="label">세부 항목</div>
-            <StyledSelect
-              onChange={handleItemSelect}
-              placeholder="선택하세요"
-              disabled={!selectedCategory}
-              showSearch
+        <EvaluationContainer>
+          <div className="score">총점: {totalScore}점</div>
+          <div className="level">
+            스트레스 수준:&nbsp;
+            <Tag
+              color={
+                stressLevel === '높음'
+                  ? 'error'
+                  : stressLevel === '중간'
+                  ? 'warning'
+                  : 'success'
+              }
             >
-              {selectedCategory &&
-                스트레스카테고리
-                  .find((cat) => cat.대분류 === selectedCategory)
-                  ?.중분류.map((item) => (
-                    <Select.Option key={item.name} value={JSON.stringify(item)}>
-                      {item.name} ({item.score}점)
-                    </Select.Option>
-                  ))}
-            </StyledSelect>
-          </FormItem>
-        </SelectWrapper>
-      </SelectContainer>
+              {stressLevel}
+            </Tag>
+            <span className="description">({description})</span>
+          </div>
+        </EvaluationContainer>
 
-      {selectedItems.length > 0 && (
         <FormItem>
-          <div className="label">선택된 항목</div>
-          <TagContainer>
-            {selectedItems.map((item) => (
-              <Tag key={item.name} color="blue">
-                {item.name} ({item.score}점)
-              </Tag>
-            ))}
-          </TagContainer>
+          <div className="label">스트레스 상세</div>
+          <StyledTextArea
+            rows={4}
+            value={details}
+            placeholder="스트레스 상황에 대한 추가 설명"
+            onChange={handleDetailsChange}
+          />
         </FormItem>
-      )}
-
-      <EvaluationContainer>
-        <div className="score">총점: {totalScore}점</div>
-        <div className="level">
-          스트레스 수준:&nbsp;
-          <Tag
-            color={
-              stressLevel === '높음'
-                ? 'error'
-                : stressLevel === '중간'
-                ? 'warning'
-                : 'success'
-            }
-          >
-            {stressLevel}
-          </Tag>
-          <span className="description">({description})</span>
-        </div>
-      </EvaluationContainer>
-
-      <FormItem>
-        <div className="label">스트레스 상세</div>
-        <StyledTextArea
-          rows={4}
-          value={details}
-          placeholder="스트레스 상황에 대한 추가 설명"
-          onChange={handleDetailsChange}
-        />
-      </FormItem>
-    </StyledCard>
+      </StyledCard>
+    </SectionCard>
   );
 };
 

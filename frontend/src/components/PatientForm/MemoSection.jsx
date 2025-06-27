@@ -2,12 +2,26 @@ import React from 'react';
 import { Input } from 'antd';
 import { StyledCard, SectionTitle, FormItem } from './styles';
 import memoIcon from '../../assets/icons/memo.svg';
+import styled from 'styled-components';
 
 const { TextArea } = Input;
 
+const SectionCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
+`;
+
 const MemoSection = ({ data = '', onChange }) => {
   return (
-    <StyledCard>
+    <SectionCard>
       <SectionTitle>
         <div className="icon-wrapper" style={{ 
           background: 'linear-gradient(135deg, #722ed1 0%, #531dab 100%)',
@@ -36,7 +50,7 @@ const MemoSection = ({ data = '', onChange }) => {
           }}
         />
       </FormItem>
-    </StyledCard>
+    </SectionCard>
   );
 };
 

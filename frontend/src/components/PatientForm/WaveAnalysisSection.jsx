@@ -93,6 +93,19 @@ const SECOND_ROW_FIELDS = [
   { label: '일회박출량 (SV)', name: 'SV', isManual: false, type: 'number', precision: 2 }
 ];
 
+const SectionCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
+`;
+
 /**
  * 맥파 분석 컴포넌트
  */
@@ -323,7 +336,7 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
   };
 
   return (
-    <Card>
+    <SectionCard>
       <input
         type="file"
         ref={fileInputRef}
@@ -383,7 +396,7 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
           ))}
         </WaveDataGrid>
       </ResultsContainer>
-    </Card>
+    </SectionCard>
   );
 };
 

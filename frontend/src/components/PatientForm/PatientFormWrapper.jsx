@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, Button, message, Steps, Alert, Form } from 'antd';
+import { Modal, Button, message, Steps, Alert, Form, Spin } from 'antd';
 import styled from 'styled-components';
 import BasicInfoSection from './BasicInfoSection';
 import MedicationSection from './MedicationSection';
@@ -30,6 +30,19 @@ const ActionButtons = styled.div`
   justify-content: flex-end;
   gap: 12px;
   margin-top: 24px;
+`;
+
+const FormCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 2rem 2rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
 `;
 
 const initialFormData = {
@@ -521,55 +534,62 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
   const isSaveButtonEnabled = currentStep === sections.length - 1 && formData.basicInfo.name;
 
   return (
-    <Modal
-      title="환자 정보 입력"
-      open={isModalVisible}
-      onCancel={handleClose}
-      width="90%"
-      style={{ top: 20 }}
-      footer={null}
-      destroyOnClose={true}
-      maskClosable={false}
-      keyboard={true}
-      styles={{
-        body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
-      }}
-    >
-      <Form form={form}>
-        <FormContainer>
-          <Steps
-            current={currentStep}
-            onChange={setCurrentStep}
-            items={sections.map((section) => ({ title: section.title }))}
-            style={{ marginBottom: 24 }}
-          />
+    <FormCard>
+      <Modal
+        title="환자 정보 입력"
+        open={isModalVisible}
+        onCancel={handleExit}
+        width="90%"
+        style={{ top: 20 }}
+        footer={null}
+        destroyOnClose={true}
+        maskClosable={false}
+        keyboard={true}
+        styles={{
+          body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
+        }}
+      >
+        {error && (
+          <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
+        )}
+        <Spin spinning={loading} tip="불러오는 중...">
+          <Form form={form}>
+            <FormContainer>
+              <Steps
+                current={currentStep}
+                onChange={setCurrentStep}
+                items={sections.map((section) => ({ title: section.title }))}
+                style={{ marginBottom: 24 }}
+              />
 
-          {sections[currentStep].content}
+              {sections[currentStep].content}
 
-          <ActionButtons>
-            {currentStep > 0 && (
-              <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading}>
-                이전
-              </Button>
-            )}
-            {currentStep < sections.length - 1 ? (
-              <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading}>
-                다음
-              </Button>
-            ) : (
-              <Button 
-                type="primary"
-                onClick={handleSave}
-                loading={loading}
-                disabled={!isSaveButtonEnabled}
-              >
-                저장하기
-              </Button>
-            )}
-          </ActionButtons>
-        </FormContainer>
-      </Form>
-    </Modal>
+              <ActionButtons>
+                {currentStep > 0 && (
+                  <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading}>
+                    이전
+                  </Button>
+                )}
+                {currentStep < sections.length - 1 ? (
+                  <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading}>
+                    다음
+                  </Button>
+                ) : (
+                  <Button 
+                    type="primary"
+                    onClick={handleSave}
+                    loading={loading}
+                    disabled={!isSaveButtonEnabled}
+                  >
+                    저장하기
+                  </Button>
+                )}
+              </ActionButtons>
+            </FormContainer>
+          </Form>
+        </Spin>
+      </Modal>
+    </FormCard>
   );
 };
 

@@ -1,6 +1,6 @@
 // src/components/QueueDisplay/QueueDisplay.jsx
 import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, List, Typography, Space, Alert, Switch, Radio, Input, Drawer, Descriptions, Tag, Tabs, message, Button } from 'antd';
+import { Modal, List, Typography, Space, Alert, Switch, Radio, Input, Drawer, Descriptions, Tag, Tabs, message, Button, Spin } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   SoundOutlined, 
@@ -393,189 +393,194 @@ const QueueDisplay = ({ visible, onClose }) => {
   }
 
   return (
-    <>
-      <Modal
-        title={
-          <div className="modal-header">
-            <span>대기 환자 목록</span>
-            <div className="header-right">
-              <span>총 {filteredList.length}명</span>
-              <span>실시간 업데이트</span>
-              <div className="switch-group">
-                <Switch 
-                  size="small" 
-                  checked={isRealtime}
-                  onChange={setIsRealtime}
-                />
-                <Switch
-                  size="small"
-                  checked={isVoiceEnabled}
-                  onChange={handleVoiceToggle}
-                  disabled={!isSpeechSynthesisSupported()}
-                />
-                <Switch
-                  size="small"
-                  checked={isSoundEnabled}
-                  onChange={handleSoundToggle}
-                />
+    <div>
+      {error && (
+        <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
+      )}
+      <Spin spinning={loading} tip="불러오는 중...">
+        <Modal
+          title={
+            <div className="modal-header">
+              <span>대기 환자 목록</span>
+              <div className="header-right">
+                <span>총 {filteredList.length}명</span>
+                <span>실시간 업데이트</span>
+                <div className="switch-group">
+                  <Switch 
+                    size="small" 
+                    checked={isRealtime}
+                    onChange={setIsRealtime}
+                  />
+                  <Switch
+                    size="small"
+                    checked={isVoiceEnabled}
+                    onChange={handleVoiceToggle}
+                    disabled={!isSpeechSynthesisSupported()}
+                  />
+                  <Switch
+                    size="small"
+                    checked={isSoundEnabled}
+                    onChange={handleSoundToggle}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        }
-        open={visible}
-        onCancel={onClose}
-        width="500px"
-        footer={null}
-        styles={{
-          body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
-        }}
-      >
-        {!isSpeechSynthesisSupported() && (
-          <Alert
-            message="음성 안내 지원 안됨"
-            description="이 브라우저는 음성 합성을 지원하지 않습니다."
-            type="warning"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-        )}
-
-        <div className="notification-bar">
-          <span>🔊 {lastCalledPatient && lastCalledPatient.status === 'called' && lastCalledPatient.patientId?.basicInfo?.name}님 진료실로 와주세요</span>
-          <span className="close">×</span>
-        </div>
-
-        <div className="tab-container">
-          <Tabs 
-            defaultActiveKey="1" 
-            onChange={setActiveTab}
-            items={[
-              { label: '전체', key: '1' },
-              { label: '대기', key: '2' },
-              { label: '호출', key: '3' },
-              { label: '진료중', key: '4' }
-            ]}
-          />
-
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="이름 또는 번호 검색"
-            className="search-input"
-            value={searchText}
-            onChange={handleSearch}
-          />
-        </div>
-
-        <List
-          loading={loading}
-          dataSource={filteredList}
-          locale={{ emptyText: '대기 환자가 없습니다.' }}
-          renderItem={(item) => {
-            const statusInfo = STATUS_CONFIG[item.status] || STATUS_CONFIG.waiting;
-            const isJustCalled = item._id === lastCalledPatient?._id;
-
-            console.log(item.patientId?.basicInfo?.name, item.queueNumber, item.createdAt);
-
-            return (
-              <AnimatePresence mode="wait">
-                <MotionCard
-                  key={item._id}
-                  isJustCalled={isJustCalled}
-                  hoverable
-                  onClick={() => handlePatientClick(item)}
-                  variants={listItemVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                >
-                  <QueueItem>
-                    <Space direction="vertical" size={2}>
-                      <Space align="center">
-                        <Title level={4} style={{ margin: 0 }}>
-                          {item.patientId?.basicInfo?.name || '이름 없음'}
-                        </Title>
-                        <Text type="secondary">({item.queueNumber || '-'})</Text>
-                      </Space>
-                      <Space>
-                        <Text type="secondary">
-                          {item.patientId?.basicInfo?.visitType || '-'}
-                        </Text>
-                        <WaitingTime>
-                          대기시간: {calculateWaitingTime(item.createdAt)}
-                        </WaitingTime>
-                      </Space>
-                    </Space>
-                    <StatusBadge 
-                      status={statusInfo.color} 
-                      text={
-                        <Space>
-                          {statusInfo.icon}
-                          {statusInfo.text}
-                        </Space>
-                      }
-                    />
-                  </QueueItem>
-                </MotionCard>
-              </AnimatePresence>
-            );
+          }
+          open={visible}
+          onCancel={onClose}
+          width="500px"
+          footer={null}
+          styles={{
+            body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
           }}
-        />
+        >
+          {!isSpeechSynthesisSupported() && (
+            <Alert
+              message="음성 안내 지원 안됨"
+              description="이 브라우저는 음성 합성을 지원하지 않습니다."
+              type="warning"
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+          )}
 
-        <div className="pagination-info">
-          총 {filteredList.length}개 <span className="current-page">1</span> 10 / 페이지
-        </div>
-      </Modal>
+          <div className="notification-bar">
+            <span>🔊 {lastCalledPatient && lastCalledPatient.status === 'called' && lastCalledPatient.patientId?.basicInfo?.name}님 진료실로 와주세요</span>
+            <span className="close">×</span>
+          </div>
 
-      <Drawer
-        title="환자 상세 정보"
-        placement="right"
-        onClose={() => setIsDrawerVisible(false)}
-        open={isDrawerVisible}
-        width={400}
-      >
-        {selectedPatient && (
-          <>
-            <Descriptions column={1} bordered>
-              <Descriptions.Item label="이름">
-                {selectedPatient.patientId?.basicInfo?.name || '-'}
-              </Descriptions.Item>
-              <Descriptions.Item label="연락처">
-                <Space>
-                  <PhoneOutlined />
-                  {selectedPatient.patientId?.basicInfo?.phone || '-'}
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="접수 시간">
-                <Space>
-                  <CalendarOutlined />
-                  {formatDate(selectedPatient.createdAt)}
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="방문 유형">
-                {selectedPatient.patientId?.basicInfo?.visitType || '-'}
-              </Descriptions.Item>
-              <Descriptions.Item label="주요 증상">
-                <Space wrap>
-                  {selectedPatient.patientId?.symptoms?.map((symptom, index) => (
-                    <Tag key={index} color="blue">{symptom}</Tag>
-                  )) || '-'}
-                </Space>
-              </Descriptions.Item>
-              <Descriptions.Item label="복용 중인 약물">
-                <Space wrap>
-                  {selectedPatient.patientId?.medications?.map((med, index) => (
-                    <Tag key={index} color="purple" icon={<MedicineBoxOutlined />}>
-                      {med}
-                    </Tag>
-                  )) || '-'}
-                </Space>
-              </Descriptions.Item>
-            </Descriptions>
-          </>
-        )}
-      </Drawer>
-    </>
+          <div className="tab-container">
+            <Tabs 
+              defaultActiveKey="1" 
+              onChange={setActiveTab}
+              items={[
+                { label: '전체', key: '1' },
+                { label: '대기', key: '2' },
+                { label: '호출', key: '3' },
+                { label: '진료중', key: '4' }
+              ]}
+            />
+
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="이름 또는 번호 검색"
+              className="search-input"
+              value={searchText}
+              onChange={handleSearch}
+            />
+          </div>
+
+          <List
+            loading={loading}
+            dataSource={filteredList}
+            locale={{ emptyText: '대기 환자가 없습니다.' }}
+            renderItem={(item) => {
+              const statusInfo = STATUS_CONFIG[item.status] || STATUS_CONFIG.waiting;
+              const isJustCalled = item._id === lastCalledPatient?._id;
+
+              console.log(item.patientId?.basicInfo?.name, item.queueNumber, item.createdAt);
+
+              return (
+                <AnimatePresence mode="wait">
+                  <MotionCard
+                    key={item._id}
+                    isJustCalled={isJustCalled}
+                    hoverable
+                    onClick={() => handlePatientClick(item)}
+                    variants={listItemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <QueueItem>
+                      <Space direction="vertical" size={2}>
+                        <Space align="center">
+                          <Title level={4} style={{ margin: 0 }}>
+                            {item.patientId?.basicInfo?.name || '이름 없음'}
+                          </Title>
+                          <Text type="secondary">({item.queueNumber || '-'})</Text>
+                        </Space>
+                        <Space>
+                          <Text type="secondary">
+                            {item.patientId?.basicInfo?.visitType || '-'}
+                          </Text>
+                          <WaitingTime>
+                            대기시간: {calculateWaitingTime(item.createdAt)}
+                          </WaitingTime>
+                        </Space>
+                      </Space>
+                      <StatusBadge 
+                        status={statusInfo.color} 
+                        text={
+                          <Space>
+                            {statusInfo.icon}
+                            {statusInfo.text}
+                          </Space>
+                        }
+                      />
+                    </QueueItem>
+                  </MotionCard>
+                </AnimatePresence>
+              );
+            }}
+          />
+
+          <div className="pagination-info">
+            총 {filteredList.length}개 <span className="current-page">1</span> 10 / 페이지
+          </div>
+        </Modal>
+
+        <Drawer
+          title="환자 상세 정보"
+          placement="right"
+          onClose={() => setIsDrawerVisible(false)}
+          open={isDrawerVisible}
+          width={400}
+        >
+          {selectedPatient && (
+            <>
+              <Descriptions column={1} bordered>
+                <Descriptions.Item label="이름">
+                  {selectedPatient.patientId?.basicInfo?.name || '-'}
+                </Descriptions.Item>
+                <Descriptions.Item label="연락처">
+                  <Space>
+                    <PhoneOutlined />
+                    {selectedPatient.patientId?.basicInfo?.phone || '-'}
+                  </Space>
+                </Descriptions.Item>
+                <Descriptions.Item label="접수 시간">
+                  <Space>
+                    <CalendarOutlined />
+                    {formatDate(selectedPatient.createdAt)}
+                  </Space>
+                </Descriptions.Item>
+                <Descriptions.Item label="방문 유형">
+                  {selectedPatient.patientId?.basicInfo?.visitType || '-'}
+                </Descriptions.Item>
+                <Descriptions.Item label="주요 증상">
+                  <Space wrap>
+                    {selectedPatient.patientId?.symptoms?.map((symptom, index) => (
+                      <Tag key={index} color="blue">{symptom}</Tag>
+                    )) || '-'}
+                  </Space>
+                </Descriptions.Item>
+                <Descriptions.Item label="복용 중인 약물">
+                  <Space wrap>
+                    {selectedPatient.patientId?.medications?.map((med, index) => (
+                      <Tag key={index} color="purple" icon={<MedicineBoxOutlined />}>
+                        {med}
+                      </Tag>
+                    )) || '-'}
+                  </Space>
+                </Descriptions.Item>
+              </Descriptions>
+            </>
+          )}
+        </Drawer>
+      </Spin>
+    </div>
   );
 };
 

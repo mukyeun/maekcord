@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PulseInfoModal from './PulseInfoModal';
 import './PulseInfoButton.css';
 
-const PulseInfoButton = ({ pulseType, children, className = '' }) => {
+const PulseInfoButton = ({ pulseType, patientPulseData, children, className = '' }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleClick = () => {
@@ -27,6 +27,7 @@ const PulseInfoButton = ({ pulseType, children, className = '' }) => {
         isOpen={isModalOpen}
         onClose={handleClose}
         pulseType={pulseType}
+        patientPulseData={patientPulseData}
       />
     </>
   );

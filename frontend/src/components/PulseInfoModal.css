@@ -304,4 +304,10 @@
 
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+@media print {
+  .print-hide {
+    display: none !important;
+  }
 } 

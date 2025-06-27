@@ -93,6 +93,19 @@ const TagContainer = styled.div`
   }
 `;
 
+const SectionCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
+`;
+
 const SymptomSection = ({ data = [], onChange, errors }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
@@ -120,99 +133,101 @@ const SymptomSection = ({ data = [], onChange, errors }) => {
   };
 
   return (
-    <StyledCard>
-      <SectionTitle>
-        <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)' }}>
-          <img src={symptomIcon} alt="증상" className="icon" />
-        </div>
-        <div className="title-text">
-          증상<div className="subtitle">현재 겪고 있는 증상을 선택해주세요</div>
-        </div>
-      </SectionTitle>
+    <SectionCard>
+      <StyledCard>
+        <SectionTitle>
+          <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #ff4d4f 0%, #cf1322 100%)' }}>
+            <img src={symptomIcon} alt="증상" className="icon" />
+          </div>
+          <div className="title-text">
+            증상<div className="subtitle">현재 겪고 있는 증상을 선택해주세요</div>
+          </div>
+        </SectionTitle>
 
-      <SelectContainer>
-        <SelectWrapper>
+        <SelectContainer>
+          <SelectWrapper>
+            <FormItem>
+              <div className="label">대분류</div>
+              <StyledSelect
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                placeholder="선택하세요"
+                showSearch
+                optionFilterProp="children"
+                status={errors?.category ? 'error' : ''}
+              >
+                {Object.keys(증상카테고리).map(category => (
+                  <Select.Option key={category} value={category}>{category}</Select.Option>
+                ))}
+              </StyledSelect>
+              {errors?.category && <div className="error-message">{errors.category}</div>}
+            </FormItem>
+          </SelectWrapper>
+
+          <SelectWrapper>
+            <FormItem>
+              <div className="label">중분류</div>
+              <StyledSelect
+                value={selectedSubCategory}
+                onChange={handleSubCategoryChange}
+                placeholder="선택하세요"
+                disabled={!selectedCategory}
+                showSearch
+                optionFilterProp="children"
+                status={errors?.subCategory ? 'error' : ''}
+              >
+                {selectedCategory &&
+                  Object.keys(증상카테고리[selectedCategory]).map(subCategory => (
+                    <Select.Option key={subCategory} value={subCategory}>{subCategory}</Select.Option>
+                  ))}
+              </StyledSelect>
+              {errors?.subCategory && <div className="error-message">{errors.subCategory}</div>}
+            </FormItem>
+          </SelectWrapper>
+
+          <SelectWrapper>
+            <FormItem>
+              <div className="label">소분류</div>
+              <StyledSelect
+                onChange={handleSymptomSelect}
+                placeholder="선택하세요"
+                disabled={!selectedSubCategory}
+                showSearch
+                optionFilterProp="children"
+                status={errors?.symptoms ? 'error' : ''}
+              >
+                {selectedSubCategory &&
+                  증상카테고리[selectedCategory][selectedSubCategory].map(symptom => (
+                    <Select.Option key={symptom.name} value={symptom.name}>{symptom.name}</Select.Option>
+                  ))}
+              </StyledSelect>
+              {errors?.symptoms && <div className="error-message">{errors.symptoms}</div>}
+            </FormItem>
+          </SelectWrapper>
+        </SelectContainer>
+
+        {data.length > 0 && (
           <FormItem>
-            <div className="label">대분류</div>
-            <StyledSelect
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              placeholder="선택하세요"
-              showSearch
-              optionFilterProp="children"
-              status={errors?.category ? 'error' : ''}
-            >
-              {Object.keys(증상카테고리).map(category => (
-                <Select.Option key={category} value={category}>{category}</Select.Option>
+            <div className="label">선택된 증상</div>
+            <TagContainer>
+              {data.map((symptom, index) => (
+                <Tag key={index} closable onClose={() => handleSymptomRemove(symptom)}>{symptom}</Tag>
               ))}
-            </StyledSelect>
-            {errors?.category && <div className="error-message">{errors.category}</div>}
+            </TagContainer>
           </FormItem>
-        </SelectWrapper>
+        )}
 
-        <SelectWrapper>
-          <FormItem>
-            <div className="label">중분류</div>
-            <StyledSelect
-              value={selectedSubCategory}
-              onChange={handleSubCategoryChange}
-              placeholder="선택하세요"
-              disabled={!selectedCategory}
-              showSearch
-              optionFilterProp="children"
-              status={errors?.subCategory ? 'error' : ''}
-            >
-              {selectedCategory &&
-                Object.keys(증상카테고리[selectedCategory]).map(subCategory => (
-                  <Select.Option key={subCategory} value={subCategory}>{subCategory}</Select.Option>
-                ))}
-            </StyledSelect>
-            {errors?.subCategory && <div className="error-message">{errors.subCategory}</div>}
-          </FormItem>
-        </SelectWrapper>
-
-        <SelectWrapper>
-          <FormItem>
-            <div className="label">소분류</div>
-            <StyledSelect
-              onChange={handleSymptomSelect}
-              placeholder="선택하세요"
-              disabled={!selectedSubCategory}
-              showSearch
-              optionFilterProp="children"
-              status={errors?.symptoms ? 'error' : ''}
-            >
-              {selectedSubCategory &&
-                증상카테고리[selectedCategory][selectedSubCategory].map(symptom => (
-                  <Select.Option key={symptom.name} value={symptom.name}>{symptom.name}</Select.Option>
-                ))}
-            </StyledSelect>
-            {errors?.symptoms && <div className="error-message">{errors.symptoms}</div>}
-          </FormItem>
-        </SelectWrapper>
-      </SelectContainer>
-
-      {data.length > 0 && (
-        <FormItem>
-          <div className="label">선택된 증상</div>
-          <TagContainer>
-            {data.map((symptom, index) => (
-              <Tag key={index} closable onClose={() => handleSymptomRemove(symptom)}>{symptom}</Tag>
-            ))}
-          </TagContainer>
+        <FormItem style={{ width: '100%' }}>
+          <div className="label">증상 상세</div>
+          <StyledTextArea
+            placeholder="증상에 대해 자세히 설명해주세요"
+            rows={4}
+            status={errors?.symptomDetails ? 'error' : ''}
+          />
+          {errors?.symptomDetails && <div className="error-message">{errors.symptomDetails}</div>}
         </FormItem>
-      )}
-
-      <FormItem style={{ width: '100%' }}>
-        <div className="label">증상 상세</div>
-        <StyledTextArea
-          placeholder="증상에 대해 자세히 설명해주세요"
-          rows={4}
-          status={errors?.symptomDetails ? 'error' : ''}
-        />
-        {errors?.symptomDetails && <div className="error-message">{errors.symptomDetails}</div>}
-      </FormItem>
-    </StyledCard>
+      </StyledCard>
+    </SectionCard>
   );
 };
 

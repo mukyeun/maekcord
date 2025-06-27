@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login } from '../../api/authApi';
+import { secureLogout, checkSessionSecurity } from '../../utils/security';
 
 // Mock login API
 const mockLoginAPI = async (credentials) => {
@@ -46,6 +47,20 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// 보안 상태 체크 액션
+export const checkSecurityStatus = createAsyncThunk(
+  'auth/checkSecurityStatus',
+  async (_, { dispatch }) => {
+    const securityStatus = checkSessionSecurity();
+    
+    if (!securityStatus.isSecure) {
+      dispatch(logout());
+    }
+    
+    return securityStatus;
+  }
+);
+
 const initialState = {
   isAuthenticated: Boolean(localStorage.getItem('token')),
   user: (() => {
@@ -59,7 +74,11 @@ const initialState = {
     }
   })(),
   loading: false,
-  error: null
+  error: null,
+  securityStatus: {
+    isSecure: false,
+    warnings: []
+  }
 };
 
 const authSlice = createSlice({
@@ -77,8 +96,17 @@ const authSlice = createSlice({
       state.user = null;
       state.loading = false;
       state.error = null;
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      state.securityStatus = {
+        isSecure: false,
+        warnings: []
+      };
+      secureLogout();
+    },
+    updateSecurityStatus: (state, action) => {
+      state.securityStatus = action.payload;
+    },
+    clearError: (state) => {
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -92,15 +120,26 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.loading = false;
         state.error = null;
+        state.securityStatus = {
+          isSecure: true,
+          warnings: []
+        };
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isAuthenticated = false;
         state.user = null;
         state.loading = false;
         state.error = action.payload;
+        state.securityStatus = {
+          isSecure: false,
+          warnings: ['로그인 실패']
+        };
+      })
+      .addCase(checkSecurityStatus.fulfilled, (state, action) => {
+        state.securityStatus = action.payload;
       });
   }
 });
 
-export const { loginSuccess, logout } = authSlice.actions;
+export const { loginSuccess, logout, updateSecurityStatus, clearError } = authSlice.actions;
 export default authSlice.reducer; 

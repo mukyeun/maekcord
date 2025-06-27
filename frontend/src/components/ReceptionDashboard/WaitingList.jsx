@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { List, Button, Tag, Space, message, Empty, Dropdown, Tooltip, Badge } from 'antd';
+import { List, Button, Tag, Space, message, Empty, Dropdown, Tooltip, Badge, Card } from 'antd';
 import { DownOutlined, ClockCircleOutlined, SoundOutlined, ReloadOutlined } from '@ant-design/icons';
 import * as queueApi from '../../api/queueApi';
 import dayjs from 'dayjs';
@@ -9,10 +9,37 @@ import styled from 'styled-components';
 // dayjs 플러그인 설정
 dayjs.extend(duration);
 
+const WaitingListCard = styled(Card)`
+  border-radius: 16px !important;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08) !important;
+  background: ${({ theme }) => theme.card} !important;
+  color: ${({ theme }) => theme.text} !important;
+  border: 1px solid ${({ theme }) => theme.border} !important;
+  margin-bottom: 1.5rem;
+  
+  .ant-card-body {
+    padding: 1.5rem;
+    @media (max-width: 700px) {
+      padding: 1rem;
+    }
+  }
+`;
+
 const StyledListItem = styled(List.Item)`
   transition: all 0.3s ease;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 16px;
+  background: ${({ theme }) => theme.card};
+  border: 1px solid ${({ theme }) => theme.border};
+  
   &:hover {
-    background-color: #f5f5f5;
+    background: ${({ theme }) => theme.hover};
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+  }
+  
+  @media (max-width: 700px) {
+    padding: 12px;
   }
 `;
 
@@ -20,12 +47,52 @@ const WaitingTimeTag = styled(Tag).withConfig({
   shouldForwardProp: (prop) => prop !== 'isLongWait'
 })`
   color: ${props => props.isLongWait ? '#ff4d4f' : 'inherit'};
+  border-radius: 12px;
+  font-weight: 500;
 `;
 
 const StatusSpan = styled.span.withConfig({
   shouldForwardProp: (prop) => prop !== 'isLongWait',
 })`
-  color: ${({ isLongWait }) => (isLongWait ? 'red' : 'black')};
+  color: ${({ isLongWait }) => (isLongWait ? 'red' : 'inherit')};
+  font-weight: 500;
+`;
+
+const StatisticsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  padding: 16px;
+  background: ${({ theme }) => theme.background};
+  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.border};
+  
+  @media (max-width: 700px) {
+    gap: 8px;
+    padding: 12px;
+  }
+`;
+
+const PatientInfo = styled.div`
+  .patient-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: ${({ theme }) => theme.text};
+    margin-bottom: 4px;
+  }
+  
+  .patient-details {
+    font-size: 14px;
+    color: ${({ theme }) => theme.textSecondary};
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    
+    @media (max-width: 700px) {
+      gap: 8px;
+    }
+  }
 `;
 
 const WaitingList = ({ queueList = [], onQueueUpdate, loading = false }) => {
@@ -136,25 +203,27 @@ const WaitingList = ({ queueList = [], onQueueUpdate, loading = false }) => {
 
   if (!queueList || queueList.length === 0) {
     return (
-      <Empty
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-        description="현재 대기 중인 환자가 없습니다."
-      >
-        <Button 
-          type="primary" 
-          icon={<ReloadOutlined />} 
-          onClick={onQueueUpdate}
-          loading={loading}
+      <WaitingListCard>
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description="현재 대기 중인 환자가 없습니다."
         >
-          새로고침
-        </Button>
-      </Empty>
+          <Button 
+            type="primary" 
+            icon={<ReloadOutlined />} 
+            onClick={onQueueUpdate}
+            loading={loading}
+          >
+            새로고침
+          </Button>
+        </Empty>
+      </WaitingListCard>
     );
   }
 
   return (
-    <div>
-      <Space style={{ marginBottom: 16 }}>
+    <WaitingListCard>
+      <StatisticsContainer>
         {Object.entries(statistics).map(([status, count]) => (
           <Badge key={status} count={count} style={{ backgroundColor: status === 'waiting' ? '#1890ff' : '#999' }}>
             <Tag color={status === 'waiting' ? 'blue' : 'default'}>
@@ -172,7 +241,7 @@ const WaitingList = ({ queueList = [], onQueueUpdate, loading = false }) => {
         >
           새로고침
         </Button>
-      </Space>
+      </StatisticsContainer>
 
       <List
         loading={loading}
@@ -198,38 +267,32 @@ const WaitingList = ({ queueList = [], onQueueUpdate, loading = false }) => {
             >
               <List.Item.Meta
                 title={
-                  <Space>
-                    <span style={{ fontWeight: 'bold' }}>#{item.queueNumber}</span>
-                    <span>{patient.name || '이름 없음'}</span>
-                    {getStatusTag(item.status)}
-                    <Tooltip title={`대기 시작: ${dayjs(item.registeredAt).format('HH:mm')}`}>
+                  <PatientInfo>
+                    <div className="patient-name">
+                      #{item.queueNumber} {patient.name || '이름 없음'}
+                    </div>
+                    <div className="patient-details">
+                      {patient.phoneNumber && <span>📞 {patient.phoneNumber}</span>}
+                      {patient.gender && <span>👤 {patient.gender === 'male' ? '남성' : '여성'}</span>}
+                      <span>🏥 {item.visitType === 'first' ? '초진' : '재진'}</span>
                       <WaitingTimeTag isLongWait={waitingTime.isLongWait}>
-                        <ClockCircleOutlined /> {waitingTime.text}
+                        ⏱️ {waitingTime.text}
                       </WaitingTimeTag>
-                    </Tooltip>
-                  </Space>
-                }
-                description={
-                  <Space direction="vertical">
-                    <span>방문유형: {item.visitType === 'first' ? '초진' : '재진'}</span>
-                    <span>연락처: {patient.phoneNumber || '정보 없음'}</span>
+                      {getStatusTag(item.status)}
+                    </div>
                     {item.symptoms?.length > 0 && (
-                      <span>증상: {item.symptoms.join(', ')}</span>
+                      <div style={{ marginTop: '8px', fontSize: '13px', color: '#666' }}>
+                        💊 증상: {item.symptoms.join(', ')}
+                      </div>
                     )}
-                  </Space>
+                  </PatientInfo>
                 }
               />
             </StyledListItem>
           );
         }}
-        style={{ 
-          backgroundColor: 'white',
-          border: '1px solid #f0f0f0',
-          borderRadius: '8px',
-          minHeight: '200px'
-        }}
       />
-    </div>
+    </WaitingListCard>
   );
 };
 

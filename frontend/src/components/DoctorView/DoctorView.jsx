@@ -40,6 +40,7 @@ const DoctorView = ({ visible, onClose }) => {
   const [pulseAnalysis, setPulseAnalysis] = useState('');
   const [status, setStatus] = useState('waiting');
   const [medication, setMedication] = useState([]);
+  const [error, setError] = useState(null);
   
   const [pulseData, setPulseData] = useState({
     systolicBP: '', diastolicBP: '', heartRate: '', pulsePressure: '',
@@ -76,6 +77,7 @@ const DoctorView = ({ visible, onClose }) => {
   const loadCurrentPatient = async () => {
     try {
       setLoading(true);
+      setError(null);
       const todayQueueListResponse = await queueApi.getTodayQueueList();
       const queueList = todayQueueListResponse.data || [];
       
@@ -115,6 +117,7 @@ const DoctorView = ({ visible, onClose }) => {
       }
     } catch (error) {
       console.error('현재 환자 정보 로드 실패:', error);
+      setError('환자 정보를 불러오는데 실패했습니다.');
       if (error.response?.status !== 404) {
         message.error('환자 정보를 불러오는데 실패했습니다.');
       }
@@ -535,9 +538,14 @@ const DoctorView = ({ visible, onClose }) => {
       width={1200}
       centered
     >
-      <Spin spinning={loading} tip="로딩 중...">
-        {currentPatient ? renderContent() : <Alert message="현재 진료 중인 환자가 없습니다." type="info" showIcon />}
-      </Spin>
+      <div>
+        {error && (
+          <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
+        )}
+        <Spin spinning={loading} tip="불러오는 중...">
+          {currentPatient ? renderContent() : <Alert message="현재 진료 중인 환자가 없습니다." type="info" showIcon />}
+        </Spin>
+      </div>
     </Modal>
   );
 };

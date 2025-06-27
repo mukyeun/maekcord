@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Modal, Table, Tag, Button, Space, Drawer, Descriptions, message, Dropdown, Input, Select, Alert, Spin, Empty } from 'antd';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Modal, Table, Tag, Button, Space, Drawer, Descriptions, message, Dropdown, Input, Select, Alert, Spin, Empty, Card } from 'antd';
 import { UserOutlined, ReloadOutlined, BellOutlined, MoreOutlined, SearchOutlined, LoadingOutlined, EllipsisOutlined, BugOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 import {
   DashboardWrapper,
@@ -21,18 +21,112 @@ import { debounce } from 'lodash';
 import './styles.css';
 import { speak, announceWaitingRoom, announceConsultingRoom, announcePatientCall } from '../../utils/speechUtils';
 import WaitingList from './WaitingList';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import useRealtimeData from '../../hooks/useRealtimeData';
+import useKeyboardShortcuts from '../../hooks/useKeyboardShortcuts';
+import { useDebounce, useDeepMemo } from '../../hooks/useMemoization';
 
 const DashboardContainer = styled.div`
   padding: 24px;
+  background: ${({ theme }) => theme.background};
+  min-height: 100vh;
+  @media (max-width: 700px) {
+    padding: 1rem;
+  }
 `;
 
 const { Search } = Input;
 const { Option } = Select;
 
-const ReceptionDashboard = ({ visible, onClose }) => {
-  const [queueList, setQueueList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+const ResponsiveGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+`;
+
+const DashboardCard = styled(Card)`
+  border-radius: 16px !important;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08) !important;
+  background: ${({ theme }) => theme.card} !important;
+  color: ${({ theme }) => theme.text} !important;
+  border: 1px solid ${({ theme }) => theme.border} !important;
+  margin-bottom: 1.5rem;
+  
+  .ant-card-head {
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+    background: ${({ theme }) => theme.card};
+  }
+  
+  .ant-card-body {
+    padding: 1.5rem;
+    @media (max-width: 700px) {
+      padding: 1rem;
+    }
+  }
+`;
+
+const SearchCard = styled(Card)`
+  border-radius: 16px !important;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08) !important;
+  background: ${({ theme }) => theme.card} !important;
+  color: ${({ theme }) => theme.text} !important;
+  border: 1px solid ${({ theme }) => theme.border} !important;
+  margin-bottom: 1.5rem;
+  
+  .ant-card-body {
+    padding: 1.5rem;
+    @media (max-width: 700px) {
+      padding: 1rem;
+    }
+  }
+`;
+
+const TableCard = styled(Card)`
+  border-radius: 16px !important;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08) !important;
+  background: ${({ theme }) => theme.card} !important;
+  color: ${({ theme }) => theme.text} !important;
+  border: 1px solid ${({ theme }) => theme.border} !important;
+  
+  .ant-card-head {
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+    background: ${({ theme }) => theme.card};
+  }
+  
+  .ant-card-body {
+    padding: 1.5rem;
+    @media (max-width: 700px) {
+      padding: 1rem;
+    }
+  }
+  
+  .ant-table {
+    background: ${({ theme }) => theme.card};
+    color: ${({ theme }) => theme.text};
+  }
+  
+  .ant-table-thead > tr > th {
+    background: ${({ theme }) => theme.card};
+    color: ${({ theme }) => theme.text};
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+  }
+  
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid ${({ theme }) => theme.border};
+  }
+  
+  .ant-table-tbody > tr:hover > td {
+    background: ${({ theme }) => theme.hover};
+  }
+`;
+
+const ReceptionDashboard = (props) => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [isQueueDisplayVisible, setIsQueueDisplayVisible] = useState(false);
@@ -40,39 +134,98 @@ const ReceptionDashboard = ({ visible, onClose }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastCalledPatient, setLastCalledPatient] = useState(null);
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector(state => state.auth);
 
-  // 실시간 업데이트를 위한 폴링 간격 (ms)
-  const POLLING_INTERVAL = 300000; // 5분
+  // 검색창 ref 선언
+  const searchInputRef = useRef(null);
 
-  const fetchQueueList = async () => {
+  // 디바운스된 검색 텍스트 (300ms 지연)
+  const debouncedSearchText = useDebounce(searchText, 300);
+
+  // onDataUpdate 콜백을 useCallback으로 감싸기
+  const handleDataUpdate = useCallback((data) => {
+    console.log('✅ 대기 목록 실시간 업데이트:', data);
+  }, []);
+
+  const handleDataError = useCallback((error) => {
+    console.error('❌ 대기 목록 조회 실패:', error);
+    message.error('대기 목록을 불러오는데 실패했습니다.');
+  }, []);
+
+  // 실시간 데이터 훅 사용
+  const {
+    data: queueList,
+    loading,
+    error,
+    lastUpdate,
+    isOnline,
+    refresh,
+    updateItem,
+    removeItem,
+    addItem,
+    connectionStatus,
+    isConnected
+  } = useRealtimeData('queue', queueApi.getTodayQueueList, {
+    autoConnect: true,
+    pollingInterval: 600000, // 10분으로 증가
+    enableWebSocket: true,
+    onDataUpdate: handleDataUpdate,
+    onError: handleDataError
+  });
+
+  // 수동 새로고침 (shortcuts 선언보다 위에서 선언)
+  const handleRefresh = async () => {
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
     try {
-      setLoading(true);
-      setError(null);
-      console.log('📋 대기 목록 조회 시작');
-      
-      const response = await queueApi.getTodayQueueList();
-      console.log('🔍 서버 응답:', response);
-      
-      if (response?.data && Array.isArray(response.data)) {
-        console.log('✅ 대기 목록 데이터 처리:', response.data);
-        setQueueList(response.data);
-      } else if (Array.isArray(response)) {
-        console.log('✅ 대기 목록 데이터 처리 (배열):', response);
-        setQueueList(response);
-      } else {
-        console.error('❌ 대기 목록 데이터 형식 오류:', response);
-        message.error('대기 목록을 불러오는 데 실패했습니다.');
-        setQueueList([]);
-      }
-    } catch (error) {
-      console.error('❌ 대기 목록 조회 실패:', error);
-      setError(error.message);
-      message.error('대기 목록을 불러오는 데 실패했습니다.');
-      setQueueList([]);
+      await refresh();
+      message.success('목록이 새로고침되었습니다.');
     } finally {
-      setLoading(false);
+      setIsRefreshing(false);
     }
   };
+
+  // 단축키 정의 및 훅 호출 (항상 최상단에서 호출)
+  const shortcuts = {
+    'ctrl+r': { description: '목록 새로고침', action: handleRefresh },
+    'ctrl+f': { description: '검색창 포커스', action: () => searchInputRef.current?.focus() },
+    'ctrl+q': { description: '대기열 화면 열기', action: () => setIsQueueDisplayVisible(true) },
+    'esc':    { description: '상세 닫기', action: () => setDetailVisible(false) }
+  };
+  useKeyboardShortcuts(shortcuts, true);
+
+  // 메모이즈된 필터링 로직 (항상 최상단에서 호출)
+  const filteredData = useMemo(() => {
+    // queueList가 undefined나 null이면 빈 배열 사용
+    let result = Array.isArray(queueList) ? [...queueList] : [];
+    
+    if (statusFilter !== 'all') {
+      result = result.filter(item => item.status === statusFilter);
+    }
+    
+    if (debouncedSearchText) {
+      const searchLower = debouncedSearchText.toLowerCase();
+      result = result.filter(item => 
+        item.patientId?.basicInfo?.name?.toLowerCase().includes(searchLower) ||
+        item.queueNumber?.toString().includes(searchLower) ||
+        item.patientId?.basicInfo?.phone?.includes(debouncedSearchText)
+      );
+    }
+    
+    return result;
+  }, [queueList, debouncedSearchText, statusFilter]);
+
+  console.log('isAuthenticated', isAuthenticated, 'loading', loading, 'error', error, 'queueList', queueList);
+
+  if (!isAuthenticated) return <Navigate to="/" replace />;
+  if (error) {
+    return <Alert message="데이터 로드 실패" description={error} type="error" showIcon />;
+  }
+  if (loading) {
+    return <Spin tip="대기 목록을 불러오는 중..."><div className="content" /></Spin>;
+  }
 
   const handleCallPatient = async (queue) => {
     const queueId = queue?._id;
@@ -84,7 +237,7 @@ const ReceptionDashboard = ({ visible, onClose }) => {
     }
 
     try {
-      setLoading(true);
+      setIsRefreshing(true);
       const response = await queueApi.callPatient(queueId);
       
       if (response?.data?.success || response?.status === 200) {
@@ -125,8 +278,8 @@ const ReceptionDashboard = ({ visible, onClose }) => {
           }
         }
         
-        // 대기 목록 새로고침
-        await fetchQueueList();
+        // 실시간 데이터 새로고침
+        refresh();
       } else {
         throw new Error(response?.data?.message || '호출 처리에 실패했습니다.');
       }
@@ -145,7 +298,7 @@ const ReceptionDashboard = ({ visible, onClose }) => {
       
       message.error(errorMessage);
     } finally {
-      setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -165,6 +318,9 @@ const ReceptionDashboard = ({ visible, onClose }) => {
         console.log('✅ 상태 업데이트 성공');
         message.success(`상태가 "${newStatus}"로 변경되었습니다.`);
 
+        // 로컬 상태 즉시 업데이트
+        updateItem(record._id, { status: newStatus });
+
         // WebSocket 이벤트 전송
         wsClient.send({
           type: 'QUEUE_UPDATE',
@@ -172,9 +328,6 @@ const ReceptionDashboard = ({ visible, onClose }) => {
           status: newStatus,
           timestamp: new Date().toISOString()
         });
-        
-        // 대기 목록 새로고침
-        await fetchQueueList();
       } else {
         throw new Error(response?.message || '상태 업데이트에 실패했습니다.');
       }
@@ -190,7 +343,9 @@ const ReceptionDashboard = ({ visible, onClose }) => {
       await queueApi.deleteQueue(queueId);
       console.log('✅ 대기 삭제 성공');
       message.success('대기가 삭제되었습니다.');
-      fetchQueueList();
+      
+      // 로컬 상태에서 즉시 제거
+      removeItem(queueId);
     } catch (error) {
       console.error('❌ 대기 삭제 실패:', error);
       message.error('대기 삭제에 실패했습니다.');
@@ -226,84 +381,6 @@ const ReceptionDashboard = ({ visible, onClose }) => {
       onClick: ({ key }) => handleStatusChange(record, key)
     };
   };
-
-  // 로컬 스토리지에서 초기 데이터 로드 - 컴포넌트 마운트 시 한 번만 실행
-  useEffect(() => {
-    try {
-      const savedQueue = localStorage.getItem('queueList');
-      if (savedQueue) {
-        const parsedQueue = JSON.parse(savedQueue);
-        if (Array.isArray(parsedQueue)) {
-          setQueueList(parsedQueue);
-        }
-      }
-    } catch (err) {
-      console.error('저장된 대기 목록 파싱 오류:', err);
-      // 잘못된 데이터 제거
-      localStorage.removeItem('queueList');
-    }
-    fetchQueueList().then((list) => {
-      if (Array.isArray(list) && list.length > 0) {
-        console.log('🔍 queueList 샘플 확인:', list[0]);
-      }
-    });
-  }, []);
-
-  // 큐 목록이 변경될 때 로컬 스토리지 업데이트 - 디바운스 적용
-  const debouncedSaveToLocalStorage = useCallback(
-    debounce((queue) => {
-      try {
-        localStorage.setItem('queueList', JSON.stringify(queue));
-      } catch (err) {
-        console.error('대기 목록 저장 오류:', err);
-      }
-    }, 1000),
-    []
-  );
-
-  useEffect(() => {
-    debouncedSaveToLocalStorage(queueList);
-  }, [queueList]);
-
-  // 단일 폴링 설정
-  useEffect(() => {
-    if (!visible) return; // 대시보드가 보이지 않을 때는 폴링 중지
-
-    console.log('🔄 폴링 시작 - 간격:', POLLING_INTERVAL);
-    const interval = setInterval(fetchQueueList, POLLING_INTERVAL);
-    
-    return () => {
-      console.log('🛑 폴링 중지');
-      clearInterval(interval);
-    };
-  }, [visible]);
-
-  // 디바운스된 검색 함수
-  const debouncedSearch = useCallback(
-    debounce((value) => setSearchText(value), 300),
-    []
-  );
-
-  // 메모이즈된 필터링 로직
-  const filteredData = useMemo(() => {
-    // queueList가 undefined나 null이면 빈 배열 사용
-    let result = Array.isArray(queueList) ? [...queueList] : [];
-    
-    if (statusFilter !== 'all') {
-      result = result.filter(item => item.status === statusFilter);
-    }
-    
-    if (searchText) {
-      const searchLower = searchText.toLowerCase();
-      result = result.filter(item => 
-        item.patientId?.basicInfo?.name?.toLowerCase().includes(searchLower) ||
-        item.queueNumber?.toString().includes(searchLower) ||
-        item.patientId?.basicInfo?.phone?.includes(searchText)
-      );
-    }
-    
-    return result;
-  }, [queueList, searchText, statusFilter]);
 
   const getStatusStyle = (status) => {
     const styles = {
@@ -403,241 +480,117 @@ const ReceptionDashboard = ({ visible, onClose }) => {
     }
   ];
 
-  // 수동 새로고침
-  const handleRefresh = async () => {
-    if (isRefreshing) return;
-    
-    setIsRefreshing(true);
-    try {
-      await fetchQueueList();
-      message.success('목록이 새로고침되었습니다.');
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
-  // WebSocket 이벤트 처리 최적화
-  const handleWebSocketMessage = useCallback((data) => {
-    console.log('📨 ReceptionDashboard - WebSocket 메시지 수신:', data);
-    
-    switch (data?.type) {
-      case 'QUEUE_UPDATE':
-        if (Array.isArray(data?.queue)) {
-          console.log('📋 큐 목록 업데이트:', data.queue);
-          setQueueList(data.queue);
-        } else {
-          console.warn('⚠️ 유효하지 않은 큐 데이터:', data.queue);
-          fetchQueueList(); // 유효하지 않은 데이터 수신 시 서버에서 다시 조회
-        }
-        break;
-      case 'PATIENT_CALLED': {
-        console.log('📞 환자 호출 이벤트:', data);
-        const name = data?.patient?.basicInfo?.name || '환자';
-        
-        // 음성 안내 실행
-        announcePatientCall(name);
-        
-        // 큐 데이터가 포함된 경우 fetchQueueList 호출 없이 직접 업데이트
-        if (Array.isArray(data?.queue)) {
-          setQueueList(data.queue);
-        } else {
-          fetchQueueList(); // 큐 데이터가 없거나 유효하지 않은 경우 서버에서 다시 조회
-        }
-        break;
-      }
-      case 'CONNECTED':
-      case 'pong':
-      case 'PONG':
-        // 연결 확인 및 ping-pong 메시지 - 무시
-        break;
-      default:
-        console.log('⚠️ 처리되지 않은 WebSocket 메시지:', data);
-    }
-  }, []); // fetchQueueList 의존성 제거
-
-  // WebSocket 연결 관리
-  useEffect(() => {
-    let isComponentMounted = true;
-
-    const setupWebSocket = () => {
-      if (!isComponentMounted) return;
-
-      console.log('🔄 ReceptionDashboard - WebSocket 연결 설정');
-      wsClient.connect();
-      return wsClient.addListener(handleWebSocketMessage);
-    };
-
-    const removeListener = setupWebSocket();
-
-    return () => {
-      console.log('🔌 ReceptionDashboard - WebSocket 정리');
-      isComponentMounted = false;
-      if (removeListener) removeListener();
-    };
-  }, [handleWebSocketMessage]);
-
   // 환자 클릭 처리
   const handlePatientClick = (record) => {
     setSelectedPatient(record.patientId);
     setDetailVisible(true);
   };
 
-  // ✅ 로딩 상태 표시
-  if (loading && queueList.length === 0) {
-    return <Spin tip="대기 목록을 불러오는 중...">
-      <div className="content" />
-    </Spin>;
-  }
-
-  // ✅ 에러 상태 표시
-  if (error) {
-    return (
-      <Alert
-        message="데이터 로드 실패"
-        description={error}
-        type="error"
-        showIcon
-      />
-    );
-  }
-
-  // ✅ 테스트 함수 추가
-  const handleTest = async () => {
-    try {
-      setLoading(true);
-      const response = await queueApi.testQueueList();
-      console.log('테스트 결과:', response);
-      message.info(`전체 데이터 수: ${response.count}개`);
-    } catch (error) {
-      console.error('테스트 실패:', error);
-      message.error('테스트 실패');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateTestData = async () => {
-    try {
-      setLoading(true);
-      const response = await queueApi.createTestData();
-      message.success(`테스트 데이터 ${response.testData.length}개 생성됨`);
-      fetchQueueList(); // 목록 새로고침
-    } catch (error) {
-      console.error('테스트 데이터 생성 실패:', error);
-      message.error('테스트 데이터 생성 실패');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDebug = async () => {
-    try {
-      setLoading(true);
-      const response = await queueApi.getDebugInfo();
-      console.log('디버깅 정보:', response);
-      
-      Modal.info({
-        title: '데이터베이스 디버깅 정보',
-        width: 800,
-        content: (
-          <div style={{ maxHeight: '60vh', overflow: 'auto' }}>
-            <pre>{JSON.stringify(response.debug, null, 2)}</pre>
-          </div>
-        )
-      });
-    } catch (error) {
-      console.error('디버깅 실패:', error);
-      message.error('디버깅 정보 조회 실패');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <Modal
-      title="접수실 대시보드"
-      open={visible}
-      onCancel={onClose}
-      width="80%"
-      style={{ top: 20 }}
-      footer={null}
-      styles={{
-        body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
-      }}
-    >
-      <div className="dashboard-wrapper">
-        {error && (
-          <Alert
-            message="오류"
-            description={error}
-            type="error"
-            showIcon
-            style={{ marginBottom: 16 }}
-            closable
-            onClose={() => setError(null)}
-          />
-        )}
-        <Space style={{ marginBottom: 16 }} size="middle">
-          <Button 
-            type="primary"
-            onClick={() => setIsQueueDisplayVisible(true)}
-          >
-            대기 현황판
-          </Button>
-          
-          <Search
-            placeholder="이름/번호/연락처 검색"
-            allowClear
-            style={{ width: 200 }}
-            onChange={e => debouncedSearch(e.target.value)}
-          />
-          
-          <Select
-            value={statusFilter}
-            onChange={setStatusFilter}
-            style={{ width: 120 }}
-          >
-            <Option value="all">전체 상태</Option>
-            <Option value="waiting">대기중</Option>
-            <Option value="called">호출됨</Option>
-            <Option value="consulting">진료중</Option>
-            <Option value="done">완료</Option>
-          </Select>
-
-          <Button
-            icon={isRefreshing ? <LoadingOutlined /> : <ReloadOutlined />}
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="refresh-button"
-          >
-            새로고침
-          </Button>
-
-          <span>
-            총 {filteredData.length}명
-            {loading && <Spin size="small" style={{ marginLeft: 8 }}>
-              <div className="content" />
-            </Spin>}
-          </span>
-        </Space>
-
-        <Table 
-          className="queue-table"
-          columns={columns}
-          dataSource={filteredData}
-          rowKey="_id"
-          loading={loading}
-          rowClassName={(record) => `${record.status}-row`}
-          pagination={{
-            total: filteredData.length,
-            pageSize: 10,
-            showTotal: (total) => `총 ${total}개`,
-            showSizeChanger: true,
-            showQuickJumper: true
-          }}
-          scroll={{ y: 'calc(100vh - 300px)' }}
-          size="middle"
+    <DashboardContainer>
+      {error && (
+        <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
+      )}
+      
+      {/* 연결 상태 표시 */}
+      {!isOnline && (
+        <Alert 
+          message="오프라인 모드" 
+          description="인터넷 연결이 끊어졌습니다. 일부 기능이 제한될 수 있습니다." 
+          type="warning" 
+          showIcon 
+          style={{ marginBottom: 16 }} 
         />
+      )}
+      
+      <Spin spinning={loading} tip="불러오는 중...">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>접수실</h1>
+            {lastUpdate && (
+              <small style={{ color: '#8c8c8c' }}>
+                마지막 업데이트: {lastUpdate.toLocaleTimeString()}
+              </small>
+            )}
+          </div>
+          <Button onClick={props.onClose || (() => navigate('/'))} type="default">
+            홈으로
+          </Button>
+        </div>
+        
+        <SearchCard>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <Input.Search
+              ref={searchInputRef}
+              placeholder="환자명, 연락처로 검색"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ flex: 1, minWidth: '200px' }}
+              allowClear
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: '150px' }}
+              placeholder="상태 필터"
+            >
+              <Select.Option value="all">전체</Select.Option>
+              <Select.Option value="waiting">대기중</Select.Option>
+              <Select.Option value="called">호출됨</Select.Option>
+              <Select.Option value="consulting">진료중</Select.Option>
+              <Select.Option value="done">완료</Select.Option>
+            </Select>
+            <Button
+              type="primary"
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+              loading={isRefreshing}
+            >
+              새로고침
+            </Button>
+          </div>
+        </SearchCard>
+
+        <TableCard title="대기 관리">
+          {/* 대기 현황 */}
+          <div style={{ marginBottom: '1.5rem' }}>
+            <WaitingList 
+              queueList={queueList || []} 
+              onQueueUpdate={refresh}
+              loading={loading}
+            />
+          </div>
+          
+          {/* 대기열 화면 열기 버튼 */}
+          <Button
+            type="primary"
+            size="large"
+            onClick={() => setIsQueueDisplayVisible(true)}
+            style={{ marginBottom: '1.5rem' }}
+            block
+          >
+            대기열 화면 열기
+          </Button>
+          
+          {/* 대기 목록 테이블 */}
+          <Table 
+            className="queue-table"
+            columns={columns}
+            dataSource={filteredData}
+            rowKey="_id"
+            loading={loading}
+            rowClassName={(record) => `${record.status}-row`}
+            pagination={{
+              total: filteredData.length,
+              pageSize: 10,
+              showTotal: (total) => `총 ${total}개`,
+              showSizeChanger: true,
+              showQuickJumper: true
+            }}
+            scroll={{ y: 'calc(100vh - 400px)' }}
+            size="middle"
+          />
+        </TableCard>
 
         <Drawer
           title="환자 상세 정보"
@@ -694,16 +647,10 @@ const ReceptionDashboard = ({ visible, onClose }) => {
         <QueueDisplay
           visible={isQueueDisplayVisible}
           onClose={() => setIsQueueDisplayVisible(false)}
-          initialQueueList={queueList}
+          initialQueueList={queueList || []}
         />
-
-        <WaitingList 
-          queueList={queueList}
-          onQueueUpdate={fetchQueueList}
-          loading={loading}
-        />
-      </div>
-    </Modal>
+      </Spin>
+    </DashboardContainer>
   );
 };
 

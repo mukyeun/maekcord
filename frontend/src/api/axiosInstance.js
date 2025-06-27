@@ -1,28 +1,30 @@
 // src/api/axiosInstance.js
 import axios from 'axios';
+import { getSecurityHeaders, secureLogout } from '../utils/security';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000',
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
   }
 });
 
 // 요청 인터셉터
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 1. 토큰을 localStorage(또는 sessionStorage)에서 가져옴
-    const token = localStorage.getItem('token'); // 실제 토큰 저장 위치에 따라 수정
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // 보안 헤더 추가
+    const securityHeaders = getSecurityHeaders();
+    config.headers = { ...config.headers, ...securityHeaders };
+    
     console.log('📤 API 요청:', {
       method: config.method,
       url: config.url,
       data: config.data,
       params: config.params
     });
+    
     return config;
   },
   (error) => {
@@ -50,13 +52,12 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 || error.response?.status === 403) {
       console.warn('🔐 인증 토큰이 만료되었습니다. 로그인 페이지로 이동합니다.');
       
-      // 토큰 제거
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // 보안 정리
+      secureLogout();
       
       // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닌 경우에만)
       if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     }
     

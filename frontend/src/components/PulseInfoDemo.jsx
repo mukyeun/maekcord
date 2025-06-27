@@ -3,7 +3,7 @@ import PulseInfoButton from './PulseInfoButton';
 import PulseInfoModal from './PulseInfoModal';
 import './PulseInfoDemo.css';
 
-const PulseInfoDemo = () => {
+const PulseInfoDemo = ({ patientPulseData }) => {
   const [selectedPulse, setSelectedPulse] = useState('부허맥');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -57,6 +57,7 @@ const PulseInfoDemo = () => {
           <div className="action-buttons">
             <PulseInfoButton 
               pulseType={selectedPulse}
+              patientPulseData={patientPulseData}
               className="large"
             >
               맥상정보보기
@@ -99,6 +100,7 @@ const PulseInfoDemo = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         pulseType={selectedPulse}
+        patientPulseData={patientPulseData}
       />
     </div>
   );

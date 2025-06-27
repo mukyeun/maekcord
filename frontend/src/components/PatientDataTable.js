@@ -43,6 +43,54 @@ import {
   Close as CloseIcon
 } from '@mui/icons-material';
 import moment from 'moment';
+import styled from 'styled-components';
+
+const ResponsiveGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const PatientCard = styled.div`
+  background: ${({ theme }) => theme.card};
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid ${({ theme }) => theme.border};
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: ${({ theme }) => theme.text};
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.primary};
+  margin-bottom: 0.5rem;
+`;
+
+const CardRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  padding: 0.2rem 0;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
 
 const PatientDataTable = () => {
   const navigate = useNavigate();
@@ -236,6 +284,9 @@ const PatientDataTable = () => {
     }
   };
 
+  // 모바일 여부 감지
+  const isMobile = window.innerWidth < 700;
+
   // 테이블 컬럼 정의
   const columns = [
     { field: 'patientId', headerName: '환자 ID', flex: 1, valueGetter: (params) => params.row.basicInfo?.patientId || 'N/A' },
@@ -369,258 +420,254 @@ const PatientDataTable = () => {
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      {/* 헤더 영역 */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          환자 데이터 관리
-        </Typography>
+    <div style={{ padding: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <h2 style={{ color: '#1976d2', fontWeight: 800 }}>환자 데이터 관리</h2>
         <Button
           variant="outlined"
-          startIcon={<CloseIcon />}
+          style={{ borderRadius: 8, borderColor: '#1976d2', color: '#1976d2', fontWeight: 600 }}
           onClick={handleClose}
         >
           닫기
         </Button>
-      </Box>
-
-      {/* 메시지 표시 */}
-      {message.text && (
-        <Alert 
-          severity={message.type} 
-          sx={{ mb: 2 }}
-          onClose={() => setMessage({ type: '', text: '' })}
-        >
-          {message.text}
-        </Alert>
-      )}
-
-      {/* 검색 및 필터 */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} md={3}>
-              <TextField
-                fullWidth
-                label="검색 (이름, ID, 전화번호)"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton onClick={handleSearch}>
-                      <SearchIcon />
-                    </IconButton>
-                  )
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>방문 유형</InputLabel>
-                <Select
-                  value={visitTypeFilter}
-                  onChange={(e) => setVisitTypeFilter(e.target.value)}
-                  label="방문 유형"
-                >
-                  <MenuItem value="">전체</MenuItem>
-                  <MenuItem value="초진">초진</MenuItem>
-                  <MenuItem value="재진">재진</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <FormControl fullWidth>
-                <InputLabel>상태</InputLabel>
-                <Select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  label="상태"
-                >
-                  <MenuItem value="">전체</MenuItem>
-                  <MenuItem value="active">활성</MenuItem>
-                  <MenuItem value="inactive">비활성</MenuItem>
-                  <MenuItem value="deceased">사망</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} md={5}>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<FilterIcon />}
-                  onClick={handleResetFilters}
-                >
-                  필터 초기화
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<RefreshIcon />}
-                  onClick={fetchPatients}
-                >
-                  새로고침
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={exportLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
-                  onClick={handleExportData}
-                  disabled={exportLoading}
-                >
-                  엑셀 내보내기
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  onClick={handleDeleteSelected}
-                  disabled={selectedIds.length === 0}
-                >
-                  선택 삭제
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
-
-      {/* 환자 데이터 테이블 */}
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="환자 데이터 테이블">
-          <TableHead>
-            <TableRow>
-              <TableCell padding="checkbox">
-                <Checkbox
-                  indeterminate={selectedIds.length > 0 && selectedIds.length < patients.length}
-                  checked={patients.length > 0 && selectedIds.length === patients.length}
-                  onChange={handleSelectAll}
-                />
-              </TableCell>
-              <TableCell>환자 ID</TableCell>
-              <TableCell>이름</TableCell>
-              <TableCell>성별</TableCell>
-              <TableCell>나이</TableCell>
-              <TableCell>전화번호</TableCell>
-              <TableCell>방문 유형</TableCell>
-              <TableCell>방문 횟수</TableCell>
-              <TableCell>마지막 방문일</TableCell>
-              <TableCell>복용약물</TableCell>
-              <TableCell>증상</TableCell>
-              <TableCell>스트레스</TableCell>
-              <TableCell>맥파분석</TableCell>
-              <TableCell>메모</TableCell>
-              <TableCell>상태</TableCell>
-              <TableCell>작업</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
+      </div>
+      {/* 검색/필터 영역 최신 스타일 적용 */}
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
+        <TextField
+          fullWidth
+          label="검색 (이름, ID, 전화번호)"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+          InputProps={{
+            endAdornment: (
+              <IconButton onClick={handleSearch}>
+                <SearchIcon />
+              </IconButton>
+            )
+          }}
+          style={{ maxWidth: 300 }}
+        />
+        <FormControl fullWidth>
+          <InputLabel>방문 유형</InputLabel>
+          <Select
+            value={visitTypeFilter}
+            onChange={(e) => setVisitTypeFilter(e.target.value)}
+            label="방문 유형"
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="초진">초진</MenuItem>
+            <MenuItem value="재진">재진</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth>
+          <InputLabel>상태</InputLabel>
+          <Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            label="상태"
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="active">활성</MenuItem>
+            <MenuItem value="inactive">비활성</MenuItem>
+            <MenuItem value="deceased">사망</MenuItem>
+          </Select>
+        </FormControl>
+        <Grid item xs={12} md={5}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<FilterIcon />}
+              onClick={handleResetFilters}
+            >
+              필터 초기화
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              onClick={fetchPatients}
+            >
+              새로고침
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={exportLoading ? <CircularProgress size={20} /> : <DownloadIcon />}
+              onClick={handleExportData}
+              disabled={exportLoading}
+            >
+              엑셀 내보내기
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDeleteSelected}
+              disabled={selectedIds.length === 0}
+            >
+              선택 삭제
+            </Button>
+          </Box>
+        </Grid>
+      </div>
+      {/* 반응형 카드/테이블 렌더링 */}
+      {isMobile ? (
+        <ResponsiveGrid>
+          {patients.map((patient) => (
+            <PatientCard key={patient._id}>
+              <CardTitle>{patient.basicInfo?.name || '이름 없음'}</CardTitle>
+              <CardRow><span>환자 ID</span><span>{patient.basicInfo?.patientId || 'N/A'}</span></CardRow>
+              <CardRow><span>성별</span><span>{getGenderDisplay(patient.basicInfo?.gender)}</span></CardRow>
+              <CardRow><span>나이</span><span>{patient.age || 'N/A'}</span></CardRow>
+              <CardRow><span>전화번호</span><span>{patient.basicInfo?.phone || 'N/A'}</span></CardRow>
+              <CardRow><span>방문 유형</span><span>{patient.basicInfo?.visitType || 'N/A'}</span></CardRow>
+              <CardRow><span>복용약물</span><span>{renderTruncatedCell(patient.medication?.current.map(med => med.name).join(', '))}</span></CardRow>
+              <CardRow><span>증상</span><span>{renderTruncatedCell(patient.pulseWaveInfo?.symptoms || 'N/A')}</span></CardRow>
+              <CardRow><span>상태</span><span>{getStatusDisplay(patient.status).label}</span></CardRow>
+              <CardActions>
+                <Button size="small" variant="outlined" style={{ borderRadius: 8, color: '#1976d2', borderColor: '#1976d2' }} onClick={() => handleViewPatient(patient._id)}>상세</Button>
+              </CardActions>
+            </PatientCard>
+          ))}
+        </ResponsiveGrid>
+      ) : (
+        // 데스크탑: 기존 테이블
+        <TableContainer component={Paper} style={{ borderRadius: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)' }}>
+          <Table sx={{ minWidth: 650 }} aria-label="환자 데이터 테이블">
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={10} align="center">
-                  <CircularProgress />
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    indeterminate={selectedIds.length > 0 && selectedIds.length < patients.length}
+                    checked={patients.length > 0 && selectedIds.length === patients.length}
+                    onChange={handleSelectAll}
+                  />
                 </TableCell>
+                <TableCell>환자 ID</TableCell>
+                <TableCell>이름</TableCell>
+                <TableCell>성별</TableCell>
+                <TableCell>나이</TableCell>
+                <TableCell>전화번호</TableCell>
+                <TableCell>방문 유형</TableCell>
+                <TableCell>방문 횟수</TableCell>
+                <TableCell>마지막 방문일</TableCell>
+                <TableCell>복용약물</TableCell>
+                <TableCell>증상</TableCell>
+                <TableCell>스트레스</TableCell>
+                <TableCell>맥파분석</TableCell>
+                <TableCell>메모</TableCell>
+                <TableCell>상태</TableCell>
+                <TableCell>작업</TableCell>
               </TableRow>
-            ) : patients.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={10} align="center">
-                  환자 데이터가 없습니다.
-                </TableCell>
-              </TableRow>
-            ) : (
-              patients.map((patient) => {
-                if (patient.basicInfo?.name === '박종화') {
-                  console.log('박종화 pulseWaveInfo:', patient.pulseWaveInfo);
-                }
-                console.log('환자 row 데이터:', patient);
-                const statusInfo = getStatusDisplay(patient.status);
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={10} align="center">
+                    <CircularProgress />
+                  </TableCell>
+                </TableRow>
+              ) : patients.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} align="center">
+                    환자 데이터가 없습니다.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                patients.map((patient) => {
+                  if (patient.basicInfo?.name === '박종화') {
+                    console.log('박종화 pulseWaveInfo:', patient.pulseWaveInfo);
+                  }
+                  console.log('환자 row 데이터:', patient);
+                  const statusInfo = getStatusDisplay(patient.status);
 
-                const medicationText =
-                  (Array.isArray(patient.medication?.current) && patient.medication.current.length > 0
-                    ? (typeof patient.medication.current[0] === 'string'
-                        ? patient.medication.current.join(', ')
-                        : patient.medication.current.map(med => med.name).join(', '))
-                    : 'N/A');
+                  const medicationText =
+                    (Array.isArray(patient.medication?.current) && patient.medication.current.length > 0
+                      ? (typeof patient.medication.current[0] === 'string'
+                          ? patient.medication.current.join(', ')
+                          : patient.medication.current.map(med => med.name).join(', '))
+                      : 'N/A');
 
-                const symptomsText = (
-                  patient.pulseWaveInfo?.symptoms ||
-                  (Array.isArray(patient.symptoms?.mainSymptoms) && patient.symptoms.mainSymptoms.length > 0 && patient.symptoms.mainSymptoms.map(s => s.symptom).join(', ')) ||
-                  'N/A'
-                );
+                  const symptomsText = (
+                    patient.pulseWaveInfo?.symptoms ||
+                    (Array.isArray(patient.symptoms?.mainSymptoms) && patient.symptoms.mainSymptoms.length > 0 && patient.symptoms.mainSymptoms.map(s => s.symptom).join(', ')) ||
+                    'N/A'
+                  );
 
-                const stressText =
-                  patient.pulseWaveInfo?.stress
-                    ? `${patient.pulseWaveInfo.stress.level} (${patient.pulseWaveInfo.stress.score}점)`
+                  const stressText =
+                    patient.pulseWaveInfo?.stress
+                      ? `${patient.pulseWaveInfo.stress.level} (${patient.pulseWaveInfo.stress.score}점)`
+                      : 'N/A';
+
+                  const pulseWaveText = patient.pulseWaveInfo?.pulseWave
+                    ? [
+                        `수축기:${patient.pulseWaveInfo.pulseWave.systolicBP ?? 'N/A'}`,
+                        `이완기:${patient.pulseWaveInfo.pulseWave.diastolicBP ?? 'N/A'}`,
+                        `심박수:${patient.pulseWaveInfo.pulseWave.heartRate ?? 'N/A'}`,
+                        `맥압:${patient.pulseWaveInfo.pulseWave.pulsePressure ?? 'N/A'}`,
+                        `a-b:${patient.pulseWaveInfo.pulseWave['a-b'] ?? 'N/A'}`,
+                        `a-c:${patient.pulseWaveInfo.pulseWave['a-c'] ?? 'N/A'}`,
+                        `a-d:${patient.pulseWaveInfo.pulseWave['a-d'] ?? 'N/A'}`,
+                        `a-e:${patient.pulseWaveInfo.pulseWave['a-e'] ?? 'N/A'}`,
+                        `b/a:${patient.pulseWaveInfo.pulseWave['b/a'] ?? 'N/A'}`,
+                        `c/a:${patient.pulseWaveInfo.pulseWave['c/a'] ?? 'N/A'}`,
+                        `d/a:${patient.pulseWaveInfo.pulseWave['d/a'] ?? 'N/A'}`,
+                        `e/a:${patient.pulseWaveInfo.pulseWave['e/a'] ?? 'N/A'}`,
+                        `탄성:${patient.pulseWaveInfo.pulseWave.elasticityScore ?? 'N/A'}`
+                      ].join(', ')
                     : 'N/A';
 
-                const pulseWaveText = patient.pulseWaveInfo?.pulseWave
-                  ? [
-                      `수축기:${patient.pulseWaveInfo.pulseWave.systolicBP ?? 'N/A'}`,
-                      `이완기:${patient.pulseWaveInfo.pulseWave.diastolicBP ?? 'N/A'}`,
-                      `심박수:${patient.pulseWaveInfo.pulseWave.heartRate ?? 'N/A'}`,
-                      `맥압:${patient.pulseWaveInfo.pulseWave.pulsePressure ?? 'N/A'}`,
-                      `a-b:${patient.pulseWaveInfo.pulseWave['a-b'] ?? 'N/A'}`,
-                      `a-c:${patient.pulseWaveInfo.pulseWave['a-c'] ?? 'N/A'}`,
-                      `a-d:${patient.pulseWaveInfo.pulseWave['a-d'] ?? 'N/A'}`,
-                      `a-e:${patient.pulseWaveInfo.pulseWave['a-e'] ?? 'N/A'}`,
-                      `b/a:${patient.pulseWaveInfo.pulseWave['b/a'] ?? 'N/A'}`,
-                      `c/a:${patient.pulseWaveInfo.pulseWave['c/a'] ?? 'N/A'}`,
-                      `d/a:${patient.pulseWaveInfo.pulseWave['d/a'] ?? 'N/A'}`,
-                      `e/a:${patient.pulseWaveInfo.pulseWave['e/a'] ?? 'N/A'}`,
-                      `탄성:${patient.pulseWaveInfo.pulseWave.elasticityScore ?? 'N/A'}`
-                    ].join(', ')
-                  : 'N/A';
-
-                const analysisText = patient.pulseWaveInfo?.pulseAnalysis || 'N/A';
-                const memoText = patient.pulseWaveInfo?.memo || patient.symptoms?.symptomMemo || 'N/A';
-                
-                return (
-                  <TableRow key={patient._id} hover selected={selectedIds.includes(patient._id)}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={selectedIds.includes(patient._id)}
-                        onChange={() => handleSelectOne(patient._id)}
-                      />
-                    </TableCell>
-                    <TableCell>{patient.basicInfo?.patientId}</TableCell>
-                    <TableCell>{patient.basicInfo?.name}</TableCell>
-                    <TableCell>{getGenderDisplay(patient.basicInfo?.gender)}</TableCell>
-                    <TableCell>{patient.age || 'N/A'}</TableCell>
-                    <TableCell>{patient.basicInfo?.phone || 'N/A'}</TableCell>
-                    <TableCell>{patient.basicInfo?.visitType}</TableCell>
-                    <TableCell>{patient.basicInfo?.visitCount}</TableCell>
-                    <TableCell>
-                      {patient.basicInfo?.lastVisitDate
-                        ? moment(patient.basicInfo.lastVisitDate).format('YYYY-MM-DD')
-                        : 'N/A'}
-                    </TableCell>
-                    <TableCell>{renderTruncatedCell(medicationText)}</TableCell>
-                    <TableCell>{renderTruncatedCell(symptomsText)}</TableCell>
-                    <TableCell>{renderTruncatedCell(stressText)}</TableCell>
-                    <TableCell>{renderTruncatedCell(pulseWaveText, 50)}</TableCell>
-                    <TableCell>{renderTruncatedCell(memoText)}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={statusInfo.label} 
-                        color={statusInfo.color} 
-                        size="small" 
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleViewPatient(patient._id)}
-                        title="상세보기"
-                      >
-                        <ViewIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
+                  const analysisText = patient.pulseWaveInfo?.pulseAnalysis || 'N/A';
+                  const memoText = patient.pulseWaveInfo?.memo || patient.symptoms?.symptomMemo || 'N/A';
+                  
+                  return (
+                    <TableRow key={patient._id} hover selected={selectedIds.includes(patient._id)}>
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedIds.includes(patient._id)}
+                          onChange={() => handleSelectOne(patient._id)}
+                        />
+                      </TableCell>
+                      <TableCell>{patient.basicInfo?.patientId}</TableCell>
+                      <TableCell>{patient.basicInfo?.name}</TableCell>
+                      <TableCell>{getGenderDisplay(patient.basicInfo?.gender)}</TableCell>
+                      <TableCell>{patient.age || 'N/A'}</TableCell>
+                      <TableCell>{patient.basicInfo?.phone || 'N/A'}</TableCell>
+                      <TableCell>{patient.basicInfo?.visitType}</TableCell>
+                      <TableCell>{patient.basicInfo?.visitCount}</TableCell>
+                      <TableCell>
+                        {patient.basicInfo?.lastVisitDate
+                          ? moment(patient.basicInfo.lastVisitDate).format('YYYY-MM-DD')
+                          : 'N/A'}
+                      </TableCell>
+                      <TableCell>{renderTruncatedCell(medicationText)}</TableCell>
+                      <TableCell>{renderTruncatedCell(symptomsText)}</TableCell>
+                      <TableCell>{renderTruncatedCell(stressText)}</TableCell>
+                      <TableCell>{renderTruncatedCell(pulseWaveText, 50)}</TableCell>
+                      <TableCell>{renderTruncatedCell(memoText)}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={statusInfo.label} 
+                          color={statusInfo.color} 
+                          size="small" 
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleViewPatient(patient._id)}
+                          title="상세보기"
+                        >
+                          <ViewIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
       {/* 페이지네이션 */}
       <TablePagination
         component="div"
@@ -635,7 +682,6 @@ const PatientDataTable = () => {
           `${from}-${to} / ${count !== -1 ? count : `${to}개 이상`}`
         }
       />
-
       {/* 환자 상세 정보 다이얼로그 */}
       <Dialog
         open={detailDialogOpen}
@@ -817,7 +863,7 @@ const PatientDataTable = () => {
           <Button onClick={() => setDetailDialogOpen(false)}>닫기</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </div>
   );
 };
 
