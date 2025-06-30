@@ -595,6 +595,171 @@ router.post('/search', async (req, res) => {
   }
 });
 
+// 진료 기록 분석 조회
+router.get('/:patientId/medical-history', async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    const { period = '6months', type = 'all' } = req.query;
+
+    const patientData = await PatientData.findOne({ 'basicInfo.patientId': patientId });
+
+    if (!patientData) {
+      return res.status(404).json({
+        success: false,
+        message: '해당 환자 데이터를 찾을 수 없습니다.'
+      });
+    }
+
+    let filteredRecords = patientData.medicalRecords || [];
+
+    // 기간 필터링
+    if (period !== 'all') {
+      const now = new Date();
+      let startDate;
+      
+      switch (period) {
+        case '3months':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+          break;
+        case '6months':
+          startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+          break;
+        case '1year':
+          startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+          break;
+        default:
+          startDate = new Date(0); // 모든 기록
+      }
+      
+      filteredRecords = filteredRecords.filter(record => 
+        new Date(record.visitDate) >= startDate
+      );
+    }
+
+    // 방문 유형 필터링
+    if (type !== 'all') {
+      filteredRecords = filteredRecords.filter(record => 
+        record.visitType === type
+      );
+    }
+
+    // 날짜순 정렬 (최신순)
+    filteredRecords.sort((a, b) => new Date(b.visitDate) - new Date(a.visitDate));
+
+    // 방문 빈도 분석
+    const visitFrequency = calculateVisitFrequency(filteredRecords);
+    
+    // 맥파 추이 분석
+    const pulseTrends = analyzePulseTrends(filteredRecords);
+    
+    // 증상 변화 분석
+    const symptomChanges = analyzeSymptomChanges(filteredRecords);
+
+    res.json({
+      success: true,
+      records: filteredRecords,
+      analysis: {
+        visitFrequency,
+        pulseTrends,
+        symptomChanges,
+        totalRecords: filteredRecords.length,
+        period,
+        type
+      }
+    });
+
+  } catch (error) {
+    console.error('진료 기록 분석 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '진료 기록 분석 조회 중 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+});
+
+// 방문 빈도 계산 함수
+const calculateVisitFrequency = (records) => {
+  if (records.length < 2) {
+    return {
+      frequency: 0,
+      trend: 'stable',
+      analysis: {
+        level: 'normal',
+        message: '진료 기록이 충분하지 않습니다.',
+        recommendation: '더 많은 진료 기록이 필요합니다.'
+      }
+    };
+  }
+
+  const sortedRecords = records.sort((a, b) => new Date(a.visitDate) - new Date(b.visitDate));
+  const firstVisit = new Date(sortedRecords[0].visitDate);
+  const lastVisit = new Date(sortedRecords[sortedRecords.length - 1].visitDate);
+  const monthsDiff = Math.max(1, (lastVisit.getFullYear() - firstVisit.getFullYear()) * 12 + 
+    (lastVisit.getMonth() - firstVisit.getMonth()));
+  
+  const frequency = records.length / monthsDiff;
+  
+  // 최근 3개월과 이전 3개월 비교
+  const recentRecords = sortedRecords.slice(-3);
+  const previousRecords = sortedRecords.slice(-6, -3);
+  const recentFreq = recentRecords.length / 3;
+  const previousFreq = previousRecords.length / 3;
+  
+  let trend = 'stable';
+  if (recentFreq > previousFreq * 1.2) trend = 'increasing';
+  else if (recentFreq < previousFreq * 0.8) trend = 'decreasing';
+  
+  let analysis = {
+    level: 'normal',
+    message: '정상적인 방문 빈도입니다.',
+    recommendation: '현재 치료 계획을 유지하세요.'
+  };
+  
+  if (frequency > 3) {
+    analysis = {
+      level: 'high',
+      message: '높은 방문 빈도입니다.',
+      recommendation: '치료 효과를 재검토하고 근본 원인을 파악해보세요.'
+    };
+  } else if (frequency < 0.5) {
+    analysis = {
+      level: 'low',
+      message: '낮은 방문 빈도입니다.',
+      recommendation: '정기적인 관리가 필요할 수 있습니다.'
+    };
+  }
+  
+  return { frequency, trend, analysis };
+};
+
+// 맥파 추이 분석 함수
+const analyzePulseTrends = (records) => {
+  const recordsWithPulse = records.filter(r => r.pulseWave && 
+    (r.pulseWave.systolicBP || r.pulseWave.diastolicBP || r.pulseWave.heartRate));
+  
+  if (recordsWithPulse.length < 2) return null;
+  
+  return recordsWithPulse.map(record => ({
+    date: new Date(record.visitDate).toISOString().split('T')[0],
+    systolicBP: record.pulseWave.systolicBP || null,
+    diastolicBP: record.pulseWave.diastolicBP || null,
+    heartRate: record.pulseWave.heartRate || null,
+    pulsePressure: record.pulseWave.pulsePressure || null
+  }));
+};
+
+// 증상 변화 분석 함수
+const analyzeSymptomChanges = (records) => {
+  return records.map(record => ({
+    date: new Date(record.visitDate).toISOString().split('T')[0],
+    symptoms: record.symptoms || record.subjectiveSymptoms || [],
+    severity: record.severity || '보통',
+    diagnosis: record.diagnosis?.primary || record.diagnosis || '',
+    visitType: record.visitType || '진료'
+  }));
+};
+
 // 테스트용 라우트
 router.get('/test', (req, res) => {
   res.json({

@@ -15,7 +15,7 @@ const {
   getQueueStatus,
   checkPatientStatus,
   getCurrentPatient,
-  callQueue,
+  callPatient,
   callNextPatient,
   saveQueueNote
 } = require('../controllers/queueController');
@@ -65,7 +65,7 @@ router.use((req, res, next) => {
 });
 
 // 환자 호출 API - 다른 라우트보다 먼저 정의
-router.put('/:id/call', callQueue);
+router.put('/:id/call', callPatient);
 
 // ✅ 기본 라우트
 router.get('/', getTodayQueueList);                    // 대기열 목록 조회

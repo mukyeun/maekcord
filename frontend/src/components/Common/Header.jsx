@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Button, Space, Typography, Modal, Form, Input, message, Badge, Tooltip } from 'antd';
+import { Layout, Button, Space, Typography, Modal, Form, Input, message, Badge, Tooltip, Card } from 'antd';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -38,7 +38,7 @@ const StyledHeader = styled(Layout.Header)`
 
 const Logo = styled(Title)`
   margin: 0 !important;
-  color: #1890ff !important;
+  color: #1e40af !important;
   font-size: 36px !important;
   font-weight: 800 !important;
 `;
@@ -138,6 +138,19 @@ const SecurityStatus = styled.div`
   }
 `;
 
+export const GlassCard = styled(Card)`
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.18);
+  transition: all 0.3s;
+  &:hover {
+    box-shadow: 0 16px 48px 0 rgba(16, 185, 129, 0.18);
+    transform: translateY(-8px) scale(1.03);
+  }
+`;
+
 const Header = ({ onToggle, onToggleDark, dark }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -213,7 +226,7 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
     <HeaderBar>
       <Logo>
         <MenuOutlined style={{ marginRight: 12, fontSize: 22 }} />
-        Maekcord
+        Maekstation
       </Logo>
       <Nav>
         <NavItem href="/">대시보드</NavItem>

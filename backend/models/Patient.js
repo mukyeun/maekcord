@@ -9,17 +9,14 @@ const RecordSchema = new mongoose.Schema({
   stress: {
     level: {
       type: String,
-      enum: ['low', 'normal', 'high', '낮음', '보통', '높음', '중간'],
+      enum: ['low', 'normal', 'high', '낮음', '보통', '높음', '중간', '낮은', '높은'],
       default: 'normal'
     },
     score: {
       type: Number,
       default: 0
     },
-    items: [{
-      name: String,
-      score: Number
-    }],
+    items: [String],
     measuredAt: {
       type: Date,
       default: Date.now
@@ -121,17 +118,14 @@ const patientSchema = new mongoose.Schema({
   stress: {
     level: {
       type: String,
-      enum: ['low', 'normal', 'high', '낮음', '보통', '높음', '중간'],
+      enum: ['low', 'normal', 'high', '낮음', '보통', '높음', '중간', '낮은', '높은'],
       default: 'normal'
     },
     score: {
       type: Number,
       default: 0
     },
-    items: [{
-      name: String,
-      score: Number
-    }],
+    items: [String],
     measuredAt: {
       type: Date,
       default: Date.now

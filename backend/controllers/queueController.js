@@ -531,12 +531,9 @@ exports.getCurrentPatient = async (req, res) => {
 };
 
 // callQueue 함수 정의 - 라우트와 일치하도록 수정
-const callQueue = asyncHandler(async (req, res) => {
+exports.callPatient = asyncHandler(async (req, res) => {
   const { id } = req.params;
-
-  console.log('📞 환자 호출 요청:', { id, body: req.body });
-
-  // ID 유효성 검사
+  
   if (!mongoose.Types.ObjectId.isValid(id)) {
     console.error('❌ 유효하지 않은 ID 형식:', id);
     return res.status(400).json({ success: false, message: '유효하지 않은 ID 형식입니다.' });
@@ -550,14 +547,38 @@ const callQueue = asyncHandler(async (req, res) => {
           path: 'records'
         }
       });
+
     if (!queue) {
       console.error('❌ 큐를 찾을 수 없음:', id);
       return res.status(404).json({ success: false, message: '해당 대기열을 찾을 수 없습니다.' });
     }
 
+    // 이미 호출된 환자인지 확인
     if (queue.status === 'called') {
-      console.warn('⚠️ 이미 호출된 환자:', id);
+      console.warn('⚠️ 이미 호출된 환자:', {
+        queueId: id,
+        patientName: queue.patientId?.basicInfo?.name,
+        status: queue.status
+      });
       return res.status(400).json({ success: false, message: '이미 호출된 환자입니다.' });
+    }
+
+    // 다른 환자가 이미 호출 상태인지 확인
+    const existingCalledQueue = await Queue.findOne({
+      status: 'called',
+      _id: { $ne: id },
+      date: queue.date
+    });
+
+    if (existingCalledQueue) {
+      console.warn('⚠️ 다른 환자가 이미 호출됨:', {
+        existingPatient: existingCalledQueue.patientId?.basicInfo?.name,
+        newPatient: queue.patientId?.basicInfo?.name
+      });
+      return res.status(400).json({ 
+        success: false, 
+        message: `이미 ${existingCalledQueue.patientId?.basicInfo?.name}님이 호출되어 있습니다.` 
+      });
     }
 
     // 상태 변경
@@ -579,7 +600,8 @@ const callQueue = asyncHandler(async (req, res) => {
     console.log('✅ 환자 호출 완료:', {
       queueId: id,
       patientName: queue.patientId?.basicInfo?.name,
-      status: queue.status
+      status: queue.status,
+      calledAt: queue.calledAt
     });
 
     res.json({ 
@@ -625,6 +647,7 @@ exports.callNextPatient = asyncHandler(async (req, res) => {
     });
 
     if (!nextQueue) {
+      console.log('⚠️ 대기 중인 환자가 없음');
       return res.json({
         success: true,
         data: null,
@@ -632,13 +655,44 @@ exports.callNextPatient = asyncHandler(async (req, res) => {
       });
     }
 
-    // 3. 환자 상태 업데이트
+    // 3. 환자 정보 검증
+    if (!nextQueue.patientId || !nextQueue.patientId.basicInfo || !nextQueue.patientId.basicInfo.name) {
+      console.error('❌ 잘못된 환자 데이터:', {
+        queueId: nextQueue._id,
+        patientId: nextQueue.patientId?._id,
+        patientData: nextQueue.patientId
+      });
+      return res.status(400).json({
+        success: false,
+        message: '환자 정보가 올바르지 않습니다.'
+      });
+    }
+
+    // 4. 다른 환자가 이미 호출 상태인지 확인
+    const existingCalledQueue = await Queue.findOne({
+      status: 'called',
+      _id: { $ne: nextQueue._id },
+      date: nextQueue.date
+    }).populate('patientId', 'basicInfo');
+
+    if (existingCalledQueue) {
+      console.warn('⚠️ 다른 환자가 이미 호출됨:', {
+        existingPatient: existingCalledQueue.patientId?.basicInfo?.name,
+        newPatient: nextQueue.patientId.basicInfo.name
+      });
+      return res.status(400).json({
+        success: false,
+        message: `이미 ${existingCalledQueue.patientId?.basicInfo?.name}님이 호출되어 있습니다.`
+      });
+    }
+
+    // 5. 환자 상태 업데이트
     const previousStatus = nextQueue.status;
     nextQueue.status = 'called';
     nextQueue.calledAt = new Date();
     await nextQueue.save();
 
-    // 4. 대기열 히스토리 기록
+    // 6. 대기열 히스토리 기록
     await QueueHistory.create({
       queueId: nextQueue._id,
       patientId: nextQueue.patientId._id,
@@ -650,14 +704,16 @@ exports.callNextPatient = asyncHandler(async (req, res) => {
 
     console.log('✅ 다음 환자 호출 완료:', {
       queueId: nextQueue._id,
-      patientName: nextQueue.patientId?.basicInfo?.name,
-      queueNumber: nextQueue.queueNumber
+      patientName: nextQueue.patientId.basicInfo.name,
+      queueNumber: nextQueue.queueNumber,
+      status: nextQueue.status,
+      calledAt: nextQueue.calledAt
     });
 
     res.json({
       success: true,
       data: nextQueue,
-      message: `${nextQueue.patientId?.basicInfo?.name || '환자'}님을 호출했습니다.`
+      message: `${nextQueue.patientId.basicInfo.name}님을 호출했습니다.`
     });
   } catch (error) {
     console.error('❌ 다음 환자 호출 실패:', error);
@@ -716,7 +772,7 @@ module.exports = {
   getQueueStatus: exports.getQueueStatus,
   checkPatientStatus: exports.checkPatientStatus,
   getCurrentPatient: exports.getCurrentPatient,
-  callQueue,  // callQueue 함수만 사용
+  callPatient: exports.callPatient,
   callNextPatient: exports.callNextPatient,
   saveQueueNote,
 };

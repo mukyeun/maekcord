@@ -176,10 +176,9 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
             level: data.stress.level || 'normal',
             score: Number(data.stress.totalScore || data.stress.score || 0),
             items: Array.isArray(data.stress.items)
-              ? data.stress.items.map(item => ({
-                  name: typeof item === 'string' ? item : item.name || '',
-                  score: typeof item === 'object' ? Number(item.score || 0) : 0
-                }))
+              ? data.stress.items.map(item => 
+                  typeof item === 'string' ? item : (item.name || '')
+                ).filter(Boolean)
               : [],
             measuredAt: data.stress.measuredAt || new Date()
           }

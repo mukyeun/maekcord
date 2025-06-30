@@ -261,10 +261,9 @@ const patientController = {
             level: formData.stress.level || 'normal',
             score: Number(formData.stress.score || formData.stress.totalScore || 0),
             items: Array.isArray(formData.stress.items) 
-              ? formData.stress.items.map(item => ({
-                  name: typeof item === 'string' ? item : (item?.name || ''),
-                  score: typeof item === 'object' ? Number(item?.score || 0) : 0
-                }))
+              ? formData.stress.items.map(item => 
+                  typeof item === 'string' ? item : (item?.name || '')
+                ).filter(Boolean)
               : [],
             measuredAt: formData.stress.measuredAt || new Date()
           };
@@ -274,10 +273,9 @@ const patientController = {
             level: formData.records.stress.level || 'normal',
             score: Number(formData.records.stress.score || formData.records.stress.totalScore || 0),
             items: Array.isArray(formData.records.stress.items) 
-              ? formData.records.stress.items.map(item => ({
-                  name: typeof item === 'string' ? item : (item?.name || ''),
-                  score: typeof item === 'object' ? Number(item?.score || 0) : 0
-                }))
+              ? formData.records.stress.items.map(item => 
+                  typeof item === 'string' ? item : (item?.name || '')
+                ).filter(Boolean)
               : [],
             measuredAt: formData.records.stress.measuredAt || new Date()
           };

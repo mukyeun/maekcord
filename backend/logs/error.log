@@ -7327,3 +7327,90 @@
     '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
   timestamp: '2025-06-26 10:52:46.913'
 }
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 13:20:24.316'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 13:20:31.725'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 13:24:33.635'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 13:24:53.928'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 13:24:55.360'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 14:12:55.036'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 14:13:06.224'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 14:13:11.117'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 16:29:16.557'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-26 16:58:33.392'
+}
+{
+  message: "Patient update failed: Plan executor error during findAndModify :: caused by :: The field 'records' must be an array but is of type object in document {_id: ObjectId('6852275afb5efc4a7ddd3fbe')}",
+  name: 'MongoServerError',
+  level: 'error',
+  timestamp: '2025-06-27 10:14:50.252'
+}
+{
+  message: "Patient update failed: Plan executor error during findAndModify :: caused by :: The field 'records' must be an array but is of type object in document {_id: ObjectId('68520fab87c865fd532d497f')}",
+  name: 'MongoServerError',
+  level: 'error',
+  timestamp: '2025-06-27 10:16:21.124'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-28 12:03:03.657'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-28 15:27:22.749'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-28 15:28:17.937'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-28 15:30:20.705'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-06-28 15:30:23.363'
+}

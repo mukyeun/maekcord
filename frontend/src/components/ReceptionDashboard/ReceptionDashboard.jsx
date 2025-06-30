@@ -236,12 +236,24 @@ const ReceptionDashboard = (props) => {
       return;
     }
 
+    // 환자 정보 검증
+    if (!queue.patientId || !queue.patientId.basicInfo || !queue.patientId.basicInfo.name) {
+      message.error('환자 정보가 올바르지 않습니다.');
+      return;
+    }
+
+    // 이미 호출된 환자인지 확인
+    if (queue.status === 'called') {
+      message.warning(`${queue.patientId.basicInfo.name}님은 이미 호출되었습니다.`);
+      return;
+    }
+
     try {
       setIsRefreshing(true);
       const response = await queueApi.callPatient(queueId);
       
       if (response?.data?.success || response?.status === 200) {
-        const patientName = queue.patientId?.basicInfo?.name || '환자';
+        const patientName = queue.patientId.basicInfo.name;
         message.success(`${patientName}님 호출 완료`);
         
         // 호출된 환자 정보 설정 (QueueDisplay에서 사용)
@@ -291,7 +303,7 @@ const ReceptionDashboard = (props) => {
       if (error.response?.status === 404) {
         errorMessage = '해당 환자를 찾을 수 없습니다.';
       } else if (error.response?.status === 400) {
-        errorMessage = '잘못된 요청입니다.';
+        errorMessage = error.response.data?.message || '잘못된 요청입니다.';
       } else if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       }
