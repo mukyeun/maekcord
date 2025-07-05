@@ -7413,4 +7413,28 @@
   level: 'error',
   message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
   timestamp: '2025-06-28 15:30:23.363'
+}{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-07-04 11:33:33.076'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-07-04 12:01:11.064'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-07-04 12:24:57.223'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-07-04 12:27:26.097'
+}
+{
+  level: 'error',
+  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
+  timestamp: '2025-07-04 14:32:06.033'
 }

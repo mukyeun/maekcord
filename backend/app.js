@@ -8,7 +8,7 @@ const logger = require('./utils/logger');
 const swaggerSpecs = require('./swagger/swagger');
 const queueRoutes = require('./routes/queueRoutes');
 const mongoose = require('mongoose');
-const pulseMapRoutes = require('./routes/pulseMapRoutes');
+const pulseMapRoutes = require('./routes/pulseMap');
 const patientDataRoutes = require('./routes/patientData');
 const dataExportRoutes = require('./routes/dataExport');
 const pulseRoutes = require('./routes/pulse');
@@ -21,17 +21,30 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // 기본 미들웨어
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  credentials: true
+  origin: 'http://localhost:3000',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'x-timestamp',
+    'x-client-version',
+    'X-Timestamp',
+    'X-Client-Version'
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 요청 로깅
 app.use((req, res, next) => {
-  logger.info(`📡 ${req.method} ${req.path}`, {
+  console.log('📡 요청 수신:', {
     method: req.method,
+    originalUrl: req.originalUrl,
     path: req.path,
+    baseUrl: req.baseUrl,
     query: req.query,
     body: ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : undefined,
     timestamp: new Date().toISOString()
@@ -47,6 +60,7 @@ const patientRoutes = require('./routes/patientRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes');
 
 // 라우터 등록
+console.log('라우터 등록 시작...');
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/waitlist', waitlistRoutes);
@@ -54,7 +68,9 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/statistics', statisticsRoutes);
 app.use('/api/queues', queueRoutes);
 app.use('/api/pulse-map', pulseMapRoutes);
+console.log('pulseRoutes 등록:', pulseRoutes.stack?.map(r => r.route?.path));
 app.use('/api/pulse', pulseRoutes);
+console.log('라우터 등록 완료');
 
 // 환자 데이터 라우트 등록
 console.log('환자 데이터 라우트 등록 중...');

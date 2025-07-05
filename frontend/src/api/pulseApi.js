@@ -17,4 +17,15 @@ export const getPulseList = () => {
 
 export const searchPulses = (query) => {
   return api.get(`/pulse/search?query=${query}`);
+};
+
+// 맥파 매개변수 평균값 조회
+export const getPulseParameterAverages = async () => {
+  try {
+    const response = await api.get('/pulse/averages');
+    return response.data;
+  } catch (error) {
+    console.error('맥파 매개변수 평균값 조회 실패:', error);
+    throw error;
+  }
 }; 

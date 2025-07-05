@@ -164,12 +164,7 @@ exports.getTodayQueueList = async (req, res) => {
       ],
       status: { $in: ['waiting', 'called', 'consulting', 'done'] }
     })
-    .populate({
-      path: 'patientId',
-      populate: {
-        path: 'records'
-      }
-    })
+    .populate('patientId', 'basicInfo records')
     .sort({ sequenceNumber: 1 });
 
     console.log('✅ 대기 목록 조회 결과:', {
@@ -183,11 +178,25 @@ exports.getTodayQueueList = async (req, res) => {
     });
 
     const result = queues.map(queue => {
+      // patientId가 없는 경우 기본 정보만 반환
+      if (!queue.patientId) {
+        return {
+          _id: queue._id,
+          queueNumber: queue.queueNumber,
+          status: queue.status,
+          symptoms: queue.symptoms,
+          memo: queue.memo,
+          stress: queue.stress,
+          pulseAnalysis: queue.pulseAnalysis,
+          registeredAt: queue.registeredAt,
+        };
+      }
+
       // 각 환자의 최신 맥파 데이터 찾기
       let latestPulseWave = null;
       
       // records.pulseWave에서 직접 가져오기 (배열이 아닌 객체)
-      if (queue.patientId && queue.patientId.records && queue.patientId.records.pulseWave) {
+      if (queue.patientId.records && queue.patientId.records.pulseWave) {
         latestPulseWave = queue.patientId.records.pulseWave;
         console.log('✅ 환자 맥파 데이터 찾음:', {
           patientName: queue.patientId.basicInfo?.name,
@@ -195,7 +204,7 @@ exports.getTodayQueueList = async (req, res) => {
         });
       }
       // fallback: records 배열에서 찾기 (기존 방식)
-      else if (queue.patientId && queue.patientId.records && Array.isArray(queue.patientId.records) && queue.patientId.records.length > 0) {
+      else if (queue.patientId.records && Array.isArray(queue.patientId.records) && queue.patientId.records.length > 0) {
         const recordsWithPulseWave = queue.patientId.records
           .filter(record => record.pulseWave && Object.keys(record.pulseWave).length > 0)
           .sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0));

@@ -1,8 +1,9 @@
-import React from 'react';
-import { Card, Typography, Tag, Row, Col, Descriptions, Space, Button } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Typography, Tag, Row, Col, Descriptions, Space, Button, Divider } from 'antd';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts';
 import styled from 'styled-components';
 import PulseInfoButton from '../PulseInfoButton';
+import * as pulseApi from '../../api/pulseApi';
 
 const { Title, Text } = Typography;
 
@@ -10,6 +11,69 @@ const ResultCard = styled(Card)`
   .ant-card-head {
     background-color: #f0f8ff;
   }
+`;
+
+const ClassificationRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+`;
+
+const ParameterInfo = styled.div`
+  width: 180px;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ParameterName = styled.div`
+  font-size: 13px;
+  color: #666;
+`;
+
+const ParameterValue = styled.div`
+  font-size: 14px;
+  font-weight: bold;
+`;
+
+const BarContainer = styled.div`
+  flex: 1;
+  height: 4px;
+  background: #f5f5f5;
+  position: relative;
+  margin: 0 20px;
+`;
+
+const CenterLine = styled.div`
+  position: absolute;
+  left: 50%;
+  top: -8px;
+  width: 1px;
+  height: 20px;
+  background: #ddd;
+  transform: translateX(-50%);
+`;
+
+const ValueMarker = styled.div`
+  position: absolute;
+  width: 2px;
+  height: 16px;
+  background: #1890ff;
+  top: -6px;
+  transform: translateX(-50%);
+`;
+
+const RangeValue = styled.div`
+  position: absolute;
+  font-size: 12px;
+  color: #999;
+  top: -25px;
+`;
+
+const ValueText = styled.span`
+  color: #1890ff;
+  font-weight: bold;
+  margin-left: 8px;
 `;
 
 const PULSE_THRESHOLDS = {
@@ -33,22 +97,33 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+const PARAMETER_RANGES = {
+  PVC: { min: 20.98, max: 38.07, mean: 29.53 },
+  BV: { min: 8.07, max: 10.27, mean: 9.17 },
+  SV: { min: 6.45, max: 11.41, mean: 8.93 },
+  HR: { min: 50.00, max: 107.00, mean: 78.50 }
+};
+
 const classifyPulse = (pulseData) => {
   const { PVC, BV, SV, HR } = pulseData;
-  const th = PULSE_THRESHOLDS;
 
-  const classify = (value, low, high, labels) => {
+  const classify = (value, range, labels) => {
     if (value === null || value === undefined) return '측정 안됨';
-    if (value < low) return labels.weak;
-    if (value > high) return labels.strong;
+    
+    const { min, max, mean } = range;
+    const stdDev = (max - min) / 4; // 표준편차 근사값
+    
+    // 평균에서 표준편차 이상 벗어난 경우에만 강/약으로 분류
+    if (value < mean - stdDev) return labels.weak;
+    if (value > mean + stdDev) return labels.strong;
     return labels.medium;
   };
   
   return {
-    PVC: classify(PVC, th.PVC.LOW, th.PVC.HIGH, { weak: '부맥', medium: '평맥', strong: '침맥' }),
-    BV: classify(BV, th.BV.LOW, th.BV.HIGH, { weak: '활맥', medium: '평맥', strong: '삽맥' }),
-    SV: classify(SV, th.SV.LOW, th.SV.HIGH, { weak: '허맥', medium: '평맥', strong: '실맥' }),
-    HR: classify(HR, th.HR.LOW, th.HR.HIGH, { weak: '지맥', medium: '평맥', strong: '삭맥' }),
+    PVC: classify(PVC, PARAMETER_RANGES.PVC, { weak: '부맥', medium: '평맥', strong: '침맥' }),
+    BV: classify(BV, PARAMETER_RANGES.BV, { weak: '활맥', medium: '평맥', strong: '삽맥' }),
+    SV: classify(SV, PARAMETER_RANGES.SV, { weak: '허맥', medium: '평맥', strong: '실맥' }),
+    HR: classify(HR, PARAMETER_RANGES.HR, { weak: '지맥', medium: '평맥', strong: '삭맥' }),
   };
 };
 
@@ -57,9 +132,12 @@ function classifyPulseByAverage(values, labels, low, high) {
   if (!Array.isArray(values) || values.length === 0) return 'N/A';
   const v = values[0];
   const mid = (low + high) / 2;
-  if (v < low) return labels[0];      // 활맥
-  if (v > high) return labels[2];     // 삽맥
-  return labels[1];                   // 평맥
+  const range = high - low;
+  const threshold = range * 0.3; // 30% threshold for classification
+
+  if (v < low + threshold) return labels[0];      // 활맥
+  if (v > high - threshold) return labels[2];     // 삽맥
+  return labels[1];                               // 평맥
 }
 
 // 81맥상 표기 변환 함수
@@ -80,78 +158,219 @@ const BarWrapper = styled.div`
   position: relative;
   width: 120px;
   height: 18px;
-  background: #F5F7FA;
-  border-radius: 9px;
+  background: #f0f0f0;
   margin: 0 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.08);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: 0 4px 16px rgba(24, 144, 255, 0.15);
-    transform: translateY(-1px);
-  }
+  overflow: visible;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 `;
 
 const BarFill = styled.div`
   position: absolute;
   top: 0;
-  left: 50%;
   height: 100%;
-  border-radius: 9px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
-              background 0.6s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.3s ease;
-  animation: slideIn 0.8s ease-out;
+  background: ${props => props.color};
+  transition: all 0.3s ease;
+`;
+
+const MinMaxLine = styled.div`
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 26px;
+  background: #666;
   
-  @keyframes slideIn {
-    from {
-      width: 0;
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -4px;
+    width: 10px;
+    height: 2px;
+    background: #666;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -4px;
+    width: 10px;
+    height: 2px;
+    background: #666;
   }
 `;
 
 const ValueLabel = styled.span`
-  font-weight: bold;
-  color: #222;
-  margin-left: 8px;
-  transition: all 0.3s ease;
+  position: absolute;
+  top: -24px;
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
 `;
 
-const PulseBar = ({ ratio, value, color }) => (
-  <BarWrapper>
-    <BarFill
-      style={{
-        width: `${Math.abs(ratio) * 50}%`,
-        background: color,
-        left: ratio < 0 ? `calc(50% - ${Math.abs(ratio) * 50}%)` : '50%',
-        boxShadow: `0 2px 8px ${color}33`,
-      }}
-    />
-    <div style={{
-      position: 'absolute', left: '50%', top: 0, width: 2, height: '100%',
-      background: '#888', zIndex: 2
-    }} />
-    <ValueLabel style={{
-      position: 'absolute',
-      top: -24,
-      left: ratio < 0 ? `calc(50% - ${Math.abs(ratio) * 50}%)` : `calc(50% + ${Math.abs(ratio) * 50}%)`,
-      transform: 'translateX(-50%)',
-      color: color,
-      fontSize: 15,
-      textShadow: '0 2px 8px #fff',
-      fontWeight: 600,
-    }}>
-      {value}
-    </ValueLabel>
-  </BarWrapper>
-);
+const PulseBar = ({ ratio, value, color, minValue, maxValue, avgValue }) => {
+  const barWidth = 120;
+  const range = maxValue - minValue;
+  const centerPoint = barWidth / 2;
+  
+  // 값들의 위치를 계산 (중앙 기준)
+  const valueScale = barWidth / range;
+  const currentPos = centerPoint + (value - avgValue) * valueScale;
 
-const PulseVisualization = ({ pulseData = {} }) => {
+  return (
+    <div style={{ position: 'relative', marginTop: '30px', marginBottom: '20px' }}>
+      <BarWrapper>
+        {/* 배경 구분선 (중앙) */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: 0,
+          width: '2px',
+          height: '100%',
+          background: '#ddd',
+          transform: 'translateX(-50%)',
+          zIndex: 1
+        }} />
+
+        {/* 현재값 막대 */}
+        <BarFill
+          style={{
+            left: value > avgValue ? '50%' : `${currentPos}px`,
+            width: `${Math.abs(value - avgValue) * valueScale}px`,
+            background: color,
+            zIndex: 2
+          }}
+        />
+
+        {/* 최소값 표시 */}
+        <MinMaxLine style={{ left: 0 }} />
+        <ValueLabel 
+          style={{ 
+            left: '-10px', 
+            transform: 'translateX(-100%)',
+            textAlign: 'right'
+          }}
+        >
+          {minValue.toFixed(2)}
+        </ValueLabel>
+
+        {/* 최대값 표시 */}
+        <MinMaxLine style={{ right: 0 }} />
+        <ValueLabel 
+          style={{ 
+            right: '-10px', 
+            transform: 'translateX(100%)',
+            textAlign: 'left'
+          }}
+        >
+          {maxValue.toFixed(2)}
+        </ValueLabel>
+
+        {/* 평균값 표시 */}
+        <ValueLabel 
+          style={{ 
+            left: '50%', 
+            color: '#333', 
+            fontWeight: 'bold',
+            transform: 'translateX(-50%)',
+            textAlign: 'center'
+          }}
+        >
+          {avgValue.toFixed(2)}
+        </ValueLabel>
+
+        {/* 현재값 표시 */}
+        <ValueLabel 
+          style={{ 
+            left: `${currentPos}px`,
+            color,
+            fontWeight: 'bold',
+            top: '-40px',
+            transform: 'translateX(-50%)',
+            textAlign: 'center'
+          }}
+        >
+          {value.toFixed(2)}
+        </ValueLabel>
+      </BarWrapper>
+    </div>
+  );
+};
+
+const ParameterBar = styled.div`
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: #f5f5f5;
+  margin: 10px 0;
+`;
+
+const ValueIndicator = styled.div`
+  position: absolute;
+  width: 3px;
+  height: 16px;
+  background: #1890ff;
+  top: -4px;
+  transform: translateX(-50%);
+`;
+
+const RangeText = styled.span`
+  position: absolute;
+  font-size: 12px;
+  color: #666;
+  top: 12px;
+`;
+
+const AverageText = styled(RangeText)`
+  left: 50%;
+  transform: translateX(-50%);
+  color: #999;
+`;
+
+const PulseVisualization = ({ pulseData = {
+  PVC: 28.64,
+  BV: 9.81,
+  SV: 8.55,
+  HR: 82.00,
+  'a-b': null,
+  'a-c': null,
+  'a-d': null,
+  'a-e': null,
+  'b/a': null,
+  'c/a': null,
+  'd/a': null,
+  'e/a': null
+} }) => {
+  const [averages, setAverages] = useState({
+    PVC: '0.00',
+    BV: '0.00',
+    SV: '0.00',
+    HR: '0.00',
+    totalRecords: 0
+  });
+
+  useEffect(() => {
+    const fetchAverages = async () => {
+      try {
+        const response = await pulseApi.getPulseParameterAverages();
+        if (response && response.success) {
+          setAverages(response.data);
+        }
+      } catch (error) {
+        console.error('평균값 조회 실패:', error);
+        setAverages({
+          PVC: '0.00',
+          BV: '0.00',
+          SV: '0.00',
+          HR: '0.00',
+          totalRecords: 0
+        });
+      }
+    };
+
+    fetchAverages();
+  }, []);
+
   const {
     'a-b': a_b, 'a-c': a_c, 'a-d': a_d, 'a-e': a_e,
     'b/a': b_a, 'c/a': c_a, 'd/a': d_a, 'e/a': e_a,
@@ -225,9 +444,17 @@ const PulseVisualization = ({ pulseData = {} }) => {
     const order = ['PVC', 'BV', 'SV', 'HR'];
     const significantRaw = order
       .map(key => types[key])
-      .filter(type => type && !type.includes('평맥'));
+      .filter(type => type && !type.includes('평맥'))
+      .sort(); // 일관된 순서를 위해 정렬
 
     if (significantRaw.length === 0) return '평맥';
+
+    // 부삽허맥 조합 확인
+    if (significantRaw.includes('부맥') && 
+        significantRaw.includes('삽맥') && 
+        significantRaw.includes('허맥')) {
+      return '부삽허맥';
+    }
 
     const pulseMap = new Map([
       [['부맥', '허맥'].join(), "부허맥"],
@@ -247,10 +474,6 @@ const PulseVisualization = ({ pulseData = {} }) => {
       [['침맥', '지맥', '활맥', '허맥'].join(), "침지활허맥"],
       [['침맥', '지맥', '삽맥', '실맥'].join(), "침지삽실맥"],
       [['침맥', '지맥', '삽맥', '허맥'].join(), "침지삽허맥"],
-      [['부맥', '삽맥', '허맥'].join(), "부삽허맥"],
-      [['부맥', '삽맥', '지맥', '허맥'].join(), "부삽허지맥"],
-      [['부맥', '활맥'].join(), "부활맥"],
-      [['부맥', '삽맥'].join(), "부삽맥"],
     ]);
     
     const key = significantRaw.join();
@@ -314,154 +537,121 @@ const PulseVisualization = ({ pulseData = {} }) => {
       <Col span={24}>
         <Card>
           <Title level={4}>4대 생리 매개변수</Title>
-          <Row gutter={[16, 16]} style={{ marginTop: '20px' }}>
-            {parameterData.map((param) => (
-              <Col span={6} key={param.name}>
-                <div style={{ textAlign: 'center' }}>
-                  <Text strong>{param.fullName}</Text>
-                  <PulseBar
-                    ratio={param.ratio}
-                    value={param.value}
-                    color={getBarColor(param.ratio)}
-                  />
-                  <div style={{ marginTop: 8 }}>
-                    <Tag color={getTagColor(param.name)}>{param.name}</Tag>
+          <div style={{ maxWidth: 800, margin: '0 auto' }}>
+            {[
+              { name: 'PVC', label: '말초혈관수축도', value: PVC },
+              { name: 'BV', label: '혈관점탄도', value: BV },
+              { name: 'SV', label: '일회박출량', value: SV },
+              { name: 'HR', label: '심박동수', value: HR }
+            ].map((param) => {
+              const range = PARAMETER_RANGES[param.name];
+              const position = ((param.value - range.min) / (range.max - range.min)) * 100;
+              const avgValue = (range.max + range.min) / 2;
+              
+              return (
+                <div key={param.name} style={{ marginBottom: 30 }}>
+                  <ParameterName>
+                    {param.label} <ValueText>{param.value.toFixed(2)}</ValueText>
+                  </ParameterName>
+                  <ParameterBar>
+                    <CenterLine />
+                    <ValueIndicator style={{ left: `${position}%` }} />
+                    <RangeText style={{ left: 0 }}>{range.min}</RangeText>
+                    <AverageText>{avgValue.toFixed(2)}</AverageText>
+                    <RangeText style={{ right: 0 }}>{range.max}</RangeText>
+                  </ParameterBar>
+                  <div style={{ textAlign: 'center', marginTop: 24, fontSize: '12px' }}>
+                    {param.name}
                   </div>
                 </div>
-              </Col>
-            ))}
-          </Row>
+              );
+            })}
+          </div>
         </Card>
       </Col>
       <Col span={24}>
         <ResultCard>
-          <Title level={4}>팔요맥 분류 결과</Title>
-          <Descriptions bordered column={2}>
-            <Descriptions.Item label="말초혈관수축도 (PVC)">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  width: 120,
-                  height: 12,
-                  background: '#eee',
-                  position: 'relative',
-                  margin: '0 8px'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: parameterData[0]?.ratio < 0 ? '50%' : '50%',
-                    top: 0,
-                    width: `${Math.abs(parameterData[0]?.ratio * 60)}px`,
-                    height: '100%',
-                    background: parameterData[0]?.barColor,
-                    transform: parameterData[0]?.ratio < 0 ? 'translateX(-100%)' : 'none'
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: 0,
-                    width: 2,
-                    height: '100%',
-                    background: '#888'
-                  }} />
-                </div>
-                <span style={{ fontWeight: 'bold' }}>{PVC}</span>
-                <Tag color={getTagColor(pvcResult.summary || pvcResult)}>{pvcResult.summary || pvcResult}</Tag>
-              </div>
-            </Descriptions.Item>
-            <Descriptions.Item label="혈관점탄도 (BV)">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  width: 120,
-                  height: 12,
-                  background: '#eee',
-                  position: 'relative',
-                  margin: '0 8px'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: 0,
-                    width: `${parameterData[1]?.barWidth}px`,
-                    height: '100%',
-                    background: parameterData[1]?.barColor,
-                    transform: parameterData[1]?.ratio < 0 ? 'translateX(-100%)' : 'none'
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: 0,
-                    width: 2,
-                    height: '100%',
-                    background: '#888'
-                  }} />
-                </div>
-                <span style={{ fontWeight: 'bold' }}>{BV}</span>
-                <Tag color={getTagColor(bvResult)}>{bvResult}</Tag>
-              </div>
-            </Descriptions.Item>
-            <Descriptions.Item label="일회박출량 (SV)">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  width: 120,
-                  height: 12,
-                  background: '#eee',
-                  position: 'relative',
-                  margin: '0 8px'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: parameterData[2]?.ratio < 0 ? '50%' : '50%',
-                    top: 0,
-                    width: `${Math.abs(parameterData[2]?.ratio * 60)}px`,
-                    height: '100%',
-                    background: parameterData[2]?.barColor,
-                    transform: parameterData[2]?.ratio < 0 ? 'translateX(-100%)' : 'none'
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: 0,
-                    width: 2,
-                    height: '100%',
-                    background: '#888'
-                  }} />
-                </div>
-                <span style={{ fontWeight: 'bold' }}>{SV}</span>
-                <Tag color={getTagColor(svResult.summary || svResult)}>{svResult.summary || svResult}</Tag>
-              </div>
-            </Descriptions.Item>
-            <Descriptions.Item label="심박동수 (HR)">
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <div style={{
-                  width: 120,
-                  height: 12,
-                  background: '#eee',
-                  position: 'relative',
-                  margin: '0 8px'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    left: parameterData[3]?.ratio < 0 ? '50%' : '50%',
-                    top: 0,
-                    width: `${Math.abs(parameterData[3]?.ratio * 60)}px`,
-                    height: '100%',
-                    background: parameterData[3]?.barColor,
-                    transform: parameterData[3]?.ratio < 0 ? 'translateX(-100%)' : 'none'
-                  }} />
-                  <div style={{
-                    position: 'absolute',
-                    left: '50%',
-                    top: 0,
-                    width: 2,
-                    height: '100%',
-                    background: '#888'
-                  }} />
-                </div>
-                <span style={{ fontWeight: 'bold' }}>{HR}</span>
-                <Tag color={getTagColor(hrResult.summary || hrResult)}>{hrResult.summary || hrResult}</Tag>
-              </div>
-            </Descriptions.Item>
-            <Descriptions.Item label="종합 맥상" span={2}>
+          <Title level={4}>팔요맥 분류</Title>
+          <div style={{ maxWidth: 800, margin: '20px auto' }}>
+            <ClassificationRow>
+              <ParameterInfo>
+                <ParameterName>말초혈관수축도</ParameterName>
+                <ParameterValue>{PVC.toFixed(2)}</ParameterValue>
+              </ParameterInfo>
+              <BarContainer>
+                <CenterLine />
+                <ValueMarker 
+                  style={{ 
+                    left: `${((PVC - PARAMETER_RANGES.PVC.min) / (PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)) * 100}%` 
+                  }} 
+                />
+                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.PVC.min.toFixed(2)}</RangeValue>
+                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.PVC.mean.toFixed(2)}</RangeValue>
+                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.PVC.max.toFixed(2)}</RangeValue>
+              </BarContainer>
+              <Tag color={getTagColor(pulseTypes.PVC)}>{pulseTypes.PVC}</Tag>
+            </ClassificationRow>
+
+            <ClassificationRow>
+              <ParameterInfo>
+                <ParameterName>혈관점탄도</ParameterName>
+                <ParameterValue>{BV.toFixed(2)}</ParameterValue>
+              </ParameterInfo>
+              <BarContainer>
+                <CenterLine />
+                <ValueMarker 
+                  style={{ 
+                    left: `${((BV - PARAMETER_RANGES.BV.min) / (PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)) * 100}%` 
+                  }} 
+                />
+                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.BV.min.toFixed(2)}</RangeValue>
+                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.BV.mean.toFixed(2)}</RangeValue>
+                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.BV.max.toFixed(2)}</RangeValue>
+              </BarContainer>
+              <Tag color={getTagColor(pulseTypes.BV)}>{pulseTypes.BV}</Tag>
+            </ClassificationRow>
+
+            <ClassificationRow>
+              <ParameterInfo>
+                <ParameterName>일회박출량</ParameterName>
+                <ParameterValue>{SV.toFixed(2)}</ParameterValue>
+              </ParameterInfo>
+              <BarContainer>
+                <CenterLine />
+                <ValueMarker 
+                  style={{ 
+                    left: `${((SV - PARAMETER_RANGES.SV.min) / (PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)) * 100}%` 
+                  }} 
+                />
+                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.SV.min.toFixed(2)}</RangeValue>
+                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.SV.mean.toFixed(2)}</RangeValue>
+                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.SV.max.toFixed(2)}</RangeValue>
+              </BarContainer>
+              <Tag color={getTagColor(pulseTypes.SV)}>{pulseTypes.SV}</Tag>
+            </ClassificationRow>
+
+            <ClassificationRow>
+              <ParameterInfo>
+                <ParameterName>심박동수</ParameterName>
+                <ParameterValue>{HR.toFixed(2)}</ParameterValue>
+              </ParameterInfo>
+              <BarContainer>
+                <CenterLine />
+                <ValueMarker 
+                  style={{ 
+                    left: `${((HR - PARAMETER_RANGES.HR.min) / (PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)) * 100}%` 
+                  }} 
+                />
+                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.HR.min.toFixed(2)}</RangeValue>
+                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.HR.mean.toFixed(2)}</RangeValue>
+                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.HR.max.toFixed(2)}</RangeValue>
+              </BarContainer>
+              <Tag color={getTagColor(pulseTypes.HR)}>{pulseTypes.HR}</Tag>
+            </ClassificationRow>
+
+            <Divider />
+            
+            <div style={{ textAlign: 'center', marginTop: 16 }}>
               <Space>
                 <Tag color="purple" style={{ fontSize: '16px', padding: '5px 10px' }}>
                   {combinedPulse}
@@ -470,18 +660,15 @@ const PulseVisualization = ({ pulseData = {} }) => {
                   <PulseInfoButton 
                     pulseType={combinedPulse}
                     patientPulseData={{
-                      PVC: PVC,
-                      BV: BV,
-                      SV: SV,
-                      HR: HR
+                      PVC, BV, SV, HR
                     }}
                   >
                     맥상정보 보기
                   </PulseInfoButton>
                 )}
               </Space>
-            </Descriptions.Item>
-          </Descriptions>
+            </div>
+          </div>
           <Text type="secondary" style={{ marginTop: '1rem', display: 'block' }}>
             * BV, SV, HR의 분류 기준(상한/하한)은 현재 예시값이며, 향후 축적된 데이터에 따라 동적으로 조정될 예정입니다.
           </Text>
@@ -492,3 +679,4 @@ const PulseVisualization = ({ pulseData = {} }) => {
 };
 
 export default PulseVisualization;
+

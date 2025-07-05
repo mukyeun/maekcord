@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
+const pulseController = require('../controllers/pulseController');
+
+console.log('pulse 라우터 초기화...');
+
+// 맥파 매개변수 평균값 조회
+router.get('/averages', pulseController.getPulseParameterAverages);
+console.log('라우트 등록: /averages');
 
 // 맥상 정보 조회 API
 router.get('/info/:pulseType', async (req, res) => {

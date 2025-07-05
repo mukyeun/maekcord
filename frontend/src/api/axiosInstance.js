@@ -3,8 +3,9 @@ import axios from 'axios';
 import { getSecurityHeaders, secureLogout } from '../utils/security';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3000',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
   timeout: 10000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest'
