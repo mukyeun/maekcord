@@ -734,42 +734,172 @@ exports.callNextPatient = asyncHandler(async (req, res) => {
   }
 });
 
-// 진단 내용 저장
+// 진료 노트 저장
 const saveQueueNote = async (req, res) => {
-  const { queueId } = req.params;
-  const { symptoms, memo, stress, pulseAnalysis } = req.body;
-
-  if (!mongoose.Types.ObjectId.isValid(queueId)) {
-    return res.status(400).json({ message: '유효하지 않은 ID입니다.' });
-  }
-
   try {
-    const queueEntry = await Queue.findById(queueId);
-    if (!queueEntry) {
-      return res.status(404).json({ message: '해당 접수를 찾을 수 없습니다.' });
-    }
-
-    queueEntry.symptoms = symptoms || queueEntry.symptoms;
-    queueEntry.memo = memo || queueEntry.memo;
-    queueEntry.stress = stress || queueEntry.stress;
-    queueEntry.pulseAnalysis = pulseAnalysis || queueEntry.pulseAnalysis;
-
-    const updatedQueueEntry = await queueEntry.save();
+    const { queueId } = req.params;
+    const { symptoms, memo, stress, pulseAnalysis, visitTime } = req.body;
     
-    // 환자 정보에도 최신 증상과 메모 업데이트 (선택적)
-    if (queueEntry.patientId) {
-      await Patient.findByIdAndUpdate(queueEntry.patientId, {
-        $set: { 
-          'symptoms': symptoms,
-          'memo': memo 
-        }
+    console.log('진료 노트 저장 요청:', {
+      queueId,
+      symptoms,
+      hasStress: !!stress,
+      hasPulseAnalysis: !!pulseAnalysis,
+      providedVisitTime: visitTime,
+      requestTime: moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss')
+    });
+
+    // 큐 정보 조회
+    const queue = await Queue.findById(queueId).populate('patientId');
+    if (!queue) {
+      return res.status(404).json({
+        success: false,
+        message: '대기열 정보를 찾을 수 없습니다.'
       });
     }
 
-    res.status(200).json({ message: '진단 내용이 저장되었습니다.', data: updatedQueueEntry });
+    // 입력된 방문 시간 사용 (없으면 현재 시간)
+    const visitDateTime = visitTime 
+      ? moment(visitTime).tz('Asia/Seoul')
+      : moment().tz('Asia/Seoul');
+
+    const finalDateTime = visitDateTime.format('YYYY-MM-DD HH:mm:ss');
+    
+    console.log('시간 설정:', {
+      providedVisitTime: visitTime,
+      finalDateTime: finalDateTime
+    });
+    
+    const newRecord = {
+      date: visitDateTime.toDate(),
+      visitDateTime: visitDateTime.toDate(),
+      createdAt: visitDateTime.toDate(),  // 방문 시간으로 설정
+      updatedAt: visitDateTime.toDate(),  // 방문 시간으로 설정
+      symptoms: symptoms || [],
+      memo: memo || '',
+      stress: stress || '',
+      pulseAnalysis: pulseAnalysis || '',
+      pulseWave: queue.patientId.latestPulseWave || {}
+    };
+
+    // 기존 records 배열이 없으면 생성
+    if (!queue.patientId.records) {
+      queue.patientId.records = [];
+    }
+
+    // 새 기록을 배열의 앞쪽에 추가 (최신 기록이 앞으로 오도록)
+    queue.patientId.records.unshift(newRecord);
+
+    // 환자 정보 업데이트
+    await queue.patientId.save();
+
+    console.log('진료 기록 저장 완료:', {
+      patientId: queue.patientId._id,
+      patientName: queue.patientId.basicInfo?.name,
+      recordTime: finalDateTime,
+      symptoms: symptoms
+    });
+
+    res.json({
+      success: true,
+      message: '진료 노트가 저장되었습니다.',
+      record: newRecord,
+      todayStats: {
+        providedVisitTime: visitTime,
+        actualRecordTime: finalDateTime
+      }
+    });
   } catch (error) {
-    console.error('진단 내용 저장 중 오류 발생:', error);
-    res.status(500).json({ message: '서버 오류로 인해 진단 내용을 저장하지 못했습니다.', error: error.message });
+    console.error('진료 노트 저장 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '진료 노트 저장 중 오류가 발생했습니다.',
+      error: error.message
+    });
+  }
+};
+
+// 오늘의 진료 기록 조회
+exports.getTodayMedicalRecords = async (req, res) => {
+  try {
+    console.log('🔍 오늘의 진료 기록 조회 시작');
+
+    // 오늘 자정 시간 설정
+    const todayMidnight = moment().tz('Asia/Seoul').startOf('day');
+    const tomorrowMidnight = moment().tz('Asia/Seoul').add(1, 'day').startOf('day');
+
+    // 오늘 생성된 모든 큐 조회
+    const todayQueues = await Queue.find({
+      date: {
+        $gte: todayMidnight.toDate(),
+        $lt: tomorrowMidnight.toDate()
+      }
+    }).populate({
+      path: 'patientId',
+      select: 'basicInfo records'
+    });
+
+    // 오늘의 진료 기록 추출 및 가공
+    const todayRecords = [];
+    
+    todayQueues.forEach(queue => {
+      if (queue.patientId && queue.patientId.records) {
+        const patientRecords = Array.isArray(queue.patientId.records) 
+          ? queue.patientId.records 
+          : [queue.patientId.records];
+
+        patientRecords.forEach(record => {
+          const recordTime = moment(record.visitDateTime || record.date).tz('Asia/Seoul');
+          if (recordTime.isBetween(todayMidnight, tomorrowMidnight, null, '[]')) {
+            todayRecords.push({
+              patientName: queue.patientId.basicInfo?.name,
+              patientId: queue.patientId._id,
+              queueNumber: queue.queueNumber,
+              visitDateTime: recordTime.format('YYYY-MM-DD HH:mm:ss'),
+              symptoms: record.symptoms || [],
+              memo: record.memo || '',
+              stress: record.stress || '',
+              pulseAnalysis: record.pulseAnalysis || ''
+            });
+          }
+        });
+      }
+    });
+
+    // 시간순으로 정렬
+    todayRecords.sort((a, b) => {
+      return moment(b.visitDateTime).valueOf() - moment(a.visitDateTime).valueOf();
+    });
+
+    console.log('✅ 오늘의 진료 기록 조회 완료:', {
+      totalRecords: todayRecords.length,
+      date: todayMidnight.format('YYYY-MM-DD')
+    });
+
+    res.json({
+      success: true,
+      data: {
+        date: todayMidnight.format('YYYY-MM-DD'),
+        totalRecords: todayRecords.length,
+        records: todayRecords,
+        summary: {
+          uniquePatients: new Set(todayRecords.map(r => r.patientId)).size,
+          recordsByHour: todayRecords.reduce((acc, record) => {
+            const hour = moment(record.visitDateTime).format('HH');
+            acc[hour] = (acc[hour] || 0) + 1;
+            return acc;
+          }, {})
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ 오늘의 진료 기록 조회 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '오늘의 진료 기록 조회 중 오류가 발생했습니다.',
+      error: error.message
+    });
   }
 };
 
@@ -784,4 +914,5 @@ module.exports = {
   callPatient: exports.callPatient,
   callNextPatient: exports.callNextPatient,
   saveQueueNote,
+  getTodayMedicalRecords: exports.getTodayMedicalRecords
 };

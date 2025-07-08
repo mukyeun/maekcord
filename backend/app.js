@@ -12,6 +12,7 @@ const pulseMapRoutes = require('./routes/pulseMap');
 const patientDataRoutes = require('./routes/patientData');
 const dataExportRoutes = require('./routes/dataExport');
 const pulseRoutes = require('./routes/pulse');
+const visitRoutes = require('./routes/visitRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -70,6 +71,7 @@ app.use('/api/queues', queueRoutes);
 app.use('/api/pulse-map', pulseMapRoutes);
 console.log('pulseRoutes 등록:', pulseRoutes.stack?.map(r => r.route?.path));
 app.use('/api/pulse', pulseRoutes);
+app.use('/api', visitRoutes);
 console.log('라우터 등록 완료');
 
 // 환자 데이터 라우트 등록

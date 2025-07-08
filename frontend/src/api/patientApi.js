@@ -1,4 +1,6 @@
 import api from './axiosInstance';
+import axios from 'axios';
+import moment from 'moment';
 
 // ✅ 환자 등록 (중복 체크 포함)
 export const registerPatient = async (patientData) => {
@@ -194,4 +196,55 @@ export const getTodayQueueList = async () => {
     console.error('❌ 오늘의 대기열 조회 실패:', error);
     return { success: false, data: [], message: '오늘 대기열 조회 중 오류 발생' };
   }
+};
+
+// 환자의 과거 진료 기록 목록 조회
+export const getPatientVisitHistory = async (patientId) => {
+  try {
+    const response = await api.get(`/api/patients/${patientId}/visits`);
+    console.log('진료 기록 조회 응답:', response);
+    
+    // 응답 데이터에서 records 배열 추출
+    const records = response.data?.data?.records || [];
+    
+    // 각 기록의 날짜 필드 처리
+    const processedRecords = records.map(record => ({
+      ...record,
+      // date 필드를 visitDateTime으로 사용
+      visitDateTime: record.date || record.visitDateTime || record.createdAt,
+      // 날짜 형식 통일
+      date: moment(record.date || record.visitDateTime || record.createdAt).format('YYYY-MM-DD')
+    }));
+
+    console.log('가공된 진료 기록:', {
+      originalCount: records.length,
+      processedCount: processedRecords.length,
+      sample: processedRecords[0]
+    });
+    
+    return {
+      success: true,
+      data: {
+        records: processedRecords
+      }
+    };
+  } catch (error) {
+    console.error('진료 기록 조회 실패:', error);
+    if (error.response?.status === 401) {
+      // 로그인 페이지로 리다이렉트
+      window.location.href = '/';
+    }
+    return {
+      success: false,
+      message: error.response?.data?.message || '진료 기록 조회 중 오류가 발생했습니다.',
+      data: {
+        records: []
+      }
+    };
+  }
+};
+
+// 특정 날짜의 진료 기록 상세 조회
+export const getPatientVisitRecord = async (patientId, visitDate) => {
+  return axios.get(`/api/patients/${patientId}/visits/${visitDate}`);
 };

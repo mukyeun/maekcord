@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import * as queueApi from '../api/queueApi';
 import { GlassCard } from '../components/Common/Header';
+import PatientSearch from '../components/Common/PatientSearch';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -108,6 +109,14 @@ const HeroSubtitle = styled(Text)`
   display: block;
 `;
 
+const SearchSection = styled.section`
+  margin-bottom: 60px;
+  animation: ${fadeInUp} 1s ease-out 0.2s both;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
 const StatsSection = styled.section`
   margin-bottom: 60px;
   animation: ${fadeInUp} 1s ease-out 0.2s both;
@@ -177,7 +186,7 @@ const Home = () => {
 
     switch (feature) {
       case 'patient':
-        navigate('/patient');
+        navigate('/patient/new');
         break;
       case 'reception':
         navigate('/reception');
@@ -191,6 +200,19 @@ const Home = () => {
       default:
         break;
     }
+  };
+
+  const handlePatientSelect = (patient) => {
+    if (!isAuthenticated) {
+      message.warning('로그인이 필요한 기능입니다.');
+      return;
+    }
+    navigate('/doctor', { 
+      state: { 
+        patientId: patient._id,
+        showDoctorView: true 
+      }
+    });
   };
 
   return (
@@ -214,6 +236,16 @@ const Home = () => {
             <StarOutlined /> AI 기반 맥진 분석 시스템
           </Tag>
         </HeroSection>
+
+        <SearchSection>
+          <Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>
+            환자 검색
+          </Title>
+          <PatientSearch 
+            onPatientSelect={handlePatientSelect}
+            showRecentPatients={true}
+          />
+        </SearchSection>
 
         {/*
           <StatsSection>

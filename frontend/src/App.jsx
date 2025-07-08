@@ -66,7 +66,12 @@ const App = () => {
                   <Suspense fallback={<LoadingSpinner />}>
                     <Routes>
                       <Route path="/" element={<Home />} />
-                      <Route path="/patient" element={
+                      <Route path="/patient/new" element={
+                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                          <PatientFormPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/patient/edit/:id" element={
                         <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
                           <PatientFormPage />
                         </ProtectedRoute>

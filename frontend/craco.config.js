@@ -34,16 +34,20 @@ module.exports = {
       }
 
       // 경로 별칭 설정
-      webpackConfig.resolve.alias = {
-        ...webpackConfig.resolve.alias,
-        '@': path.resolve(__dirname, 'src'),
-        '@components': path.resolve(__dirname, 'src/components'),
-        '@pages': path.resolve(__dirname, 'src/pages'),
-        '@utils': path.resolve(__dirname, 'src/utils'),
-        '@hooks': path.resolve(__dirname, 'src/hooks'),
-        '@store': path.resolve(__dirname, 'src/store'),
-        '@api': path.resolve(__dirname, 'src/api'),
-        '@config': path.resolve(__dirname, 'config'),
+      webpackConfig.resolve = {
+        ...webpackConfig.resolve,
+        alias: {
+          ...webpackConfig.resolve.alias,
+          '@': path.resolve(__dirname, 'src'),
+          '@components': path.resolve(__dirname, 'src/components'),
+          '@pages': path.resolve(__dirname, 'src/pages'),
+          '@utils': path.resolve(__dirname, 'src/utils'),
+          '@hooks': path.resolve(__dirname, 'src/hooks'),
+          '@store': path.resolve(__dirname, 'src/store'),
+          '@api': path.resolve(__dirname, 'src/api'),
+          '@config': path.resolve(__dirname, 'config'),
+        },
+        forceCase: false // 대소문자 구분 비활성화
       };
 
       return webpackConfig;

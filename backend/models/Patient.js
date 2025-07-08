@@ -2,7 +2,22 @@ const mongoose = require('mongoose');
 const moment = require('moment-timezone');
 
 const RecordSchema = new mongoose.Schema({
-  date: { type: Date, default: Date.now },
+  date: { 
+    type: Date,
+    required: true
+  },
+  visitDateTime: {
+    type: Date,
+    required: true
+  },
+  createdAt: { 
+    type: Date,
+    required: true
+  },
+  updatedAt: { 
+    type: Date,
+    required: true
+  },
   symptoms: [String],
   medications: [String],
   memo: String,
@@ -19,7 +34,7 @@ const RecordSchema = new mongoose.Schema({
     items: [String],
     measuredAt: {
       type: Date,
-      default: Date.now
+      required: true
     }
   },
   pulseAnalysis: String,
@@ -34,7 +49,10 @@ const RecordSchema = new mongoose.Schema({
     PVC: Number,
     BV: Number,
     SV: Number,
-    lastUpdated: { type: Date, default: Date.now }
+    lastUpdated: { 
+      type: Date,
+      required: true
+    }
   },
   macSang: {
     floating: Boolean, sunken: Boolean, slow: Boolean, rapid: Boolean,

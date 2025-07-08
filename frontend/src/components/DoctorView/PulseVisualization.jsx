@@ -1,79 +1,174 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Tag, Row, Col, Descriptions, Space, Button, Divider } from 'antd';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts';
+import { Card, Typography, Tag, Row, Col, Descriptions, Space, Button, Divider, Input, Select, message } from 'antd';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, ReferenceLine, ReferenceArea, LineChart, Line, Legend } from 'recharts';
 import styled from 'styled-components';
 import PulseInfoButton from '../PulseInfoButton';
 import * as pulseApi from '../../api/pulseApi';
+import dayjs from 'dayjs';
+import { SearchOutlined } from '@ant-design/icons';
+import axios from 'axios';
 
 const { Title, Text } = Typography;
+const { Search } = Input;
 
 const ResultCard = styled(Card)`
   .ant-card-head {
-    background-color: #f0f8ff;
+    background-color: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .ant-card-head-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .ant-tag {
+    margin-left: 16px;
+    padding: 4px 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    
+    &:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   }
 `;
 
 const ClassificationRow = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   position: relative;
 `;
 
 const ParameterInfo = styled.div`
-  width: 180px;
+  width: 200px;
   display: flex;
   flex-direction: column;
+  padding-right: 16px;
 `;
 
 const ParameterName = styled.div`
-  font-size: 13px;
-  color: #666;
+  font-size: 14px;
+  color: #262626;
+  margin-bottom: 4px;
 `;
 
 const ParameterValue = styled.div`
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
 `;
 
 const BarContainer = styled.div`
   flex: 1;
-  height: 4px;
-  background: #f5f5f5;
+  height: 12px;
+  background: #f0f2f5;
   position: relative;
   margin: 0 20px;
+  border-radius: 6px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const CenterLine = styled.div`
   position: absolute;
   left: 50%;
-  top: -8px;
-  width: 1px;
-  height: 20px;
-  background: #ddd;
+  height: 100%;
+  width: 2px;
+  background: rgba(24, 144, 255, 0.2);
   transform: translateX(-50%);
+  border-left: 2px dashed rgba(24, 144, 255, 0.4);
+`;
+
+const AverageLine = styled.div`
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  background: #1890ff;
+  transform: translateX(-50%);
+  top: -6px;
+  z-index: 2;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: #1890ff;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+  }
+
+  &::after {
+    content: attr(data-value);
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #1890ff;
+    font-weight: bold;
+    white-space: nowrap;
+    background: rgba(24, 144, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
 `;
 
 const ValueMarker = styled.div`
   position: absolute;
-  width: 2px;
-  height: 16px;
+  width: 4px;
+  height: 24px;
   background: #1890ff;
   top: -6px;
   transform: translateX(-50%);
+  border-radius: 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+
+  &:hover {
+    height: 28px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid currentColor;
+  }
 `;
 
 const RangeValue = styled.div`
   position: absolute;
   font-size: 12px;
-  color: #999;
-  top: -25px;
+  color: #8c8c8c;
+  top: -28px;
+  transform: translateX(-50%);
+  font-weight: 500;
+  white-space: nowrap;
 `;
 
 const ValueText = styled.span`
   color: #1890ff;
   font-weight: bold;
-  margin-left: 8px;
+  font-size: 16px;
+  margin-left: 12px;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
 `;
 
 const PULSE_THRESHOLDS = {
@@ -85,12 +180,19 @@ const PULSE_THRESHOLDS = {
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
     return (
-      <div className="custom-tooltip" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', padding: '10px', border: '1px solid #ccc', borderRadius: '5px' }}>
-        <p style={{ margin: 0, fontWeight: 'bold' }}>{label}</p>
-        <p style={{ margin: 0 }}>{`측정값: ${data.originalValue}`}</p>
-        <p style={{ margin: 0 }}>{`정상범위: ${data.LOW} ~ ${data.HIGH}`}</p>
+      <div style={{ 
+        backgroundColor: 'white', 
+        padding: '12px',
+        border: '1px solid #f0f0f0',
+        borderRadius: '4px'
+      }}>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>{dayjs(label).format('YYYY-MM-DD HH:mm')}</p>
+        {payload.map((entry, index) => (
+          <p key={index} style={{ margin: 0, color: entry.color }}>
+            {entry.name}: {Number(entry.value || 0).toFixed(2)}
+          </p>
+        ))}
       </div>
     );
   }
@@ -135,8 +237,8 @@ function classifyPulseByAverage(values, labels, low, high) {
   const range = high - low;
   const threshold = range * 0.3; // 30% threshold for classification
 
-  if (v < low + threshold) return labels[0];      // 활맥
-  if (v > high - threshold) return labels[2];     // 삽맥
+  if (v < low + threshold) return labels[0];      // 활맥/허맥/부맥/지맥
+  if (v > high - threshold) return labels[2];     // 삽맥/실맥/침맥/삭맥
   return labels[1];                               // 평맥
 }
 
@@ -300,47 +402,298 @@ const PulseBar = ({ ratio, value, color, minValue, maxValue, avgValue }) => {
 const ParameterBar = styled.div`
   position: relative;
   width: 100%;
-  height: 8px;
-  background: #f5f5f5;
-  margin: 10px 0;
+  height: 12px;
+  background: #f0f2f5;
+  border-radius: 6px;
+  margin: 16px 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 30%;
+    height: 100%;
+    background: rgba(24, 144, 255, 0.1);
+    transform: translateX(-50%);
+    border-radius: 6px;
+  }
 `;
 
 const ValueIndicator = styled.div`
   position: absolute;
-  width: 3px;
-  height: 16px;
+  width: 4px;
+  height: 24px;
   background: #1890ff;
-  top: -4px;
+  top: -6px;
   transform: translateX(-50%);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #1890ff;
+  }
 `;
 
 const RangeText = styled.span`
   position: absolute;
   font-size: 12px;
-  color: #666;
-  top: 12px;
+  color: #8c8c8c;
+  top: 20px;
+  transform: translateX(-50%);
+  font-weight: 500;
 `;
 
 const AverageText = styled(RangeText)`
-  left: 50%;
-  transform: translateX(-50%);
-  color: #999;
+  color: #1890ff;
+  font-weight: bold;
 `;
 
-const PulseVisualization = ({ pulseData = {
-  PVC: 28.64,
-  BV: 9.81,
-  SV: 8.55,
-  HR: 82.00,
-  'a-b': null,
-  'a-c': null,
-  'a-d': null,
-  'a-e': null,
-  'b/a': null,
-  'c/a': null,
-  'd/a': null,
-  'e/a': null
-} }) => {
+const PulseValueCard = styled(Card)`
+  .ant-card-body {
+    padding: 24px;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .value-header {
+    border-bottom: 2px solid #1890ff;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  .main-value {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    margin: 24px 0;
+  }
+
+  .range-info {
+    display: flex;
+    justify-content: space-between;
+    background: #fafafa;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 24px;
+    border: 1px solid #f0f0f0;
+  }
+
+  .alert-tag {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+  }
+
+  .progress-container {
+    margin: 40px 0;
+    padding: 0 20px;
+    position: relative;
+  }
+
+  .progress-bar {
+    height: 24px;
+    background: #f0f2f5;
+    border-radius: 12px;
+    position: relative;
+    overflow: visible;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .normal-range {
+    position: absolute;
+    height: 100%;
+    background: rgba(24, 144, 255, 0.15);
+    border-left: 2px dashed rgba(24, 144, 255, 0.4);
+    border-right: 2px dashed rgba(24, 144, 255, 0.4);
+    border-radius: 12px;
+  }
+
+  .value-marker {
+    position: absolute;
+    width: 4px;
+    height: 32px;
+    top: -4px;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+
+    &:hover {
+      height: 36px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid currentColor;
+    }
+  }
+
+  .marker-label {
+    position: absolute;
+    top: -28px;
+    transform: translateX(-50%);
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    background: currentColor;
+    color: white !important;
+    padding: 2px 8px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .range-marker {
+    position: absolute;
+    width: 2px;
+    height: 16px;
+    background: #bfbfbf;
+    top: 4px;
+
+    &::after {
+      content: attr(data-value);
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #8c8c8c;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+  }
+`;
+
+const PulseValueDisplay = ({ label, value, min, max, avg, isAlert }) => {
+  // 진행률 바의 위치 계산
+  const range = max - min;
+  const position = ((value - min) / range) * 100;
+  const normalRangeStart = ((avg - (range * 0.15) - min) / range) * 100;
+  const normalRangeEnd = ((avg + (range * 0.15) - min) / range) * 100;
+
+  // 값의 상태에 따른 색상 설정
+  const getValueColor = () => {
+    if (isAlert) return '#ff4d4f';
+    if (value > avg + (range * 0.15)) return '#faad14';
+    if (value < avg - (range * 0.15)) return '#faad14';
+    return '#52c41a';
+  };
+
+  const valueColor = getValueColor();
+
+  return (
+    <PulseValueCard>
+      <div className="value-header">
+        <Title level={4} style={{ margin: 0 }}>{label}</Title>
+      </div>
+      
+      <div className="main-value" style={{ color: valueColor }}>
+        {value?.toFixed(2)}
+      </div>
+
+      <div className="progress-container">
+        <div className="progress-bar">
+          {/* 정상 범위 표시 */}
+          <div 
+            className="normal-range"
+            style={{
+              left: `${normalRangeStart}%`,
+              width: `${normalRangeEnd - normalRangeStart}%`
+            }}
+          />
+
+          {/* 범위 마커들 */}
+          <div className="range-markers">
+            <div className="range-marker" style={{ left: '0%' }} data-value={min.toFixed(1)} />
+            <div className="range-marker" style={{ left: '50%' }} data-value={avg.toFixed(1)} />
+            <div className="range-marker" style={{ right: '0%' }} data-value={max.toFixed(1)} />
+          </div>
+
+          {/* 현재값 마커 */}
+          <div 
+            className="value-marker"
+            style={{ 
+              left: `${position}%`,
+              background: valueColor,
+              color: valueColor
+            }}
+          >
+            <span className="marker-label">
+              {value.toFixed(1)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="range-info">
+        <Text type="secondary">최소: {min}</Text>
+        <Text type="secondary">평균: {avg}</Text>
+        <Text type="secondary">최대: {max}</Text>
+      </div>
+
+      {isAlert && (
+        <Tag color="error" className="alert-tag">
+          주의 필요
+        </Tag>
+      )}
+    </PulseValueCard>
+  );
+};
+
+const HistoryChart = styled(Card)`
+  margin-top: 16px;
+  .ant-card-head {
+    background-color: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .recharts-default-tooltip {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    border-radius: 4px !important;
+  }
+`;
+
+const SearchContainer = styled.div`
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+`;
+
+const PatientInfo = styled.div`
+  margin-top: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+`;
+
+const PulseVisualization = ({ 
+  pulseData = {}, 
+  historyData = [], 
+  onHistoryUpdate = () => {}
+}) => {
   const [averages, setAverages] = useState({
     PVC: '0.00',
     BV: '0.00',
@@ -348,6 +701,10 @@ const PulseVisualization = ({ pulseData = {
     HR: '0.00',
     totalRecords: 0
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [patients, setPatients] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchAverages = async () => {
@@ -504,177 +861,374 @@ const PulseVisualization = ({ pulseData = {
     return '#888';
   };
 
+  // 값의 상태에 따른 색상 설정 함수 추가
+  const getValueColor = (value, mean, range) => {
+    const threshold = range * 0.15;
+    if (value > mean + threshold) return '#faad14';
+    if (value < mean - threshold) return '#faad14';
+    return '#52c41a';
+  };
+
+  // 환자 검색 함수
+  const handleSearch = async (value) => {
+    if (!value.trim()) {
+      message.warning('검색어를 입력해주세요.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await axios.get(`/api/patients/search?query=${value}`);
+      if (response.data.success) {
+        setPatients(response.data.data);
+        if (response.data.data.length === 0) {
+          message.info('검색 결과가 없습니다.');
+        }
+      }
+    } catch (error) {
+      console.error('환자 검색 실패:', error);
+      message.error('환자 검색 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 환자 선택 시 맥진 기록 조회
+  const handlePatientSelect = async (patientId) => {
+    try {
+      setLoading(true);
+      const selectedPatient = patients.find(p => p._id === patientId);
+      setSelectedPatient(selectedPatient);
+
+      const response = await axios.get(`/api/patients/${patientId}/pulse-history`);
+      if (response.data.success) {
+        // 상위 컴포넌트의 상태 업데이트 함수가 있다면 호출
+        onHistoryUpdate(response.data.data);
+      }
+    } catch (error) {
+      console.error('맥진 기록 조회 실패:', error);
+      message.error('맥진 기록 조회 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderHistoryCharts = () => {
+    if (!historyData || historyData.length === 0) return null;
+
+    const parameters = [
+      { key: 'PVC', name: '말초혈관수축도', color: '#1890ff' },
+      { key: 'BV', name: '혈관점탄도', color: '#52c41a' },
+      { key: 'SV', name: '일회박출량', color: '#722ed1' },
+      { key: 'HR', name: '심박동수', color: '#fa8c16' }
+    ];
+
+    return (
+      <Col span={24}>
+        <HistoryChart title="측정 이력 비교">
+          <div style={{ height: 400 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={historyData.map(record => ({
+                  timestamp: record.timestamp,
+                  PVC: record.PVC,
+                  BV: record.BV,
+                  SV: record.SV,
+                  HR: record.HR
+                }))}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="timestamp" 
+                  tickFormatter={(value) => dayjs(value).format('MM-DD')}
+                />
+                <YAxis />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
+                {parameters.map(param => (
+                  <Line
+                    key={param.key}
+                    type="monotone"
+                    dataKey={param.key}
+                    name={param.name}
+                    stroke={param.color}
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: 'white', strokeWidth: 2 }}
+                    activeDot={{ r: 6 }}
+                  />
+                ))}
+                {parameters.map(param => {
+                  const range = PARAMETER_RANGES[param.key];
+                  return (
+                    <React.Fragment key={param.key}>
+                      <ReferenceLine
+                        y={range.mean}
+                        stroke={param.color}
+                        strokeDasharray="3 3"
+                        strokeOpacity={0.5}
+                      />
+                      <ReferenceArea
+                        y1={range.mean - (range.max - range.min) * 0.15}
+                        y2={range.mean + (range.max - range.min) * 0.15}
+                        fill={param.color}
+                        fillOpacity={0.05}
+                      />
+                    </React.Fragment>
+                  );
+                })}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </HistoryChart>
+      </Col>
+    );
+  };
+
+  // 데이터 유효성 검사 및 기본값 설정
+  const safeNumber = (value) => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const normalizedPulseData = {
+    systolicBP: safeNumber(pulseData.systolicBP),
+    diastolicBP: safeNumber(pulseData.diastolicBP),
+    heartRate: safeNumber(pulseData.heartRate),
+    pulsePressure: safeNumber(pulseData.pulsePressure),
+    'a-b': safeNumber(pulseData['a-b']),
+    'a-c': safeNumber(pulseData['a-c']),
+    'a-d': safeNumber(pulseData['a-d']),
+    'a-e': safeNumber(pulseData['a-e']),
+    'b/a': safeNumber(pulseData['b/a']),
+    'c/a': safeNumber(pulseData['c/a']),
+    'd/a': safeNumber(pulseData['d/a']),
+    'e/a': safeNumber(pulseData['e/a']),
+    elasticityScore: safeNumber(pulseData.elasticityScore),
+    PVC: safeNumber(pulseData.PVC),
+    BV: safeNumber(pulseData.BV),
+    SV: safeNumber(pulseData.SV),
+    HR: safeNumber(pulseData.HR || pulseData.heartRate)
+  };
+
   return (
-    <Row gutter={[16, 16]}>
-      <Col span={12}>
-        <Card>
-          <Title level={4}>맥파 변곡점 간 거리 (ms)</Title>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={distanceData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </Col>
-      <Col span={12}>
-        <Card>
-          <Title level={4}>맥파 변곡점 간 비율</Title>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={ratioData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="value" fill="#82ca9d" />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </Col>
-      <Col span={24}>
-        <Card>
-          <Title level={4}>4대 생리 매개변수</Title>
-          <div style={{ maxWidth: 800, margin: '0 auto' }}>
-            {[
-              { name: 'PVC', label: '말초혈관수축도', value: PVC },
-              { name: 'BV', label: '혈관점탄도', value: BV },
-              { name: 'SV', label: '일회박출량', value: SV },
-              { name: 'HR', label: '심박동수', value: HR }
-            ].map((param) => {
-              const range = PARAMETER_RANGES[param.name];
-              const position = ((param.value - range.min) / (range.max - range.min)) * 100;
-              const avgValue = (range.max + range.min) / 2;
-              
-              return (
-                <div key={param.name} style={{ marginBottom: 30 }}>
-                  <ParameterName>
-                    {param.label} <ValueText>{param.value.toFixed(2)}</ValueText>
-                  </ParameterName>
-                  <ParameterBar>
-                    <CenterLine />
-                    <ValueIndicator style={{ left: `${position}%` }} />
-                    <RangeText style={{ left: 0 }}>{range.min}</RangeText>
-                    <AverageText>{avgValue.toFixed(2)}</AverageText>
-                    <RangeText style={{ right: 0 }}>{range.max}</RangeText>
-                  </ParameterBar>
-                  <div style={{ textAlign: 'center', marginTop: 24, fontSize: '12px' }}>
-                    {param.name}
+    <div>
+      <SearchContainer>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Search
+            placeholder="환자 이름 또는 ID를 입력하세요"
+            enterButton={<SearchOutlined />}
+            size="large"
+            loading={loading}
+            onSearch={handleSearch}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {patients.length > 0 && (
+            <Select
+              style={{ width: '100%' }}
+              placeholder="환자를 선택하세요"
+              onChange={handlePatientSelect}
+              loading={loading}
+              options={patients.map(patient => ({
+                value: patient._id,
+                label: `${patient.name} (${patient.patientId})`
+              }))}
+            />
+          )}
+        </Space>
+      </SearchContainer>
+
+      {selectedPatient && (
+        <PatientInfo>
+          <Title level={4}>{selectedPatient.name}님의 맥진 기록</Title>
+        </PatientInfo>
+      )}
+
+      <Row gutter={[16, 16]}>
+        <Col span={12}>
+          <Card>
+            <Title level={4}>맥파 변곡점 간 거리 (ms)</Title>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={distanceData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card>
+            <Title level={4}>맥파 변곡점 간 비율</Title>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={ratioData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="value" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col span={24}>
+          <Card>
+            <Title level={4}>4대 생리 매개변수</Title>
+            <div style={{ maxWidth: 800, margin: '0 auto' }}>
+              {[
+                { name: 'PVC', label: '말초혈관수축도', value: PVC },
+                { name: 'BV', label: '혈관점탄도', value: BV },
+                { name: 'SV', label: '일회박출량', value: SV },
+                { name: 'HR', label: '심박동수', value: HR }
+              ].map((param) => {
+                const range = PARAMETER_RANGES[param.name];
+                const position = ((param.value - range.min) / (range.max - range.min)) * 100;
+                const avgValue = range.mean;
+                
+                return (
+                  <div key={param.name} style={{ marginBottom: 30 }}>
+                    <ParameterName>
+                      {param.label} <ValueText>{param.value.toFixed(2)}</ValueText>
+                    </ParameterName>
+                    <ParameterBar>
+                      <CenterLine />
+                      <AverageLine data-value={avgValue.toFixed(2)} />
+                      <ValueIndicator 
+                        style={{ 
+                          left: `${position}%`,
+                          background: getValueColor(param.value, avgValue, range.max - range.min)
+                        }} 
+                      />
+                      <RangeText style={{ left: 0 }}>{range.min.toFixed(2)}</RangeText>
+                      <RangeText style={{ right: 0 }}>{range.max.toFixed(2)}</RangeText>
+                    </ParameterBar>
+                    <div style={{ textAlign: 'center', marginTop: 24, fontSize: '12px' }}>
+                      {param.name}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-      </Col>
-      <Col span={24}>
-        <ResultCard>
-          <Title level={4}>팔요맥 분류</Title>
-          <div style={{ maxWidth: 800, margin: '20px auto' }}>
-            <ClassificationRow>
-              <ParameterInfo>
-                <ParameterName>말초혈관수축도</ParameterName>
-                <ParameterValue>{PVC.toFixed(2)}</ParameterValue>
-              </ParameterInfo>
-              <BarContainer>
-                <CenterLine />
-                <ValueMarker 
-                  style={{ 
-                    left: `${((PVC - PARAMETER_RANGES.PVC.min) / (PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)) * 100}%` 
-                  }} 
-                />
-                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.PVC.min.toFixed(2)}</RangeValue>
-                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.PVC.mean.toFixed(2)}</RangeValue>
-                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.PVC.max.toFixed(2)}</RangeValue>
-              </BarContainer>
-              <Tag color={getTagColor(pulseTypes.PVC)}>{pulseTypes.PVC}</Tag>
-            </ClassificationRow>
-
-            <ClassificationRow>
-              <ParameterInfo>
-                <ParameterName>혈관점탄도</ParameterName>
-                <ParameterValue>{BV.toFixed(2)}</ParameterValue>
-              </ParameterInfo>
-              <BarContainer>
-                <CenterLine />
-                <ValueMarker 
-                  style={{ 
-                    left: `${((BV - PARAMETER_RANGES.BV.min) / (PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)) * 100}%` 
-                  }} 
-                />
-                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.BV.min.toFixed(2)}</RangeValue>
-                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.BV.mean.toFixed(2)}</RangeValue>
-                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.BV.max.toFixed(2)}</RangeValue>
-              </BarContainer>
-              <Tag color={getTagColor(pulseTypes.BV)}>{pulseTypes.BV}</Tag>
-            </ClassificationRow>
-
-            <ClassificationRow>
-              <ParameterInfo>
-                <ParameterName>일회박출량</ParameterName>
-                <ParameterValue>{SV.toFixed(2)}</ParameterValue>
-              </ParameterInfo>
-              <BarContainer>
-                <CenterLine />
-                <ValueMarker 
-                  style={{ 
-                    left: `${((SV - PARAMETER_RANGES.SV.min) / (PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)) * 100}%` 
-                  }} 
-                />
-                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.SV.min.toFixed(2)}</RangeValue>
-                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.SV.mean.toFixed(2)}</RangeValue>
-                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.SV.max.toFixed(2)}</RangeValue>
-              </BarContainer>
-              <Tag color={getTagColor(pulseTypes.SV)}>{pulseTypes.SV}</Tag>
-            </ClassificationRow>
-
-            <ClassificationRow>
-              <ParameterInfo>
-                <ParameterName>심박동수</ParameterName>
-                <ParameterValue>{HR.toFixed(2)}</ParameterValue>
-              </ParameterInfo>
-              <BarContainer>
-                <CenterLine />
-                <ValueMarker 
-                  style={{ 
-                    left: `${((HR - PARAMETER_RANGES.HR.min) / (PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)) * 100}%` 
-                  }} 
-                />
-                <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.HR.min.toFixed(2)}</RangeValue>
-                <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{PARAMETER_RANGES.HR.mean.toFixed(2)}</RangeValue>
-                <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.HR.max.toFixed(2)}</RangeValue>
-              </BarContainer>
-              <Tag color={getTagColor(pulseTypes.HR)}>{pulseTypes.HR}</Tag>
-            </ClassificationRow>
-
-            <Divider />
-            
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-              <Space>
-                <Tag color="purple" style={{ fontSize: '16px', padding: '5px 10px' }}>
-                  {combinedPulse}
-                </Tag>
-                {combinedPulse && combinedPulse !== '평맥' && (
-                  <PulseInfoButton 
-                    pulseType={combinedPulse}
-                    patientPulseData={{
-                      PVC, BV, SV, HR
-                    }}
-                  >
-                    맥상정보 보기
-                  </PulseInfoButton>
-                )}
-              </Space>
+                );
+              })}
             </div>
-          </div>
-          <Text type="secondary" style={{ marginTop: '1rem', display: 'block' }}>
-            * BV, SV, HR의 분류 기준(상한/하한)은 현재 예시값이며, 향후 축적된 데이터에 따라 동적으로 조정될 예정입니다.
-          </Text>
-        </ResultCard>
-      </Col>
-    </Row>
+          </Card>
+        </Col>
+        <Col span={24}>
+          <ResultCard>
+            <Title level={4}>팔요맥 분류</Title>
+            <div style={{ maxWidth: 800, margin: '20px auto' }}>
+              <ClassificationRow>
+                <ParameterInfo>
+                  <ParameterName>말초혈관수축도</ParameterName>
+                  <ParameterValue>{PVC.toFixed(2)}</ParameterValue>
+                </ParameterInfo>
+                <BarContainer>
+                  <CenterLine />
+                  <ValueMarker 
+                    style={{ 
+                      left: `${((PVC - PARAMETER_RANGES.PVC.min) / (PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)) * 100}%`,
+                      background: getValueColor(PVC, PARAMETER_RANGES.PVC.mean, PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min),
+                      color: getValueColor(PVC, PARAMETER_RANGES.PVC.mean, PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)
+                    }} 
+                  />
+                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.PVC.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.PVC.mean.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.PVC.max.toFixed(2)}</RangeValue>
+                </BarContainer>
+                <Tag color={getTagColor(pulseTypes.PVC)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.PVC}</Tag>
+              </ClassificationRow>
+
+              <ClassificationRow>
+                <ParameterInfo>
+                  <ParameterName>혈관점탄도</ParameterName>
+                  <ParameterValue>{BV.toFixed(2)}</ParameterValue>
+                </ParameterInfo>
+                <BarContainer>
+                  <CenterLine />
+                  <ValueMarker 
+                    style={{ 
+                      left: `${((BV - PARAMETER_RANGES.BV.min) / (PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)) * 100}%`,
+                      background: getValueColor(BV, PARAMETER_RANGES.BV.mean, PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min),
+                      color: getValueColor(BV, PARAMETER_RANGES.BV.mean, PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)
+                    }} 
+                  />
+                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.BV.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.BV.mean.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.BV.max.toFixed(2)}</RangeValue>
+                </BarContainer>
+                <Tag color={getTagColor(pulseTypes.BV)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.BV}</Tag>
+              </ClassificationRow>
+
+              <ClassificationRow>
+                <ParameterInfo>
+                  <ParameterName>일회박출량</ParameterName>
+                  <ParameterValue>{SV.toFixed(2)}</ParameterValue>
+                </ParameterInfo>
+                <BarContainer>
+                  <CenterLine />
+                  <ValueMarker 
+                    style={{ 
+                      left: `${((SV - PARAMETER_RANGES.SV.min) / (PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)) * 100}%`,
+                      background: getValueColor(SV, PARAMETER_RANGES.SV.mean, PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min),
+                      color: getValueColor(SV, PARAMETER_RANGES.SV.mean, PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)
+                    }} 
+                  />
+                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.SV.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.SV.mean.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.SV.max.toFixed(2)}</RangeValue>
+                </BarContainer>
+                <Tag color={getTagColor(pulseTypes.SV)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.SV}</Tag>
+              </ClassificationRow>
+
+              <ClassificationRow>
+                <ParameterInfo>
+                  <ParameterName>심박동수</ParameterName>
+                  <ParameterValue>{HR.toFixed(2)}</ParameterValue>
+                </ParameterInfo>
+                <BarContainer>
+                  <CenterLine />
+                  <ValueMarker 
+                    style={{ 
+                      left: `${((HR - PARAMETER_RANGES.HR.min) / (PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)) * 100}%`,
+                      background: getValueColor(HR, PARAMETER_RANGES.HR.mean, PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min),
+                      color: getValueColor(HR, PARAMETER_RANGES.HR.mean, PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)
+                    }} 
+                  />
+                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.HR.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.HR.mean.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.HR.max.toFixed(2)}</RangeValue>
+                </BarContainer>
+                <Tag color={getTagColor(pulseTypes.HR)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.HR}</Tag>
+              </ClassificationRow>
+
+              <Divider />
+              
+              <div style={{ textAlign: 'center', marginTop: 24 }}>
+                <Space size="large">
+                  <Tag color="purple" style={{ fontSize: '16px', padding: '8px 16px' }}>
+                    {combinedPulse}
+                  </Tag>
+                  {combinedPulse && combinedPulse !== '평맥' && (
+                    <PulseInfoButton 
+                      pulseType={combinedPulse}
+                      patientPulseData={{
+                        PVC, BV, SV, HR
+                      }}
+                    >
+                      맥상정보 보기
+                    </PulseInfoButton>
+                  )}
+                </Space>
+              </div>
+            </div>
+            <Text type="secondary" style={{ marginTop: '1rem', display: 'block' }}>
+              * BV, SV, HR의 분류 기준(상한/하한)은 현재 예시값이며, 향후 축적된 데이터에 따라 동적으로 조정될 예정입니다.
+            </Text>
+          </ResultCard>
+        </Col>
+        {renderHistoryCharts()}
+      </Row>
+    </div>
   );
 };
 

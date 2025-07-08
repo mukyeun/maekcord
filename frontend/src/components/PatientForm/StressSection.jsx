@@ -28,6 +28,40 @@ const SectionCard = styled.div`
   }
 `;
 
+const StyledTag = styled(Tag)`
+  margin: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 14px;
+  
+  &:hover {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+  
+  .anticon-close {
+    color: #ffffff;
+    margin-left: 6px;
+    font-size: 12px;
+    opacity: 0.85;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 50%;
+    padding: 2px;
+    
+    &:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  &.ant-tag-blue {
+    .anticon-close {
+      color: #ffffff;
+    }
+  }
+`;
+
 const StressSection = ({ formData = {}, onStressChange }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedItems, setSelectedItems] = useState(formData.stress?.items || []);
@@ -100,6 +134,10 @@ const StressSection = ({ formData = {}, onStressChange }) => {
     setDetails(e.target.value);
   };
 
+  const handleRemoveItem = (itemToRemove) => {
+    setSelectedItems(selectedItems.filter(item => item.name !== itemToRemove.name));
+  };
+
   return (
     <SectionCard>
       <StyledCard>
@@ -159,9 +197,14 @@ const StressSection = ({ formData = {}, onStressChange }) => {
             <div className="label">선택된 항목</div>
             <TagContainer>
               {selectedItems.map((item) => (
-                <Tag key={item.name} color="blue">
+                <StyledTag
+                  key={item.name}
+                  color="blue"
+                  closable
+                  onClose={() => handleRemoveItem(item)}
+                >
                   {item.name} ({item.score}점)
-                </Tag>
+                </StyledTag>
               ))}
             </TagContainer>
           </FormItem>

@@ -120,62 +120,136 @@ const SectionCard = ({ title, icon, children, gradient }) => (
   </GradientCard>
 );
 
-// 스타일 컴포넌트 추가
-const ClassificationRow = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
+const ParameterBar = styled.div`
   position: relative;
-`;
-
-const ParameterInfo = styled.div`
-  width: 180px;
-  display: flex;
-  flex-direction: column;
-`;
-
-const ParameterName = styled.div`
-  font-size: 13px;
-  color: #666;
-`;
-
-const ParameterValue = styled.div`
-  font-size: 14px;
-  font-weight: bold;
-`;
-
-const BarContainer = styled.div`
-  flex: 1;
-  height: 4px;
-  background: #f5f5f5;
-  position: relative;
-  margin: 0 20px;
+  width: 100%;
+  height: 12px;
+  background: #f0f2f5;
+  border-radius: 6px;
+  margin: 16px 0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: 30%;
+    height: 100%;
+    background: rgba(24, 144, 255, 0.1);
+    transform: translateX(-50%);
+    border-radius: 6px;
+  }
 `;
 
 const CenterLine = styled.div`
   position: absolute;
   left: 50%;
-  top: -8px;
-  width: 1px;
-  height: 20px;
-  background: #ddd;
+  height: 100%;
+  width: 2px;
+  background: rgba(24, 144, 255, 0.2);
   transform: translateX(-50%);
+  border-left: 2px dashed rgba(24, 144, 255, 0.4);
 `;
 
 const ValueMarker = styled.div`
   position: absolute;
-  width: 2px;
-  height: 16px;
+  width: 4px;
+  height: 24px;
   background: #1890ff;
   top: -6px;
   transform: translateX(-50%);
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 3;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid currentColor;
+  }
 `;
 
 const RangeValue = styled.div`
   position: absolute;
   font-size: 12px;
-  color: #999;
-  top: -25px;
+  color: #8c8c8c;
+  top: 20px;
+  transform: translateX(-50%);
+  font-weight: 500;
+`;
+
+const AverageLine = styled.div`
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  background: #1890ff;
+  transform: translateX(-50%);
+  top: -6px;
+  z-index: 2;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: #1890ff;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+  }
+
+  &::after {
+    content: attr(data-value);
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    color: #1890ff;
+    font-weight: bold;
+    white-space: nowrap;
+    background: rgba(24, 144, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+`;
+
+const ClassificationRow = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  position: relative;
+`;
+
+const ParameterInfo = styled.div`
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  padding-right: 16px;
+`;
+
+const ParameterName = styled.div`
+  font-size: 14px;
+  color: #262626;
+  margin-bottom: 4px;
+`;
+
+const ParameterValue = styled.div`
+  font-size: 16px;
+  font-weight: bold;
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
 `;
 
 const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
@@ -336,34 +410,25 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
     transition: all 0.3s ease;
   `;
 
-  const PulseBar = ({ ratio, value, color }) => (
-    <BarWrapper>
-      <BarFill
-        style={{
-          width: `${Math.abs(ratio) * 50}%`,
-          background: color,
-          left: ratio < 0 ? `calc(50% - ${Math.abs(ratio) * 50}%)` : '50%',
-          boxShadow: `0 2px 8px ${color}33`,
-        }}
-      />
-      <div style={{
-        position: 'absolute', left: '50%', top: 0, width: 2, height: '100%',
-        background: '#888', zIndex: 2
-      }} />
-      <ValueLabel style={{
-        position: 'absolute',
-        top: -24,
-        left: ratio < 0 ? `calc(50% - ${Math.abs(ratio) * 50}%)` : `calc(50% + ${Math.abs(ratio) * 50}%)`,
-        transform: 'translateX(-50%)',
-        color: color,
-        fontSize: 15,
-        textShadow: '0 2px 8px #fff',
-        fontWeight: 600,
-      }}>
-        {value}
-      </ValueLabel>
-    </BarWrapper>
-  );
+  const PulseBar = ({ ratio, value, color, min, max, avg }) => {
+    const position = ((value - min) / (max - min)) * 100;
+    
+    return (
+      <ParameterBar>
+        <CenterLine />
+        <AverageLine data-value={avg.toFixed(2)} />
+        <ValueMarker 
+          style={{ 
+            left: `${position}%`,
+            background: color,
+            color: color
+          }} 
+        />
+        <RangeValue style={{ left: 0 }}>{min.toFixed(2)}</RangeValue>
+        <RangeValue style={{ right: 0 }}>{max.toFixed(2)}</RangeValue>
+      </ParameterBar>
+    );
+  };
 
   // 올바른 분류 기준에 맞게 수정
   const pulseTypes = {
@@ -470,23 +535,14 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
                         color: color
                       }}>{value.toFixed(2)}</ParameterValue>
                     </ParameterInfo>
-                    <BarContainer style={{
-                      background: '#f5f7fa',
-                      borderRadius: '8px',
-                      height: '6px'
-                    }}>
-                      <CenterLine />
-                      <ValueMarker 
-                        style={{ 
-                          left: `${position}%`,
-                          background: color,
-                          boxShadow: `0 2px 8px ${color}80`
-                        }} 
-                      />
-                      <RangeValue style={{ left: 0 }}>{range.min.toFixed(2)}</RangeValue>
-                      <RangeValue style={{ left: '50%', transform: 'translateX(-50%)' }}>{range.avg.toFixed(2)}</RangeValue>
-                      <RangeValue style={{ right: 0 }}>{range.max.toFixed(2)}</RangeValue>
-                    </BarContainer>
+                    <PulseBar 
+                      ratio={ratio} 
+                      value={value} 
+                      color={color}
+                      min={range.min}
+                      max={range.max}
+                      avg={range.avg}
+                    />
                     <StyledTag color={ratio > 0.3 ? 'red' : ratio < -0.3 ? 'blue' : 'green'}>
                       {classification}맥
                     </StyledTag>

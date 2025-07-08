@@ -170,18 +170,20 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
     message.loading('최근 측정 결과를 자동으로 가져오는 중...', 0);
 
     try {
+      // 직접 read-ubio-result API 호출
       const response = await fetch('/api/patients/read-ubio-result', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ patientName: formData.basicInfo.name })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          patientName: formData.basicInfo.name
+        }),
+        credentials: 'include'
       });
 
       if (!response.ok) {
-        if (response.status === 404) {
-          message.destroy();
-          message.error('백엔드 서버가 실행되지 않았습니다. 서버를 시작한 후 다시 시도해주세요.');
-          return;
-        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -189,10 +191,15 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
       message.destroy();
 
       if (result.success) {
+        if (!result.pulseData || Object.keys(result.pulseData).length === 0) {
+          message.warning('파일에서 유효한 측정 데이터를 찾을 수 없습니다.');
+          return;
+        }
+
         const newPulseWave = {
           ...formData.records?.pulseWave,
           ...result.pulseData,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: result.pulseData.lastUpdated || new Date().toISOString()
         };
 
         // 자동 계산 값 추가
@@ -207,7 +214,9 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
             pulseWave: newPulseWave
           }
         });
-        message.success(`'${formData.basicInfo.name}'님의 최근 측정 데이터를 성공적으로 불러왔습니다.`);
+
+        const measurementTime = new Date(result.fileInfo?.lastModified || result.pulseData.lastUpdated).toLocaleString();
+        message.success(`'${formData.basicInfo.name}'님의 ${measurementTime} 측정 데이터를 불러왔습니다.`);
       } else {
         message.error(result.message || '결과를 가져오는 데 실패했습니다.');
       }

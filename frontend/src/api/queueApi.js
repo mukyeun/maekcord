@@ -215,12 +215,44 @@ export const callNextPatient = async () => {
 
 export const saveNote = async (queueId, noteData) => {
   try {
-    // noteData에는 { symptoms, memo, stress, pulseAnalysis } 등이 포함됩니다.
-    const response = await axiosInstance.put(`${BASE_URL}/${queueId}/note`, noteData);
-    return response.data;
-  } catch (error)    {
+    console.log('⚠️ Deprecated: Please use saveQueueNote instead');
+    return await saveQueueNote(queueId, noteData);
+  } catch (error) {
     console.error(`진단 내용 저장 실패 (ID: ${queueId}):`, error.response?.data || error.message);
     throw error;
+  }
+};
+
+export const saveQueueNote = async (queueId, noteData) => {
+  try {
+    console.log('📝 진료 노트 저장 요청:', {
+      queueId,
+      visitTime: noteData.visitTime,
+      hasSymptoms: !!noteData.symptoms?.length,
+      hasMemo: !!noteData.memo,
+      hasStress: !!noteData.stress,
+      hasPulseAnalysis: !!noteData.pulseAnalysis,
+      isNewRecord: true  // 새로운 기록임을 표시
+    });
+
+    // 새로운 기록 생성을 위해 endpoint 수정
+    const response = await axiosInstance.post(`${BASE_URL}/${queueId}/visit-record`, {
+      ...noteData,
+      createdAt: noteData.visitTime,  // 현재 시간 대신 방문 시간 사용
+      isNewRecord: true  // 새로운 기록임을 표시
+    });
+    
+    console.log('✅ 진료 노트 저장 완료:', {
+      success: response.data.success,
+      recordTime: response.data.todayStats?.recordTime,
+      visitTime: noteData.visitTime,
+      createdAt: noteData.visitTime
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error('❌ 진료 노트 저장 실패:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || '진료 노트 저장 중 오류가 발생했습니다.');
   }
 };
 
@@ -237,5 +269,6 @@ export default {
   getQueueStatus,
   getCurrentPatient,
   callNextPatient,
-  saveNote
+  saveNote,
+  saveQueueNote
 };

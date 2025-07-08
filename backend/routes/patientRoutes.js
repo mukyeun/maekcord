@@ -15,6 +15,7 @@ const path = require('path');
 const util = require('util');
 const execPromise = util.promisify(require('child_process').exec);
 const fs = require('fs');
+const XLSX = require('xlsx');
 
 /**
  * @swagger
@@ -596,54 +597,56 @@ router.post('/execute-ubio', async (req, res) => {
   }
 });
 
-// 유비오맥파 측정 결과 자동 가져오기 API
+// ✅ 유비오맥파 측정 결과 읽기 API
 router.post('/read-ubio-result', async (req, res) => {
-  const { patientName } = req.body;
-  if (!patientName) {
-    return res.status(400).json({ success: false, message: '환자 이름이 필요합니다.' });
-  }
-
-  const filePath = 'D:\\uBioMacpaData\\유비오측정맥파.xlsx';
-  logger.info(`🔬 유비오맥파 결과 파일 읽기 시도: ${filePath}`);
-
   try {
-    const fs = require('fs');
-    if (!fs.existsSync(filePath)) {
-      logger.error('❌ 유비오맥파 결과 파일을 찾을 수 없습니다:', filePath);
-      return res.status(404).json({
+    const { patientName } = req.body;
+    
+    if (!patientName) {
+      return res.status(400).json({
         success: false,
-        message: '측정 결과 파일을 찾을 수 없습니다. 저장 경로를 확인해주세요. (D:\\uBioMacpaData\\유비오측정맥파.xlsx)'
+        message: '환자 이름이 필요합니다.'
       });
     }
 
-    const xlsx = require('xlsx');
-    const workbook = xlsx.readFile(filePath, {cellDates: true});
+    logger.info(`📊 '${patientName}' 환자의 유비오맥파 측정 결과 읽기 시도`);
+
+    // 유비오맥파 엑셀 파일 경로
+    const excelPath = 'D:\\uBioMacpaData\\유비오측정맥파.xlsx';
+
+    // 파일 존재 여부 확인
+    if (!fs.existsSync(excelPath)) {
+      logger.error('❌ 유비오맥파 결과 파일을 찾을 수 없습니다');
+      return res.status(404).json({
+        success: false,
+        message: '측정 결과 파일을 찾을 수 없습니다. 먼저 측정을 진행해주세요.'
+      });
+    }
+
+    // Excel 파일 읽기
+    const workbook = XLSX.readFile(excelPath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const rows = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
-    
-    logger.info(`📑 엑셀 파일 로드 완료. 총 ${rows.length}개 행`);
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    let rowData = null;
-    for (let i = rows.length - 1; i >= 0; i--) {
-      const excelRowName = rows[i][0];
-      if (excelRowName && typeof excelRowName === 'string' && excelRowName.trim() === patientName.trim()) {
-        rowData = rows[i];
-        logger.info(`✅ '${patientName}' 환자 데이터 발견 (엑셀 ${i + 1}번째 행)`);
-        break;
-      }
-    }
+    // 환자 데이터 찾기
+    const patientData = data.filter(row => 
+      row[0] && typeof row[0] === 'string' && row[0].trim() === patientName.trim()
+    );
 
-    if (!rowData) {
-      logger.warn(`⚠️ 엑셀 파일에서 '${patientName}' 환자 데이터를 찾을 수 없습니다.`);
+    if (patientData.length === 0) {
+      logger.warn(`⚠️ '${patientName}' 환자의 데이터를 찾을 수 없습니다.`);
       return res.status(404).json({
         success: false,
-        message: `엑셀 파일에서 '${patientName}' 환자의 데이터를 찾을 수 없습니다.`
+        message: `'${patientName}' 환자의 측정 데이터를 찾을 수 없습니다. 먼저 측정을 진행해주세요.`
       });
     }
 
-    if (rowData.length < 17) {
-      logger.error(`❌ 데이터 형식 오류: ${patientName} 환자의 데이터 길이가 너무 짧습니다. (${rowData.length}개)`);
+    // 가장 최근 데이터 사용
+    const latestData = patientData[patientData.length - 1];
+
+    if (latestData.length < 17) {
+      logger.error(`❌ 데이터 형식 오류: 데이터 길이가 너무 짧습니다. (${latestData.length}개)`);
       return res.status(400).json({
         success: false,
         message: '선택된 환자의 데이터 형식이 올바르지 않습니다.'
@@ -651,20 +654,29 @@ router.post('/read-ubio-result', async (req, res) => {
     }
 
     const ELASTICITY_SCORES = { 'A': 0.2, 'B': 0.4, 'C': 0.6, 'D': 0.8, 'E': 1.0 };
-
     const pulseData = {
-      'elasticityScore': ELASTICITY_SCORES[rowData[8]] || null,
-      'a-b': rowData[9] !== undefined ? parseFloat(rowData[9]) : null,
-      'a-c': rowData[10] !== undefined ? parseFloat(rowData[10]) : null,
-      'a-d': rowData[11] !== undefined ? parseFloat(rowData[11]) : null,
-      'a-e': rowData[12] !== undefined ? parseFloat(rowData[12]) : null,
-      'b/a': rowData[13] !== undefined ? parseFloat(rowData[13]) : null,
-      'c/a': rowData[14] !== undefined ? parseFloat(rowData[14]) : null,
-      'd/a': rowData[15] !== undefined ? parseFloat(rowData[15]) : null,
-      'e/a': rowData[16] !== undefined ? parseFloat(rowData[16]) : null,
+      'elasticityScore': ELASTICITY_SCORES[latestData[8]] || null,
+      'a-b': latestData[9] !== undefined ? parseFloat(latestData[9]) : null,
+      'a-c': latestData[10] !== undefined ? parseFloat(latestData[10]) : null,
+      'a-d': latestData[11] !== undefined ? parseFloat(latestData[11]) : null,
+      'a-e': latestData[12] !== undefined ? parseFloat(latestData[12]) : null,
+      'b/a': latestData[13] !== undefined ? parseFloat(latestData[13]) : null,
+      'c/a': latestData[14] !== undefined ? parseFloat(latestData[14]) : null,
+      'd/a': latestData[15] !== undefined ? parseFloat(latestData[15]) : null,
+      'e/a': latestData[16] !== undefined ? parseFloat(latestData[16]) : null,
+      lastUpdated: new Date().toISOString()
     };
 
-    res.json({ success: true, pulseData });
+    logger.info(`✅ '${patientName}' 환자의 맥파 데이터 추출 성공`);
+
+    return res.json({ 
+      success: true, 
+      pulseData,
+      fileInfo: {
+        path: excelPath,
+        lastModified: fs.statSync(excelPath).mtime
+      }
+    });
 
   } catch (error) {
     logger.error('❌ 유비오맥파 결과 처리 오류:', error);
