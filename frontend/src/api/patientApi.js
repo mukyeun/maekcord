@@ -248,3 +248,48 @@ export const getPatientVisitHistory = async (patientId) => {
 export const getPatientVisitRecord = async (patientId, visitDate) => {
   return axios.get(`/api/patients/${patientId}/visits/${visitDate}`);
 };
+
+export const searchPatients = async (query) => {
+  try {
+    const response = await axios.get(`/api/patients/search`, {
+      params: { query }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getPatients = async (page = 1, limit = 10) => {
+  try {
+    const response = await axios.get('/api/patients', {
+      params: { page, limit }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// ✅ 환자 상세 정보 조회 (의사 화면용)
+export const getPatientData = async (patientId) => {
+  try {
+    // 1. 환자 기본 정보 조회
+    const patientResponse = await api.get(`/api/patients/data/${patientId}`);
+    
+    if (!patientResponse.data.success) {
+      throw new Error('환자 정보를 불러올 수 없습니다.');
+    }
+
+    return {
+      success: true,
+      patientData: patientResponse.data.patientData
+    };
+  } catch (error) {
+    console.error('❌ 환자 데이터 조회 실패:', error);
+    return {
+      success: false,
+      message: error.response?.data?.message || '환자 데이터 조회 중 오류가 발생했습니다.'
+    };
+  }
+};

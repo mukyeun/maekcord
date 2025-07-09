@@ -1,69 +1,101 @@
 const logger = require('../utils/logger');
-const { AppError } = require('../utils/errors');
 
-// 개발 환경에서만 스택 트레이스 포함
+class AppError extends Error {
+  constructor(message, statusCode, errorCode) {
+    super(message);
+    this.statusCode = statusCode;
+    this.errorCode = errorCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+const handleCastErrorDB = err => {
+  const message = `잘못된 ${err.path}: ${err.value}`;
+  return new AppError(message, 400, 'INVALID_DATA');
+};
+
+const handleDuplicateFieldsDB = err => {
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  const message = `중복된 필드 값: ${value}. 다른 값을 사용해주세요.`;
+  return new AppError(message, 400, 'DUPLICATE_FIELD');
+};
+
+const handleValidationErrorDB = err => {
+  const errors = Object.values(err.errors).map(el => el.message);
+  const message = `유효하지 않은 입력 데이터: ${errors.join('. ')}`;
+  return new AppError(message, 400, 'VALIDATION_ERROR');
+};
+
+const handleJWTError = () =>
+  new AppError('유효하지 않은 토큰입니다. 다시 로그인해주세요.', 401, 'INVALID_TOKEN');
+
+const handleJWTExpiredError = () =>
+  new AppError('만료된 토큰입니다. 다시 로그인해주세요.', 401, 'EXPIRED_TOKEN');
+
 const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    success: false,
+  logger.error('개발 환경 에러:', {
+    status: err.status,
+    error: err,
     message: err.message,
-    errors: err.errors,
-    conflictData: err.conflictData,
-    stack: err.stack,
-    error: err
+    stack: err.stack
+  });
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    error: err,
+    message: err.message,
+    stack: err.stack
   });
 };
 
-// 운영 환경에서는 민감한 정보 제외
 const sendErrorProd = (err, res) => {
-  // 운영상의 에러: 신뢰할 수 있는 에러 메시지 전송
+  // Operational, trusted error: send message to client
   if (err.isOperational) {
+    logger.error('운영 환경 에러 (Operational):', {
+      status: err.status,
+      message: err.message
+    });
+
     res.status(err.statusCode).json({
-      success: false,
+      status: err.status,
       message: err.message,
-      errors: err.errors,
-      conflictData: err.conflictData
+      errorCode: err.errorCode
     });
   } 
-  // 프로그래밍 에러: 자세한 내용 숨김
+  // Programming or other unknown error: don't leak error details
   else {
-    logger.error('ERROR 💥', err);
+    logger.error('운영 환경 에러 (Unknown):', {
+      error: err
+    });
+
     res.status(500).json({
-      success: false,
+      status: 'error',
       message: '서버에 문제가 발생했습니다.'
     });
   }
 };
 
-// 몽구스 에러 처리
-const handleMongooseError = (err) => {
-  if (err.name === 'CastError') {
-    return new AppError('잘못된 데이터 형식입니다.', 400);
-  }
-  if (err.name === 'ValidationError') {
-    const errors = Object.values(err.errors).map(el => el.message);
-    return new AppError('입력값 검증에 실패했습니다.', 400, errors);
-  }
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyPattern)[0];
-    return new AppError(`이미 존재하는 ${field} 입니다.`, 409);
-  }
-  return err;
-};
-
-// 전역 에러 핸들러
-const errorHandler = (err, req, res, next) => {
+module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-
-  // 몽구스 에러 변환
-  if (err.name === 'CastError' || err.name === 'ValidationError' || err.code === 11000) {
-    err = handleMongooseError(err);
-  }
+  err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else {
-    sendErrorProd(err, res);
+    let error = { ...err };
+    error.message = err.message;
+
+    if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
+    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
+    if (error.name === 'JsonWebTokenError') error = handleJWTError();
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
+
+    sendErrorProd(error, res);
   }
 };
 
-module.exports = errorHandler;
+module.exports.AppError = AppError;

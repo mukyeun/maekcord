@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Button, Space, Typography, Modal, Form, Input, message, Badge, Tooltip, Card } from 'antd';
+import { Layout, Button, Space, Typography, Modal, Form, Input, message, Badge, Tooltip, Card, Popover } from 'antd';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,9 @@ import {
   LogoutOutlined,
   TableOutlined,
   SafetyCertificateOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  CalendarOutlined,
+  BellOutlined
 } from '@ant-design/icons';
 import { loginUser, logout, checkSecurityStatus } from '../../store/slices/authSlice';
 import ReceptionDashboard from '../ReceptionDashboard/ReceptionDashboard';
@@ -21,6 +23,8 @@ import QueueDisplay from '../QueueDisplay/QueueDisplay';
 import DoctorView from '../DoctorView/DoctorView';
 import WebSocketStatus from './WebSocketStatus';
 import PerformanceMonitor from './PerformanceMonitor';
+import NotificationList from '../notifications/NotificationList';
+import { getUnreadCount } from '../../api/notificationApi';
 
 const { Title } = Typography;
 
@@ -159,6 +163,27 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
   const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
   const [isReceptionDashboardVisible, setIsReceptionDashboardVisible] = useState(false);
   const [isQueueDisplayVisible, setIsQueueDisplayVisible] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // 알림 수 가져오기
+  const fetchUnreadCount = async () => {
+    if (isAuthenticated) {
+      try {
+        const count = await getUnreadCount();
+        setUnreadCount(count);
+      } catch (error) {
+        console.error('알림 수 조회 실패:', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUnreadCount();
+      const interval = setInterval(fetchUnreadCount, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
   // 보안 상태 체크
   useEffect(() => {
@@ -224,14 +249,18 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
 
   return (
     <HeaderBar>
-      <Logo>
-        <MenuOutlined style={{ marginRight: 12, fontSize: 22 }} />
-        Maekstation
-      </Logo>
+      <Logo onClick={() => navigate('/')}>MaekCode</Logo>
       <Nav>
-        <NavItem href="/">대시보드</NavItem>
-        <NavItem href="/patients">환자관리</NavItem>
-        <NavItem href="/stats">통계</NavItem>
+        {isAuthenticated && (
+          <>
+            <NavItem onClick={() => navigate('/appointments')}>
+              <CalendarOutlined /> 예약 관리
+            </NavItem>
+            <NavItem href="/">대시보드</NavItem>
+            <NavItem href="/patients">환자관리</NavItem>
+            <NavItem href="/stats">통계</NavItem>
+          </>
+        )}
       </Nav>
       <UserMenu>
         <WebSocketStatus compact showDetails />
@@ -243,6 +272,16 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
         {isAuthenticated ? (
           <>
             <span style={{ marginRight: 8 }}>{user?.name || user?.username || '사용자'}님 환영합니다</span>
+            <Popover
+              placement="bottomRight"
+              content={<NotificationList onRead={fetchUnreadCount} />}
+              trigger="click"
+              overlayStyle={{ width: 400 }}
+            >
+              <Badge count={unreadCount} offset={[-5, 5]}>
+                <Button type="text" icon={<BellOutlined style={{ fontSize: 20 }} />} />
+              </Badge>
+            </Popover>
             <IconBtn title="로그아웃" onClick={handleLogout}>
               <LogoutOutlined />
             </IconBtn>

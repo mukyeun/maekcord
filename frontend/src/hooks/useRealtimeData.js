@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { wsClient } from '../utils/websocket';
-import { message } from 'antd';
+import webSocketService from '../services/websocket.service';
+import { message, notification } from 'antd';
 
 /**
  * 실시간 데이터 동기화를 위한 커스텀 훅
@@ -27,6 +27,7 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [retryCount, setRetryCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
   
   const pollingRef = useRef(null);
   const wsListenerRef = useRef(null);
@@ -105,7 +106,7 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
         setLoading(false);
       }
     }
-  }, [dataType, fetchFunction, onDataUpdate, onError, retryAttempts, retryDelay]); // retryCount 제거
+  }, [dataType, fetchFunction, onDataUpdate, onError, retryAttempts, retryDelay]);
 
   // WebSocket 메시지 처리 - fetchData 의존성 제거
   const handleWebSocketMessage = useCallback((wsData) => {
@@ -137,26 +138,26 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
     if (!enableWebSocket || !mountedRef.current) return;
 
     // WebSocket 리스너 등록
-    wsListenerRef.current = wsClient.addListener(handleWebSocketMessage);
+    webSocketService.on(dataType, handleWebSocketMessage);
 
-    // 연결 상태 리스너
-    const statusListener = wsClient.addStatusListener((status) => {
-      if (status === 'connected' && autoConnect) {
+    // 연결 상태 체크
+    const checkConnection = () => {
+      const isWsConnected = webSocketService.isConnected();
+      setIsConnected(isWsConnected);
+      
+      if (isWsConnected && autoConnect) {
         fetchData();
       }
-    });
+    };
+
+    checkConnection();
 
     return () => {
-      if (wsListenerRef.current) {
-        wsListenerRef.current();
-      }
-      if (statusListener) {
-        statusListener();
-      }
+      webSocketService.off(dataType, handleWebSocketMessage);
     };
-  }, [enableWebSocket, handleWebSocketMessage, autoConnect, fetchData]);
+  }, [enableWebSocket, handleWebSocketMessage, autoConnect, fetchData, dataType]);
 
-  // 폴링 설정 - fetchData 의존성 제거
+  // 폴링 설정
   useEffect(() => {
     if (!enablePolling || !mountedRef.current) return;
 
@@ -169,7 +170,7 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
       
       pollingRef.current = setInterval(() => {
         // WebSocket이 연결되어 있으면 폴링 건너뛰기
-        if (isOnline && !wsClient.isConnected()) {
+        if (isOnline && !webSocketService.isConnected()) {
           console.log(`🔄 ${dataType} 폴링 실행 (WebSocket 연결 없음)`);
           fetchData();
         } else {
@@ -187,7 +188,7 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
         pollingRef.current = null;
       }
     };
-  }, [enablePolling, pollingInterval, isOnline, fetchData]);
+  }, [enablePolling, pollingInterval, isOnline, fetchData, dataType]);
 
   // 초기 데이터 로드
   useEffect(() => {
@@ -206,8 +207,10 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
       if (retryTimeoutRef.current) {
         clearTimeout(retryTimeoutRef.current);
       }
+      // WebSocket 리스너 제거
+      webSocketService.off(dataType, handleWebSocketMessage);
     };
-  }, []);
+  }, [dataType, handleWebSocketMessage]);
 
   // 수동 새로고침
   const refresh = useCallback(() => {
@@ -264,8 +267,9 @@ const useRealtimeData = (dataType, fetchFunction, options = {}) => {
     updateItem,
     removeItem,
     addItem,
-    connectionStatus: wsClient.getConnectionStatus(),
-    isConnected: wsClient.isConnected()
+    isConnected: webSocketService.isConnected(),
+    isReady: webSocketService.isReady(),
+    isLoading: loading
   };
 };
 

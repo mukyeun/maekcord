@@ -19,7 +19,8 @@ const {
   callNextPatient,
   saveQueueNote
 } = require('../controllers/queueController');
-const { validateObjectId } = require('../middleware/validation');
+const validate = require('../middleware/validate');
+const { getQueueById, getQueueStatus: getQueueStatusValidation, postQueueStatus, registerQueue: registerQueueValidation, updateQueueStatus: updateQueueStatusValidation } = require('../validations/queueValidation');
 
 // 필요한 환자 정보 필드 정의
 const PATIENT_FIELDS = [
@@ -65,16 +66,16 @@ router.use((req, res, next) => {
 });
 
 // 환자 호출 API - 다른 라우트보다 먼저 정의
-router.put('/:id/call', callPatient);
+router.put('/:id/call', validate(getQueueById), callPatient);
 
 // ✅ 기본 라우트
 router.get('/', getTodayQueueList);                    // 대기열 목록 조회
-router.post('/', registerQueue);                       // 대기열 등록
+router.post('/', validate(registerQueueValidation), registerQueue);                       // 대기열 등록
 router.get('/today', getTodayQueueList);              // 오늘 대기 목록 조회
 router.get('/status', getQueueStatus);                // 대기 현황 통계
 
 // POST /api/queues/status - 환자별 대기 상태 조회 (POST 방식)
-router.post('/status', async (req, res) => {
+router.post('/status', validate(postQueueStatus), async (req, res) => {
   const { patientId, date } = req.body;
 
   // 필수 파라미터 검증
@@ -135,7 +136,7 @@ router.post('/status', async (req, res) => {
   }
 });
 
-router.get('/status/patient', async (req, res) => {   // 환자별 대기 상태 조회 (GET 방식)
+router.get('/status/patient', validate(getQueueStatusValidation), async (req, res) => {   // 환자별 대기 상태 조회 (GET 방식)
   const { patientId, date } = req.query;
 
   // 필수 파라미터 검증
@@ -414,7 +415,7 @@ router.post('/test-data', async (req, res) => {
 router.get('/current-patient', getCurrentPatient);
 
 // 대기 상태 변경 라우트
-router.put('/:id/status', validateObjectId, async (req, res) => {
+router.put('/:id/status', validate(getQueueById), async (req, res) => {
   try {
     const { status } = req.body;
     const queueId = req.params.id;

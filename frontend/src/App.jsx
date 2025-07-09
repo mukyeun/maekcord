@@ -9,6 +9,7 @@ import Header from './components/Common/Header';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { lightTheme, darkTheme } from './theme';
 import { useState } from 'react';
+import { AuthProvider } from './contexts/AuthContext';
 
 // 보안 컴포넌트들
 import TokenRefreshManager from './components/Auth/TokenRefreshManager';
@@ -36,6 +37,7 @@ const ReceptionDashboardPage = lazy(() => import('./routes/ReceptionDashboardPag
 const QueueDisplayPage = lazy(() => import('./routes/QueueDisplayPage'));
 const DoctorViewPage = lazy(() => import('./routes/DoctorViewPage'));
 const PatientDataTable = lazy(() => import('./components/PatientDataTable'));
+const AppointmentPage = lazy(() => import('./pages/AppointmentPage'));
 
 const { Content } = Layout;
 
@@ -55,53 +57,60 @@ const App = () => {
       <GlobalStyle />
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <ConfigProvider locale={koKR}>
-            <BrowserRouter>
-              <Layout>
-                <Header onToggleDark={() => setDark(d => !d)} dark={dark} />
-                <Content style={{ marginTop: 64 }}>
-                  {/* 보안 관리자 컴포넌트 */}
-                  <TokenRefreshManager />
-                  
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/patient/new" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <PatientFormPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/patient/edit/:id" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <PatientFormPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/reception" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception']}>
-                          <ReceptionDashboardPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/queue" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <QueueDisplayPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/doctor" element={
-                        <ProtectedRoute requiredRoles={['admin', 'doctor']}>
-                          <DoctorViewPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/patient-data" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <PatientDataTable />
-                        </ProtectedRoute>
-                      } />
-                    </Routes>
-                  </Suspense>
-                </Content>
-              </Layout>
-            </BrowserRouter>
-          </ConfigProvider>
+          <AuthProvider>
+            <ConfigProvider locale={koKR}>
+              <BrowserRouter>
+                <Layout>
+                  <Header onToggleDark={() => setDark(d => !d)} dark={dark} />
+                  <Content style={{ marginTop: 64 }}>
+                    {/* 보안 관리자 컴포넌트 */}
+                    <TokenRefreshManager />
+                    
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/patient/new" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <PatientFormPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/patient/edit/:id" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <PatientFormPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/reception" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception']}>
+                            <ReceptionDashboardPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/queue" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <QueueDisplayPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/doctor" element={
+                          <ProtectedRoute requiredRoles={['admin', 'doctor']}>
+                            <DoctorViewPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/patient-data" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <PatientDataTable />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/appointments" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <AppointmentPage />
+                          </ProtectedRoute>
+                        } />
+                      </Routes>
+                    </Suspense>
+                  </Content>
+                </Layout>
+              </BrowserRouter>
+            </ConfigProvider>
+          </AuthProvider>
         </PersistGate>
       </Provider>
     </ThemeProvider>

@@ -13,6 +13,39 @@ class AppError extends Error {
 }
 
 /**
+ * 알림 에러
+ */
+class NotificationError extends AppError {
+  constructor(message, originalError = null) {
+    super(message, 500);
+    this.name = 'NotificationError';
+    this.originalError = originalError;
+  }
+}
+
+/**
+ * WebSocket 에러
+ */
+class WebSocketError extends AppError {
+  constructor(message, code = 4000) {
+    super(message, 500);
+    this.name = 'WebSocketError';
+    this.code = code;
+  }
+}
+
+/**
+ * 캐시 에러
+ */
+class CacheError extends AppError {
+  constructor(message, originalError = null) {
+    super(message, 500);
+    this.name = 'CacheError';
+    this.originalError = originalError;
+  }
+}
+
+/**
  * 유효성 검사 에러
  */
 class ValidationError extends AppError {
@@ -26,7 +59,7 @@ class ValidationError extends AppError {
  * 인증 에러
  */
 class AuthenticationError extends AppError {
-  constructor(message = '인증에 실패했습니다.') {
+  constructor(message) {
     super(message, 401);
     this.name = 'AuthenticationError';
   }
@@ -36,7 +69,7 @@ class AuthenticationError extends AppError {
  * 권한 에러
  */
 class AuthorizationError extends AppError {
-  constructor(message = '접근 권한이 없습니다.') {
+  constructor(message) {
     super(message, 403);
     this.name = 'AuthorizationError';
   }
@@ -45,20 +78,20 @@ class AuthorizationError extends AppError {
 /**
  * 리소스를 찾을 수 없음
  */
-class NotFoundError extends AppError {
-  constructor(message = '요청한 리소스를 찾을 수 없습니다.') {
-    super(message, 404);
-    this.name = 'NotFoundError';
+class ResourceNotFoundError extends AppError {
+  constructor(resource) {
+    super(`${resource} not found`, 404);
+    this.name = 'ResourceNotFoundError';
   }
 }
 
 /**
  * 중복 데이터 에러
  */
-class DuplicateError extends AppError {
-  constructor(message = '이미 존재하는 데이터입니다.') {
-    super(message, 409);
-    this.name = 'DuplicateError';
+class DuplicateResourceError extends AppError {
+  constructor(resource) {
+    super(`${resource} already exists`, 409);
+    this.name = 'DuplicateResourceError';
   }
 }
 
@@ -96,7 +129,7 @@ const convertError = (error) => {
 
   if (error.name === 'MongoError' && error.code === 11000) {
     // Mongoose Duplicate Key Error
-    return new DuplicateError('중복된 데이터가 존재합니다.');
+    return new DuplicateResourceError('중복된 데이터가 존재합니다.');
   }
 
   if (error.name === 'CastError') {
@@ -121,14 +154,28 @@ const convertError = (error) => {
   return new AppError('서버 오류가 발생했습니다.', 500);
 };
 
+/**
+ * 데이터베이스 에러
+ */
+class RateLimitError extends AppError {
+  constructor(message) {
+    super(message, 429);
+    this.name = 'RateLimitError';
+  }
+}
+
 module.exports = {
   AppError,
+  NotificationError,
+  WebSocketError,
+  CacheError,
   ValidationError,
   AuthenticationError,
   AuthorizationError,
-  NotFoundError,
-  DuplicateError,
+  ResourceNotFoundError,
+  DuplicateResourceError,
   DatabaseError,
   ExternalServiceError,
+  RateLimitError,
   convertError
 }; 

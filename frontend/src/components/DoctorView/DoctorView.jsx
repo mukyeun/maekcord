@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import * as queueApi from '../../api/queueApi';
 import * as pulseApi from '../../api/pulseApi';
 import * as patientApi from '../../api/patientApi';
-import { wsClient } from '../../utils/websocket';
+import { useWebSocket } from '../../hooks/useWebSocket';
 import { 증상카테고리 } from '../../data/symptoms';
 import PulseVisualization from './PulseVisualization';
 import MedicalHistoryComparison from './MedicalHistoryComparison';
@@ -79,6 +79,8 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
     elasticityScore: '', PVC: '', BV: '', SV: '', HR: ''
   });
   
+  const { isReady, subscribe } = useWebSocket();
+
   const getBasicInfoData = (patient, historicalRecord = null) => {
     if (!patient?.patientId?.basicInfo) return [];
 
@@ -196,148 +198,56 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
     try {
       setLoading(true);
       setError(null);
-      
-      // 1. 환자 정보 조회
-      const patientResponse = await patientApi.getPatientById(patientId);
-      console.log('Patient data response:', patientResponse); // 디버깅
-      
-      if (!patientResponse.data?.success) {
-        throw new Error('환자 정보를 불러올 수 없습니다.');
-      }
-      
-      const patientData = patientResponse.data.data;
-      
-      // 2. 해당 환자의 대기열 정보 조회 또는 생성
-      let queueData;
-      const queueResponse = await queueApi.getTodayQueueList();
-      console.log('Queue data response:', queueResponse); // 디버깅
-      
-      const existingQueue = queueResponse.data?.find(q => 
-        q.patientId?._id === patientId
-      );
-      
-      if (existingQueue) {
-        queueData = existingQueue;
-      } else {
-        // 대기열에 없으면 새로 등록
-        const createQueueResponse = await queueApi.registerQueue({
-          patientId: patientId,
-          date: new Date().toISOString().split('T')[0]
+
+      // 직접 환자 데이터 로드
+      const response = await patientApi.getPatientData(patientId);
+      if (response.success && response.patientData) {
+        console.log('🩺 환자 데이터 로드 성공:', response.patientData);
+        setCurrentPatient({
+          patientId: response.patientData,
+          status: 'consulting'
         });
-        queueData = createQueueResponse.data;
+        setStatus('consulting');
+
+        // 진료 기록 로드
+        const medicalHistoryResponse = await api.get(`/api/medical-records/patient/${patientId}`);
+        if (medicalHistoryResponse.data.success) {
+          setVisitHistory(medicalHistoryResponse.data.data.records || []);
+        }
+
+        // 최신 맥파 데이터 설정
+        if (response.patientData.latestPulseWave) {
+          setPulseData(response.patientData.latestPulseWave);
+        }
+      } else {
+        throw new Error('환자 데이터를 찾을 수 없습니다.');
       }
-      
-      // 환자 정보와 대기열 정보 결합
-      const combinedData = {
-        ...queueData,
-        patientId: patientData
-      };
-      
-      console.log('Setting current patient:', combinedData); // 디버깅
-      setCurrentPatient(combinedData);
-      setStatus('consulting');
-      
     } catch (error) {
-      console.error('선택된 환자 정보 로드 실패:', error);
+      console.error('환자 데이터 로드 실패:', error);
       setError('환자 정보를 불러오는데 실패했습니다.');
       message.error('환자 정보를 불러오는데 실패했습니다.');
+      setCurrentPatient(null);
+      setStatus('waiting');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleWebSocketMessage = (data) => {
-    console.log('📨 DoctorView - WebSocket 메시지 수신:', data);
-    switch (data.type) {
-      case 'PATIENT_CALLED_TO_DOCTOR': {
-        const patientData = data.patient;
-        console.log('👨‍⚕️ 접수실에서 호출된 환자 정보:', patientData);
-        
-        // 환자 정보 검증
-        if (!patientData || !patientData.patientId || !patientData.patientId.basicInfo) {
-          console.error('❌ 잘못된 환자 데이터:', patientData);
-          message.error('환자 정보가 올바르지 않습니다.');
-          return;
-        }
-        
-        // 현재 환자와 다른 환자인 경우에만 업데이트
-        const currentPatientId = currentPatient?.patientId?._id;
-        const newPatientId = patientData.patientId._id;
-        
-        if (currentPatientId !== newPatientId) {
-          console.log('🔄 새로운 환자 호출:', {
-            currentPatient: currentPatient?.patientId?.basicInfo?.name,
-            newPatient: patientData.patientId.basicInfo.name
-          });
-          
-          setCurrentPatient(patientData);
-          setStatus('called');
-          message.success(`${patientData.patientId.basicInfo.name}님이 진료실로 호출되었습니다.`);
-          setActiveTab('1');
-        } else {
-          console.log('⚠️ 이미 같은 환자가 호출됨:', patientData.patientId.basicInfo.name);
-        }
-        break;
-      }
-      case 'PATIENT_CALLED': {
-        const patientData = data.patient;
-        console.log('👨‍⚕️ 호출된 환자 정보:', patientData);
-        
-        // 환자 정보 검증
-        if (!patientData || !patientData.id) {
-          console.error('❌ 잘못된 환자 호출 데이터:', patientData);
-          return;
-        }
-        
-        // 현재 환자와 다른 환자인 경우에만 업데이트
-        const currentPatientId = currentPatient?.patientId?._id;
-        const newPatientId = patientData.id;
-        
-        if (currentPatientId !== newPatientId) {
-          console.log('🔄 새로운 환자 호출 (PATIENT_CALLED):', {
-            currentPatient: currentPatient?.patientId?.basicInfo?.name,
-            newPatient: patientData.name
-          });
-          
-          // 환자 정보를 다시 로드하여 최신 데이터 가져오기
-          loadCurrentPatient();
-        }
-        break;
-      }
-      case 'QUEUE_UPDATE':
-        console.log('🔄 큐 업데이트 - 현재 환자 정보 다시 로드');
-        loadCurrentPatient();
-        break;
-      case 'PONG':
-      case 'pong':
-      case 'CONNECTED':
-        console.log('🔗 WebSocket 연결 확인 메시지:', data.type);
-        break;
-      default:
-        console.log('⚠️ DoctorView - 처리되지 않은 WebSocket 메시지:', data);
-        break;
-    }
-  };
-  
+  // WebSocket 메시지 처리
   useEffect(() => {
-    console.log('DoctorView useEffect:', { visible, selectedPatientId }); // 디버깅
-    if (visible && selectedPatientId) {
-      loadSelectedPatient(selectedPatientId);
-    } else if (visible) {
-      loadCurrentPatient();
-    }
-  }, [visible, selectedPatientId]);
+    if (!isReady) return;
 
-  // WebSocket 연결 관리
-  useEffect(() => {
-    if (visible) {
-      wsClient.connect();
-      const removeListener = wsClient.addListener(handleWebSocketMessage);
-      return () => {
-        if (removeListener) removeListener();
-      };
-    }
-  }, [visible]);
+    const unsubscribe = subscribe('QUEUE_UPDATE', (data) => {
+      console.log('📨 DoctorView - WebSocket 메시지 수신:', data);
+      if (data.type === 'QUEUE_UPDATE') {
+        loadCurrentPatient();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [isReady, subscribe]);
 
   useEffect(() => {
     console.log('🩺 DoctorView - currentPatient state updated:', JSON.stringify(currentPatient, null, 2));
@@ -501,7 +411,6 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
       setStatus('consulting');
       setCurrentPatient(prev => prev ? { ...prev, status: 'consulting' } : prev);
       message.success('진료를 시작합니다.');
-      wsClient.send({ type: 'CONSULTATION_STARTED', patientId: currentPatient._id });
     } catch (error) {
       console.error('진료 시작 실패:', error);
       message.error('진료 시작에 실패했습니다.');
@@ -521,7 +430,6 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
       setStatus('waiting');
       setCurrentPatient(null);
       message.success('진료를 완료했습니다.');
-      wsClient.send({ type: 'CONSULTATION_COMPLETED' });
     } catch (error) {
       console.error('진료 완료 실패:', error);
       message.error('진료 완료 처리에 실패했습니다.');
@@ -713,17 +621,13 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
   // 컴포넌트 마운트/언마운트 시 처리
   useEffect(() => {
     if (visible) {
-      // 모달이 열릴 때 초기화
-      if (currentPatient?.patientId?._id) {
-        loadVisitHistory(currentPatient.patientId._id);
+      if (selectedPatientId) {
+        loadSelectedPatient(selectedPatientId);
+      } else {
+        loadCurrentPatient();
       }
-    } else {
-      // 모달이 닫힐 때 초기화
-      setVisitHistory([]);
-      setSelectedVisitDate(null);
-      setHistoricalData(null);
     }
-  }, [visible]);
+  }, [visible, selectedPatientId]);
 
   const handleShowHistoryComparison = () => {
     setShowHistoryComparison(true);
@@ -744,8 +648,8 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
         if (key === 'systolicBP' || key === 'diastolicBP') {
           const sbp = Number(newPulseData.systolicBP) || 0;
           const dbp = Number(newPulseData.diastolicBP) || 0;
-          newPulseData.pulsePressure = sbp - dbp;
-        }
+            newPulseData.pulsePressure = sbp - dbp;
+          }
         
         // 심박수 동기화
         if (key === 'heartRate') {
@@ -786,9 +690,9 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
             <Col span={6}><Form.Item label="e/a"><Input value={pulseData['e/a']} onChange={e => handleInputChange('e/a', e.target.value)} /></Form.Item></Col>
           </Row>
           {!selectedVisitDate && (
-            <Button type="primary" onClick={handleSavePulseData} icon={<SaveOutlined />}>
-              맥파 데이터 저장
-            </Button>
+          <Button type="primary" onClick={handleSavePulseData} icon={<SaveOutlined />}>
+            맥파 데이터 저장
+          </Button>
           )}
           {selectedVisitDate && (
             <Alert
@@ -906,11 +810,11 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
                       <Tag color="cyan">맥파</Tag>
                     )}
                   </Space>
-                </div>
+              </div>
               );
             })}
-          </div>
-        </Card>
+            </div>
+          </Card>
       </Space>
     );
   };
@@ -1085,7 +989,7 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
     const recordData = historicalData || {};
 
     return (
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab={<span><UserOutlined />환자 정보</span>} key="1">
           <HistoryControls>
             {renderVisitHistorySelector()}
@@ -1099,54 +1003,54 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
               </Space>
             }
           >
-            <Descriptions bordered column={2}>
-              {getBasicInfoData(currentPatient).map((item, index) => (
-                <Descriptions.Item key={index} label={item.label}>
-                  {item.value}
-                </Descriptions.Item>
-              ))}
-            </Descriptions>
-          </StyledCard>
+                <Descriptions bordered column={2}>
+                  {getBasicInfoData(currentPatient).map((item, index) => (
+                    <Descriptions.Item key={index} label={item.label}>
+                      {item.value}
+                    </Descriptions.Item>
+                  ))}
+                </Descriptions>
+              </StyledCard>
 
           {/* 과거 진료 기록 표시 */}
           {renderHistoricalRecord(recordData)}
-        </TabPane>
+            </TabPane>
 
-        <TabPane tab="증상/메모" key="2">
-          <StyledCard title="증상 및 메모">
-            <Form layout="vertical">
-              <Form.Item label="증상">
-                <Select
-                  mode="multiple"
-                  placeholder="증상을 선택하세요"
-                  value={symptoms}
-                  onChange={setSymptoms}
-                  options={symptomOptions}
-                  style={{ width: '100%' }}
+            <TabPane tab="증상/메모" key="2">
+              <StyledCard title="증상 및 메모">
+                <Form layout="vertical">
+                  <Form.Item label="증상">
+                    <Select
+                      mode="multiple"
+                      placeholder="증상을 선택하세요"
+                      value={symptoms}
+                      onChange={setSymptoms}
+                      options={symptomOptions}
+                      style={{ width: '100%' }}
                   disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
-              <Form.Item label="메모">
-                <TextArea
-                  rows={4}
-                  placeholder="진료 메모를 입력하세요"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
+                    />
+                  </Form.Item>
+                  <Form.Item label="메모">
+                    <TextArea
+                      rows={4}
+                      placeholder="진료 메모를 입력하세요"
+                      value={memo}
+                      onChange={(e) => setMemo(e.target.value)}
                   disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
-              <Form.Item label="스트레스">
-                <Input
-                  placeholder="스트레스 정보"
-                  value={stress}
-                  onChange={(e) => setStress(e.target.value)}
+                    />
+                  </Form.Item>
+                  <Form.Item label="스트레스">
+                    <Input
+                      placeholder="스트레스 정보"
+                      value={stress}
+                      onChange={(e) => setStress(e.target.value)}
                   disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
+                    />
+                  </Form.Item>
               {!selectedVisitDate && (
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
-                  저장
-                </Button>
+                  <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
+                    저장
+                  </Button>
               )}
               {selectedVisitDate && (
                 <Alert
@@ -1156,33 +1060,33 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
                   showIcon
                 />
               )}
-            </Form>
-          </StyledCard>
-        </TabPane>
+                </Form>
+              </StyledCard>
+            </TabPane>
 
-        <TabPane tab="맥파분석" key="3">
-          <PulseAnalysisCard title="맥파 분석">
-            {renderPulseAnalysis()}
-          </PulseAnalysisCard>
-        </TabPane>
+            <TabPane tab="맥파분석" key="3">
+              <PulseAnalysisCard title="맥파 분석">
+                {renderPulseAnalysis()}
+              </PulseAnalysisCard>
+            </TabPane>
 
-        <TabPane tab="81맥상" key="4">
-          <MacSangCard title="81맥상 분석">
-            <PulseVisualization pulseData={pulseData} />
-            <Form layout="vertical" style={{ marginTop: '16px' }}>
-              <Form.Item label="맥상 분석 결과">
-                <TextArea
-                  rows={6}
-                  placeholder="81맥상 분석 결과를 입력하세요"
-                  value={pulseAnalysis}
-                  onChange={(e) => setPulseAnalysis(e.target.value)}
+            <TabPane tab="81맥상" key="4">
+              <MacSangCard title="81맥상 분석">
+                <PulseVisualization pulseData={pulseData} />
+                <Form layout="vertical" style={{ marginTop: '16px' }}>
+                  <Form.Item label="맥상 분석 결과">
+                    <TextArea
+                      rows={6}
+                      placeholder="81맥상 분석 결과를 입력하세요"
+                      value={pulseAnalysis}
+                      onChange={(e) => setPulseAnalysis(e.target.value)}
                   disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
+                    />
+                  </Form.Item>
               {!selectedVisitDate && (
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
-                  저장
-                </Button>
+                  <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
+                    저장
+                  </Button>
               )}
               {selectedVisitDate && (
                 <Alert
@@ -1192,10 +1096,10 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
                   showIcon
                 />
               )}
-            </Form>
-          </MacSangCard>
-        </TabPane>
-      </Tabs>
+                </Form>
+              </MacSangCard>
+            </TabPane>
+          </Tabs>
     );
   };
 

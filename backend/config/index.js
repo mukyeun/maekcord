@@ -55,6 +55,12 @@ const config = {
   appointment: {
     maxPerDay: parseInt(process.env.MAX_APPOINTMENTS_PER_DAY) || 50,
     cancellationDeadlineHours: parseInt(process.env.CANCELLATION_DEADLINE_HOURS) || 24
+  },
+  
+  statsd: {
+    host: process.env.STATSD_HOST || 'localhost',
+    port: parseInt(process.env.STATSD_PORT) || 8125,
+    prefix: process.env.STATSD_PREFIX || 'maekcode.'
   }
 };
 

@@ -13,7 +13,7 @@ import {
   MedicineBoxOutlined
 } from '@ant-design/icons';
 import * as queueApi from '../../api/queueApi';
-import { wsClient } from '../../utils/websocket';
+import { useWebSocket } from '../../hooks/useWebSocket';
 import { speak, initSpeech, announcePatientCall, getVoices, speakText, isSpeechSynthesisSupported, safeSpeak } from '../../utils/speechUtils';
 import { soundManager } from '../../utils/sound';
 import styled from 'styled-components';  // styled-components import 추가
@@ -106,6 +106,7 @@ const QueueDisplay = ({ visible, onClose }) => {
     return localStorage.getItem('queueVoiceEnabled') !== 'false' && isSpeechSynthesisSupported();
   });
   const [activeTab, setActiveTab] = useState('1');
+  const { isReady, subscribe } = useWebSocket();
 
   // ReceptionDashboard에서 테스트 데이터로 큐 생성
   const testPatients = [
@@ -240,69 +241,28 @@ const QueueDisplay = ({ visible, onClose }) => {
   };
 
   // WebSocket 메시지 처리
-  const handleWebSocketMessage = useCallback((data) => {
-    console.log('📨 QueueDisplay - WebSocket 메시지 수신:', data);
-    
-    if (data.type === 'QUEUE_UPDATE' && Array.isArray(data.queue)) {
-      console.log('📋 QueueDisplay - 큐 목록 업데이트:', data.queue);
-      setQueueList(data.queue);
-    } else if (data.type === 'PATIENT_CALLED') {
-      console.log('📞 QueueDisplay - 환자 호출 이벤트:', data);
-      
-      // 호출된 환자 정보 설정
-      if (data.patient) {
-        setLastCalledPatient(data.patient);
-        
-        // 음성 안내 실행
-        if (isVoiceEnabled && isSpeechSynthesisSupported()) {
-          handlePatientCalled(data.patient);
-        }
-      }
-      
-      // 환자 호출 시 목록 새로고침
-      fetchQueueList();
-    } else if (data.type === 'PONG' || data.type === 'pong' || data.type === 'CONNECTED') {
-      // 연결 확인 및 ping-pong 메시지 - 무시
-      console.log('🔗 WebSocket 연결 확인 메시지:', data.type);
-    } else {
-      console.log('⚠️ QueueDisplay - 처리되지 않은 WebSocket 메시지:', data);
-    }
-  }, [isVoiceEnabled, handlePatientCalled]);
-
-  // WebSocket 연결 설정
   useEffect(() => {
-    if (!visible) return;
+    if (!isReady) return;
 
-    let isComponentMounted = true;
+    const unsubscribe = subscribe('QUEUE_UPDATE', (data) => {
+      console.log('📨 QueueDisplay - WebSocket 메시지 수신:', data);
+      if (Array.isArray(data.queue)) {
+        console.log('📋 QueueDisplay - 큐 목록 업데이트:', data.queue);
+        setQueueList(data.queue);
+      }
+    });
 
-    const setupWebSocket = () => {
-      if (!isComponentMounted) return;
-
-      console.log('🔄 QueueDisplay - WebSocket 연결 설정');
-      wsClient.connect();
-      
-      // 연결 후 즉시 대기 목록 조회
-      fetchQueueList();
-      
-      return wsClient.addListener(handleWebSocketMessage);
-    };
-
-    const removeListener = setupWebSocket();
+    const unsubscribePatientCall = subscribe('PATIENT_CALLED', (data) => {
+      console.log('📞 QueueDisplay - 환자 호출 이벤트:', data);
+      playCallSound();
+      handlePatientCalled(data.patient);
+    });
 
     return () => {
-      console.log('🔌 QueueDisplay - WebSocket 정리');
-      isComponentMounted = false;
-      if (removeListener) removeListener();
+      unsubscribe();
+      unsubscribePatientCall();
     };
-  }, [visible, handleWebSocketMessage]);
-
-  // 컴포넌트 마운트/언마운트 시 대기 목록 조회
-  useEffect(() => {
-    if (visible) {
-      console.log('🔄 QueueDisplay - 초기 대기 목록 조회');
-      fetchQueueList();
-    }
-  }, [visible]);
+  }, [isReady, subscribe, handlePatientCalled]);
 
   // 필터링된 목록 계산
   const getFilteredList = () => {

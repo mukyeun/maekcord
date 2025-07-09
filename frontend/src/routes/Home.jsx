@@ -224,7 +224,7 @@ const Home = () => {
         <HeroSection>
           <HeroTitle level={1}>
             <HeartOutlined style={{ marginRight: 16, color: '#ff6b6b' }} />
-            Maekstation
+            MaekCode
           </HeroTitle>
           <HeroSubtitle>
             81맥상 정량 맥진 진단 시스템

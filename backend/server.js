@@ -5,6 +5,7 @@ const config = require('./config');
 const http = require('http');
 const wsServer = require('./websocket/wsServer');
 const app = require('./app');
+const websocketService = require('./services/websocketService');
 
 logger.info('서버 시작');
 
@@ -41,7 +42,8 @@ const startServer = () => {
   const server = http.createServer(app);
   
   // WebSocket 초기화
-  wsServer.init(server);
+  websocketService.initialize(server);
+  logger.info('WebSocket 서버 초기화 완료');
 
   server.listen(PORT, () => {
     logger.info(`🚀 서버가 ${PORT}번 포트에서 실행 중입니다.`);

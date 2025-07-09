@@ -16,7 +16,7 @@ import * as queueApi from '../../api/queueApi';
 import styled, { css, keyframes } from 'styled-components';
 import QueueDisplay from '../QueueDisplay/QueueDisplay';
 import { soundManager } from '../../utils/sound';
-import { wsClient } from '../../utils/websocket';
+import { useWebSocket } from '../../hooks/useWebSocket';
 import { debounce } from 'lodash';
 import './styles.css';
 import { speak, announceWaitingRoom, announceConsultingRoom, announcePatientCall } from '../../utils/speechUtils';
@@ -136,6 +136,7 @@ const ReceptionDashboard = (props) => {
   const [lastCalledPatient, setLastCalledPatient] = useState(null);
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector(state => state.auth);
+  const { isReady, send } = useWebSocket();
 
   // 검색창 ref 선언
   const searchInputRef = useRef(null);
@@ -264,21 +265,27 @@ const ReceptionDashboard = (props) => {
         });
         
         // WebSocket을 통해 진료실로 환자 데이터 전송
-        wsClient.send({
-          type: 'PATIENT_CALLED_TO_DOCTOR',
-          patient: {
-            _id: queue._id,
-            patientId: queue.patientId,
-            queueNumber: queue.queueNumber,
-            status: 'called',
-            symptoms: queue.symptoms || [],
-            memo: queue.memo || '',
-            stress: queue.stress || '',
-            pulseAnalysis: queue.pulseAnalysis || '',
-            registeredAt: queue.registeredAt,
-            calledAt: new Date()
+        if (isReady) {
+          try {
+            await send('PATIENT_CALLED_TO_DOCTOR', {
+              _id: queue._id,
+              patientId: queue.patientId,
+              queueNumber: queue.queueNumber,
+              status: 'called',
+              symptoms: queue.symptoms || [],
+              memo: queue.memo || '',
+              stress: queue.stress || '',
+              pulseAnalysis: queue.pulseAnalysis || '',
+              registeredAt: queue.registeredAt,
+              calledAt: new Date()
+            });
+          } catch (wsError) {
+            console.error('WebSocket 메시지 전송 실패:', wsError);
+            // WebSocket 전송 실패는 치명적이지 않으므로 계속 진행
           }
-        });
+        } else {
+          console.warn('WebSocket이 준비되지 않아 실시간 알림을 보내지 못했습니다.');
+        }
         
         // 음성 안내 실행 (지원되는 경우)
         if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -334,12 +341,21 @@ const ReceptionDashboard = (props) => {
         updateItem(record._id, { status: newStatus });
 
         // WebSocket 이벤트 전송
-        wsClient.send({
-          type: 'QUEUE_UPDATE',
-          queueId: record._id,
-          status: newStatus,
-          timestamp: new Date().toISOString()
-        });
+        if (isReady) {
+          try {
+            await send('QUEUE_UPDATE', {
+              queueId: record._id,
+              status: newStatus,
+              timestamp: new Date().toISOString()
+            });
+            console.log('✅ WebSocket 메시지 전송 성공');
+          } catch (wsError) {
+            console.error('WebSocket 메시지 전송 실패:', wsError);
+            // WebSocket 전송 실패는 치명적이지 않으므로 계속 진행
+          }
+        } else {
+          console.warn('WebSocket이 준비되지 않아 실시간 알림을 보내지 못했습니다.');
+        }
       } else {
         throw new Error(response?.message || '상태 업데이트에 실패했습니다.');
       }

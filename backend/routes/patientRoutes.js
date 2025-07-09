@@ -16,6 +16,8 @@ const util = require('util');
 const execPromise = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const XLSX = require('xlsx');
+const { authMiddleware } = require('../middlewares/auth');
+const { ValidationError } = require('../middleware/errorHandler');
 
 /**
  * @swagger
@@ -144,78 +146,77 @@ router.get('/debug/park-jonghwa', async (req, res) => {
  *                 type: string
  */
 
-/**
- * @swagger
- * /api/patients:
- *   get:
- *     summary: 환자 목록 조회
- *     tags: [Patients]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: 페이지 번호
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: 페이지당 항목 수
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: 검색어 (이름, 연락처)
- *     responses:
- *       200:
- *         description: 환자 목록 조회 성공
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Patient'
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     total:
- *                       type: integer
- *                     page:
- *                       type: integer
- *                     pages:
- *                       type: integer
- */
-router.get('/', async (req, res) => {
+router.use(authMiddleware);
+
+// 환자 검색 API
+router.get('/search', async (req, res) => {
   try {
-    logger.info('📋 환자 목록 조회 시작');
+    const { query } = req.query;
+    logger.info(`🔍 환자 검색 요청 - 검색어: "${query}"`);
+
+    const searchRegex = new RegExp(query, 'i');
+    
+    // 먼저 Patient 모델에서 검색
+    const patientsFromPatient = await Patient.find({
+      $or: [
+        { 'basicInfo.name': searchRegex },
+        { 'basicInfo.patientId': searchRegex },
+        { 'basicInfo.phone': searchRegex },
+        { 'basicInfo.residentNumber': searchRegex }
+      ]
+    }).lean();
+
+    logger.info(`📊 Patient 모델 검색 결과: ${patientsFromPatient.length}명`);
+
+    // 각 환자의 진료 기록 수 확인
+    const patientsWithRecordCount = await Promise.all(
+      patientsFromPatient.map(async (patient) => {
+        const recordCount = patient.records?.length || 0;
+        logger.info(`👤 환자 ${patient.basicInfo?.name} (${patient.basicInfo?.patientId}) - 진료 기록: ${recordCount}개`);
+        return {
+          ...patient,
+          recordCount
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: patientsWithRecordCount
+    });
+  } catch (error) {
+    logger.error('❌ 환자 검색 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 검색 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 환자 목록 조회
+router.get('/', async (req, res, next) => {
+  try {
+    const { page = 1, limit = 10, sortBy = 'createdAt', order = 'desc' } = req.query;
     
     const patients = await Patient.find()
-      .select('patientId name birthDate gender status createdAt')
-      .sort({ createdAt: -1 })
-      .lean();
-    
-    logger.info(`✅ 환자 목록 조회 성공: ${patients.length}명 조회됨`);
-    logger.debug('조회된 환자 목록:', patients);
+      .sort({ [sortBy]: order })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .select('name chartNumber dateOfBirth gender phoneNumber createdAt');
+
+    const total = await Patient.countDocuments();
 
     res.json({
       success: true,
       data: patients,
-      message: '환자 목록 조회 성공'
+      pagination: {
+        total,
+        page: parseInt(page),
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
-    logger.error('❌ 환자 목록 조회 실패:', error);
-    res.status(500).json({
-      success: false,
-      message: '환자 목록 조회 중 오류가 발생했습니다.',
-      error: error.message
-    });
+    next(error);
   }
 });
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const waitlistController = require('../controllers/waitlistController');
-const auth = require('../middlewares/auth');
+const { authMiddleware } = require('../middlewares/auth');
 const { validateWaitlist } = require('../middlewares/validators');
 
 /**
@@ -53,6 +53,9 @@ const { validateWaitlist } = require('../middlewares/validators');
  *           description: 완료 시간
  */
 
+// 미들웨어 등록 - 모든 라우트에 인증 적용
+router.use(authMiddleware);
+
 /**
  * @swagger
  * /api/waitlist:
@@ -96,7 +99,7 @@ const { validateWaitlist } = require('../middlewares/validators');
  *                   items:
  *                     $ref: '#/components/schemas/Waitlist'
  */
-router.get('/', auth, waitlistController.getWaitlist);
+router.get('/', waitlistController.getWaitlist);
 
 /**
  * @swagger
@@ -143,7 +146,7 @@ router.get('/', auth, waitlistController.getWaitlist);
  *       409:
  *         description: 이미 대기 중인 환자
  */
-router.post('/', auth, validateWaitlist, waitlistController.addToWaitlist);
+router.post('/', validateWaitlist, waitlistController.addToWaitlist);
 
 /**
  * @swagger
@@ -181,7 +184,7 @@ router.post('/', auth, validateWaitlist, waitlistController.addToWaitlist);
  *       404:
  *         description: 대기자를 찾을 수 없음
  */
-router.put('/:id', auth, waitlistController.updateWaitlistStatus);
+router.put('/:id', waitlistController.updateWaitlistStatus);
 
 /**
  * @swagger
@@ -211,6 +214,6 @@ router.put('/:id', auth, waitlistController.updateWaitlistStatus);
  *       404:
  *         description: 대기자를 찾을 수 없음
  */
-router.delete('/:id', auth, waitlistController.removeFromWaitlist);
+router.delete('/:id', waitlistController.removeFromWaitlist);
 
 module.exports = router;

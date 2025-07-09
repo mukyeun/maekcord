@@ -323,16 +323,18 @@ exports.updateQueueStatus = asyncHandler(async (req, res) => {
 });
 
 // 5분마다 실행
-setInterval(async () => {
-  try {
-    const cleaned = await Counter.cleanupLocks();
-    if (cleaned > 0) {
-      console.log(`🧹 만료된 락 ${cleaned}개 정리됨`);
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(async () => {
+    try {
+      const cleaned = await Counter.cleanupLocks();
+      if (cleaned > 0) {
+        logger.info(`Cleaned up ${cleaned} expired locks`);
+      }
+    } catch (error) {
+      logger.error('Lock cleanup failed:', error);
     }
-  } catch (error) {
-    console.error('락 정리 실패:', error);
-  }
-}, 5 * 60 * 1000);
+  }, 5 * 60 * 1000);
+}
 
 mongoose.connection.on('error', (err) => {
   console.error('MongoDB 연결 오류:', err);

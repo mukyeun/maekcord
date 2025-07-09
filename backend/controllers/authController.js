@@ -13,11 +13,11 @@ const sendEmail = require('../utils/email');
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
     { 
-      userId: user._id, 
-      username: user.username, 
+      _id: user._id, 
+      email: user.email,
       role: user.role 
     },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'your-secret-key',
     { 
       expiresIn: '24h',
       issuer: 'maekstation'
@@ -25,8 +25,8 @@ const generateTokens = (user) => {
   );
 
   const refreshToken = jwt.sign(
-    { userId: user._id },
-    process.env.JWT_REFRESH_SECRET,
+    { _id: user._id },
+    process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
     { 
       expiresIn: '7d',
       issuer: 'maekstation'
@@ -44,25 +44,36 @@ const authController = {
     try {
       const { email, password } = req.body;
       
-      console.log('로그인 시도:', { email, password }); // 디버깅용
+      console.log('👉 로그인 시도:', { email }); // 비밀번호는 로그에 남기지 않음
 
       // 사용자 찾기 (비밀번호 포함)
       const user = await User.findOne({ email }).select('+password');
+      console.log('🔍 DB 조회 결과:', { 
+        found: !!user,
+        email: email,
+        userEmail: user?.email,
+        hasPassword: !!user?.password
+      });
+      
       if (!user) {
-        console.log('사용자를 찾을 수 없음:', email); // 디버깅용
+        console.log('❌ 사용자를 찾을 수 없음:', email);
         return res.status(401).json({
           success: false,
           message: '이메일 또는 비밀번호가 올바르지 않습니다.'
         });
       }
 
-      console.log('사용자 찾음:', { email: user.email, name: user.name }); // 디버깅용
-
       // 비밀번호 확인
-      const isMatch = await user.comparePassword(password);
-      console.log('비밀번호 확인 결과:', isMatch); // 디버깅용
+      console.log('🔐 비밀번호 확인 시작:', {
+        inputLength: password?.length,
+        hashedLength: user.password?.length
+      });
+      
+      const isMatch = await bcrypt.compare(password, user.password);
+      console.log('✅ 비밀번호 확인 결과:', isMatch);
       
       if (!isMatch) {
+        console.log('❌ 비밀번호 불일치');
         return res.status(401).json({
           success: false,
           message: '이메일 또는 비밀번호가 올바르지 않습니다.'
@@ -70,23 +81,27 @@ const authController = {
       }
 
       // JWT 토큰 생성
-      const token = jwt.sign(
-        { 
-          id: user._id,  // userId 대신 id 사용
-          email: user.email, 
-          role: user.role 
-        },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '24h' }
-      );
+      const { accessToken, refreshToken } = generateTokens(user);
+      console.log('🎟 토큰 생성 완료:', { 
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken
+      });
 
-      console.log('로그인 성공:', { email: user.email, role: user.role }); // 디버깅용
+      // 리프레시 토큰 저장
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      console.log('✨ 로그인 성공:', { 
+        email: user.email, 
+        role: user.role,
+        tokenGenerated: !!accessToken 
+      });
 
       res.json({
         success: true,
         message: '로그인되었습니다.',
         data: {
-          token,
+          token: accessToken,
           user: {
             id: user._id,
             email: user.email,
@@ -96,7 +111,7 @@ const authController = {
         }
       });
     } catch (error) {
-      console.error('로그인 오류:', error); // 디버깅용
+      console.error('💥 로그인 오류:', error);
       res.status(500).json({
         success: false,
         message: '서버 내부 오류가 발생했습니다.'
@@ -114,8 +129,8 @@ const authController = {
       // 새 토큰 생성
       const newToken = jwt.sign(
         { id, role },
-        config.jwt.secret,
-        { expiresIn: config.jwt.expiresIn }
+        config.jwt.secret || 'your-secret-key',
+        { expiresIn: '24h' }
       );
 
       res.json({
@@ -173,13 +188,13 @@ const authController = {
       logger.info(`New user registered: ${email}`);
 
       // 토큰 생성
-      const token = user.generateAuthToken();
+      const { accessToken } = generateTokens(user);
 
       res.status(201).json({
         success: true,
         message: '회원가입이 완료되었습니다.',
         data: {
-          token,
+          token: accessToken,
           user: {
             id: user._id,
             email: user.email,
