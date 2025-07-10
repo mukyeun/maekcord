@@ -157,7 +157,7 @@ const PatientDashboard = ({ patientId }) => {
 
           return (
             <React.Fragment key={type}>
-              <Grid item xs={12} md={4}>
+              <Grid>
                 <VitalSignCard
                   title={type.replace('_', ' ').toUpperCase()}
                   value={latest.value}
@@ -166,7 +166,7 @@ const PatientDashboard = ({ patientId }) => {
                   timestamp={latest.timestamp}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid>
                 <Card sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>
                     {type.replace('_', ' ').toUpperCase()} 트렌드

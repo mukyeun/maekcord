@@ -251,7 +251,7 @@ export const getPatientVisitRecord = async (patientId, visitDate) => {
 
 export const searchPatients = async (query) => {
   try {
-    const response = await axios.get(`/api/patients/search`, {
+    const response = await api.get(`/api/patients/search`, {
       params: { query }
     });
     return response.data.data;
@@ -262,7 +262,7 @@ export const searchPatients = async (query) => {
 
 export const getPatients = async (page = 1, limit = 10) => {
   try {
-    const response = await axios.get('/api/patients', {
+    const response = await api.get('/api/patients', {
       params: { page, limit }
     });
     return response.data;

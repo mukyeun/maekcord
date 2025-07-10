@@ -12,7 +12,7 @@ logger.info('서버 시작');
 // MongoDB 연결 설정
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maekcord';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/maekcode';
     logger.info('MongoDB 연결 시도:', { uri: mongoURI });
 
     await mongoose.connect(mongoURI, {

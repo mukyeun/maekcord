@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const monitoringController = require('../controllers/monitoring.controller');
-const { isAdmin } = require('../middleware/auth');
+const { isAdmin } = require('../middlewares/auth');
 
 // 전체 시스템 상태 조회
 router.get('/status', isAdmin, monitoringController.getSystemStatus);

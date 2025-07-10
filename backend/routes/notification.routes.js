@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const notificationController = require('../controllers/notificationController');
-const { authenticateToken } = require('../middleware/auth');
-const validate = require('../middleware/validate');
+const { authMiddleware } = require('../middlewares/auth');
+const { validate } = require('../middlewares/validation');
 const { notificationValidation } = require('../validations');
 
 // 알림 목록 조회
 router.get(
   '/',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.getNotifications),
   notificationController.getNotifications
 );
@@ -16,14 +16,14 @@ router.get(
 // 읽지 않은 알림 수 조회
 router.get(
   '/unread-count',
-  authenticateToken,
+  authMiddleware,
   notificationController.getUnreadCount
 );
 
 // 알림 상세 조회
 router.get(
   '/:id',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.getNotification),
   notificationController.getNotification
 );
@@ -31,7 +31,7 @@ router.get(
 // 알림 읽음 처리
 router.patch(
   '/:id/read',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.markAsRead),
   notificationController.markAsRead
 );
@@ -39,14 +39,14 @@ router.patch(
 // 모든 알림 읽음 처리
 router.patch(
   '/mark-all-read',
-  authenticateToken,
+  authMiddleware,
   notificationController.markAllAsRead
 );
 
 // 알림 삭제
 router.delete(
   '/:id',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.deleteNotification),
   notificationController.deleteNotification
 );
@@ -54,14 +54,14 @@ router.delete(
 // 알림 설정 조회
 router.get(
   '/settings',
-  authenticateToken,
+  authMiddleware,
   notificationController.getNotificationSettings
 );
 
 // 알림 설정 업데이트
 router.patch(
   '/settings',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.updateSettings),
   notificationController.updateNotificationSettings
 );
@@ -69,7 +69,7 @@ router.patch(
 // 알림 필터링
 router.get(
   '/filter',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.filterNotifications),
   notificationController.filterNotifications
 );
@@ -77,7 +77,7 @@ router.get(
 // 알림 통계
 router.get(
   '/stats',
-  authenticateToken,
+  authMiddleware,
   validate(notificationValidation.getNotificationStats),
   notificationController.getNotificationStats
 );

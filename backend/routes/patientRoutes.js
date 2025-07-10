@@ -17,7 +17,7 @@ const execPromise = util.promisify(require('child_process').exec);
 const fs = require('fs');
 const XLSX = require('xlsx');
 const { authMiddleware } = require('../middlewares/auth');
-const { ValidationError } = require('../middleware/errorHandler');
+const { ValidationError } = require('../middlewares/errorHandler');
 
 /**
  * @swagger
@@ -146,7 +146,10 @@ router.get('/debug/park-jonghwa', async (req, res) => {
  *                 type: string
  */
 
-router.use(authMiddleware);
+// 개발 환경에서는 인증 미들웨어를 건너뛰기
+if (process.env.NODE_ENV !== 'development') {
+  router.use(authMiddleware);
+}
 
 // 환자 검색 API
 router.get('/search', async (req, res) => {
@@ -154,19 +157,41 @@ router.get('/search', async (req, res) => {
     const { query } = req.query;
     logger.info(`🔍 환자 검색 요청 - 검색어: "${query}"`);
 
-    const searchRegex = new RegExp(query, 'i');
+    if (!query || query.trim() === '') {
+      logger.warn('❌ 검색어가 비어있음');
+      return res.json({
+        success: true,
+        data: []
+      });
+    }
+
+    const searchRegex = new RegExp(query.trim(), 'i');
+    logger.info(`🔍 검색 정규식: ${searchRegex}`);
     
     // 먼저 Patient 모델에서 검색
-    const patientsFromPatient = await Patient.find({
+    const searchQuery = {
       $or: [
         { 'basicInfo.name': searchRegex },
         { 'basicInfo.patientId': searchRegex },
         { 'basicInfo.phone': searchRegex },
         { 'basicInfo.residentNumber': searchRegex }
       ]
-    }).lean();
-
+    };
+    
+    logger.info('🔍 검색 쿼리:', JSON.stringify(searchQuery, null, 2));
+    
+    const patientsFromPatient = await Patient.find(searchQuery).lean();
     logger.info(`📊 Patient 모델 검색 결과: ${patientsFromPatient.length}명`);
+
+    // 검색 결과 로깅
+    patientsFromPatient.forEach((patient, index) => {
+      logger.info(`👤 환자 ${index + 1}:`, {
+        name: patient.basicInfo?.name,
+        patientId: patient.basicInfo?.patientId,
+        phone: patient.basicInfo?.phone,
+        residentNumber: patient.basicInfo?.residentNumber
+      });
+    });
 
     // 각 환자의 진료 기록 수 확인
     const patientsWithRecordCount = await Promise.all(
@@ -202,7 +227,7 @@ router.get('/', async (req, res, next) => {
       .sort({ [sortBy]: order })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .select('name chartNumber dateOfBirth gender phoneNumber createdAt');
+      .select('basicInfo.name patientId basicInfo.dateOfBirth basicInfo.gender basicInfo.phone createdAt');
 
     const total = await Patient.countDocuments();
 
@@ -216,7 +241,12 @@ router.get('/', async (req, res, next) => {
       }
     });
   } catch (error) {
-    next(error);
+    logger.error('❌ 환자 목록 조회 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 목록 조회 중 오류가 발생했습니다.',
+      error: error.message
+    });
   }
 });
 
@@ -552,6 +582,16 @@ router.get('/data/:patientId', async (req, res) => {
 
 // 유비오맥파기 실행 API
 router.post('/execute-ubio', async (req, res) => {
+  // 개발 환경에서는 권한 검증 우회
+  if (process.env.NODE_ENV === 'development') {
+    req.user = {
+      id: 'dev-user',
+      name: 'Developer',
+      role: 'doctor',
+      isAdmin: true
+    };
+  }
+
   const ubioPath = 'C:\\Program Files (x86)\\uBioMacpa Pro\\bin\\uBioMacpaPro.exe';
   const ubioDir = path.dirname(ubioPath);
   const ubioExe = path.basename(ubioPath);

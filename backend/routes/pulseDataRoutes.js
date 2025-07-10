@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const PulseData = require('../models/PulseData');
-const { authenticateToken } = require('../middleware/auth');
+const { authMiddleware } = require('../middlewares/auth');
 
 // 맥파 데이터 저장
-router.post('/', authenticateToken, async (req, res, next) => {
+router.post('/', authMiddleware, async (req, res, next) => {
   try {
     // 개발 환경에서는 더미 데이터 생성
     const pulseData = new PulseData({
@@ -28,7 +28,7 @@ router.post('/', authenticateToken, async (req, res, next) => {
 });
 
 // 환자별 맥파 데이터 조회
-router.get('/patient/:patientId', authenticateToken, async (req, res, next) => {
+router.get('/patient/:patientId', authMiddleware, async (req, res, next) => {
   try {
     const { from, to, limit = 100 } = req.query;
     const query = { patientId: req.params.patientId };
@@ -51,7 +51,7 @@ router.get('/patient/:patientId', authenticateToken, async (req, res, next) => {
 });
 
 // 특정 맥파 데이터 조회
-router.get('/:id', authenticateToken, async (req, res, next) => {
+router.get('/:id', authMiddleware, async (req, res, next) => {
   try {
     const pulseData = await PulseData.findById(req.params.id)
       .populate('measuredBy', 'name role')
@@ -68,7 +68,7 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
 });
 
 // 맥파 데이터 분석 결과 업데이트
-router.patch('/:id/analysis', authenticateToken, async (req, res, next) => {
+router.patch('/:id/analysis', authMiddleware, async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['heartRate', 'systolicPeak', 'diastolicPeak', 
@@ -100,7 +100,7 @@ router.patch('/:id/analysis', authenticateToken, async (req, res, next) => {
 });
 
 // 맥파 데이터 삭제
-router.delete('/:id', authenticateToken, async (req, res, next) => {
+router.delete('/:id', authMiddleware, async (req, res, next) => {
   try {
     const pulseData = await PulseData.findByIdAndDelete(req.params.id);
     if (!pulseData) {
@@ -114,7 +114,7 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
 });
 
 // 맥파 데이터 통계 조회
-router.get('/stats/patient/:patientId', authenticateToken, async (req, res, next) => {
+router.get('/stats/patient/:patientId', authMiddleware, async (req, res, next) => {
   try {
     const { from, to } = req.query;
     const query = { patientId: req.params.patientId };

@@ -17,21 +17,59 @@ const { TabPane } = Tabs;
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const StyledCard = styled(Card)`
-  margin-bottom: 16px;
-`;
-
-const PulseAnalysisCard = styled(Card)`
-  margin-bottom: 16px;
-  .ant-card-head {
-    background-color: #f0f8ff;
+// 홈화면 버튼 스타일과 통일된 메인 버튼
+const MainButton = styled(Button)`
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+  padding: 0 32px;
+  height: 44px;
+  font-size: 16px;
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+    color: #fff;
   }
 `;
 
-const MacSangCard = styled(Card)`
+// 모달 헤더 스타일
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+  color: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 28px 32px 24px 32px;
+  font-weight: 700;
+  font-size: 28px;
+  margin: -24px -24px 24px -24px;
+`;
+
+// 카드 스타일 통일
+const StyledCard = styled(Card)`
   margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
   .ant-card-head {
-    background-color: #fff0f6;
+    background: #f5f7fa;
+    border-radius: 16px 16px 0 0;
+    font-weight: 700;
+    font-size: 20px;
+  }
+`;
+
+const PulseAnalysisCard = styled(StyledCard)`
+  .ant-card-head {
+    background: #e3f2fd;
+  }
+`;
+
+const MacSangCard = styled(StyledCard)`
+  .ant-card-head {
+    background: #ede7f6;
   }
 `;
 
@@ -203,9 +241,16 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
       const response = await patientApi.getPatientData(patientId);
       if (response.success && response.patientData) {
         console.log('🩺 환자 데이터 로드 성공:', response.patientData);
+        // 큐 시스템과 호환되는 형태로 currentPatient 설정
+        const patientData = response.patientData;
         setCurrentPatient({
-          patientId: response.patientData,
-          status: 'consulting'
+          _id: patientData._id, // 큐 ID 대신 환자 ID 사용
+          patientId: patientData,
+          status: 'consulting',
+          queueNumber: 'N/A', // 직접 접근이므로 큐 번호 없음
+          calledAt: new Date(),
+          updatedAt: new Date(),
+          createdAt: new Date()
         });
         setStatus('consulting');
 
@@ -219,6 +264,12 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
         if (response.patientData.latestPulseWave) {
           setPulseData(response.patientData.latestPulseWave);
         }
+       
+        console.log('�� 선택된 환자 설정 완료:', {
+          patientId: patientData._id,
+          patientName: patientData.basicInfo?.name,
+          status: 'consulting'
+        });
       } else {
         throw new Error('환자 데이터를 찾을 수 없습니다.');
       }
@@ -1332,16 +1383,21 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
   return (
     <Modal
       title={
-        currentPatient
-          ? `진료실 - ${currentPatient.patientId?.basicInfo?.name} (Q${String(currentPatient.queueNumber).padStart(3, '0')})`
-          : '진료실'
+        <ModalHeader>
+          <DashboardOutlined style={{ fontSize: 36, marginRight: 8 }} />
+          {currentPatient
+            ? `진료실 - ${currentPatient.patientId?.basicInfo?.name} (Q${String(currentPatient.queueNumber).padStart(3, '0')})`
+            : '진료실'}
+        </ModalHeader>
       }
       open={visible}
       onCancel={onClose}
       footer={null}
       width={1200}
-      centered
+      // centered
       destroyOnClose={true}
+      style={{ top: 100, borderRadius: 20, overflow: 'hidden' }}
+      styles={{ body: { background: '#f5f7fa', borderRadius: '0 0 20px 20px', padding: 32 } }}
     >
       {/* 진료 시간 입력 필드 추가 (숨김) */}
       <input

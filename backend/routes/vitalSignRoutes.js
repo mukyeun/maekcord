@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const VitalSign = require('../models/VitalSign');
-const { authenticateToken } = require('../middleware/auth');
-const { checkRole } = require('../middleware/roleCheck');
+const { authMiddleware } = require('../middlewares/auth');
+const { checkRole } = require('../middlewares/roleCheck');
 const { body, validationResult } = require('express-validator');
 
 // 생체 신호 기록 생성
-router.post('/', authenticateToken, (req, res, next) => {
+router.post('/', authMiddleware, (req, res, next) => {
   try {
     // 개발 환경에서는 더미 데이터 생성
     const vitalSign = new VitalSign({
@@ -31,7 +31,7 @@ router.post('/', authenticateToken, (req, res, next) => {
 });
 
 // 환자별 생체 신호 조회
-router.get('/patient/:patientId', authenticateToken, async (req, res, next) => {
+router.get('/patient/:patientId', authMiddleware, async (req, res, next) => {
   try {
     const { type, from, to, limit = 100 } = req.query;
     const query = { patientId: req.params.patientId };
@@ -55,7 +55,7 @@ router.get('/patient/:patientId', authenticateToken, async (req, res, next) => {
 });
 
 // 특정 생체 신호 조회
-router.get('/:id', authenticateToken, async (req, res, next) => {
+router.get('/:id', authMiddleware, async (req, res, next) => {
   try {
     const vitalSign = await VitalSign.findById(req.params.id)
       .populate('measuredBy', 'name role')
@@ -72,7 +72,7 @@ router.get('/:id', authenticateToken, async (req, res, next) => {
 });
 
 // 생체 신호 수정
-router.patch('/:id', authenticateToken, async (req, res, next) => {
+router.patch('/:id', authMiddleware, async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['value', 'notes', 'device'];
@@ -97,7 +97,7 @@ router.patch('/:id', authenticateToken, async (req, res, next) => {
 });
 
 // 생체 신호 삭제
-router.delete('/:id', authenticateToken, async (req, res, next) => {
+router.delete('/:id', authMiddleware, async (req, res, next) => {
   try {
     const vitalSign = await VitalSign.findByIdAndDelete(req.params.id);
     if (!vitalSign) {
@@ -111,7 +111,7 @@ router.delete('/:id', authenticateToken, async (req, res, next) => {
 });
 
 // 위험 상태 생체 신호 조회
-router.get('/alerts/critical', authenticateToken, async (req, res, next) => {
+router.get('/alerts/critical', authMiddleware, async (req, res, next) => {
   try {
     const { hours = 24 } = req.query;
     const timeThreshold = new Date(Date.now() - hours * 60 * 60 * 1000);

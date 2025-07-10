@@ -6,7 +6,7 @@ const {
   validatePatientCreate,
   validateAppointmentCreate,
   validateWaitlistCreate
-} = require('../../middleware/validators');
+} = require('../../middlewares/validators');
 
 describe('Validators Middleware Test', () => {
   let mockReq;

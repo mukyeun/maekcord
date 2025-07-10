@@ -6,14 +6,14 @@ const productionConfig = {
   
   // API 설정
   api: {
-    baseURL: 'https://api.maekcord.com/api',
+    baseURL: 'https://api.maekcode.com/api',
     timeout: 15000,
     retryAttempts: 5,
   },
   
   // WebSocket 설정
   websocket: {
-    url: 'wss://api.maekcord.com/ws',
+    url: 'wss://api.maekcode.com/ws',
     reconnectInterval: 3000,
     maxReconnectAttempts: 20,
   },
@@ -66,7 +66,7 @@ const productionConfig = {
   // CDN 설정
   cdn: {
     enabled: true,
-    baseURL: 'https://cdn.maekcord.com',
+    baseURL: 'https://cdn.maekcode.com',
   },
 };
 

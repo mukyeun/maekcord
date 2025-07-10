@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
-const { isAdmin, isAuthenticated } = require('../middleware/auth');
+const { isAdmin, isAuthenticated } = require('../middlewares/auth');
 
 // 공개 라우트
 router.post('/login', userController.login);

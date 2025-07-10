@@ -118,7 +118,7 @@ const MedicalRecordForm = ({ patientData, onComplete }) => {
         <StyledPaper>
           <Typography variant="subtitle1" gutterBottom>치료 계획</Typography>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
+            <Grid xs={6}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -130,7 +130,7 @@ const MedicalRecordForm = ({ patientData, onComplete }) => {
                 label="침"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid xs={6}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -142,7 +142,7 @@ const MedicalRecordForm = ({ patientData, onComplete }) => {
                 label="한약"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid xs={6}>
               <FormControlLabel
                 control={
                   <Checkbox
@@ -154,7 +154,7 @@ const MedicalRecordForm = ({ patientData, onComplete }) => {
                 label="뜸"
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid xs={6}>
               <FormControlLabel
                 control={
                   <Checkbox

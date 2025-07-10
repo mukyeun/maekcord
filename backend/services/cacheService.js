@@ -14,7 +14,7 @@ class CacheService {
 
   initialize() {
     try {
-      // 개발 환경에서는 메모리 캐시 사용
+      // 개발 환경에서는 메모리 캐시만 사용
       if (process.env.NODE_ENV === 'development') {
         this.cache = new Map();
         this.isConnected = true;
@@ -22,29 +22,40 @@ class CacheService {
         return;
       }
 
-      // Redis 연결 설정
-      this.client = new Redis({
-        host: process.env.REDIS_HOST || 'localhost',
-        port: process.env.REDIS_PORT || 6379,
-        password: process.env.REDIS_PASSWORD,
-        retryStrategy: (times) => {
-          const delay = Math.min(times * 50, 2000);
-          return delay;
-        }
-      });
+      // 프로덕션 환경에서만 Redis 연결 시도
+      if (process.env.NODE_ENV === 'production') {
+        // Redis 연결 설정
+        this.client = new Redis({
+          host: process.env.REDIS_HOST || 'localhost',
+          port: process.env.REDIS_PORT || 6379,
+          password: process.env.REDIS_PASSWORD,
+          retryStrategy: (times) => {
+            const delay = Math.min(times * 50, 2000);
+            return delay;
+          }
+        });
 
-      this.client.on('connect', () => {
+        this.client.on('connect', () => {
+          this.isConnected = true;
+          logger.info('Cache service connected to Redis');
+        });
+
+        this.client.on('error', (error) => {
+          this.isConnected = false;
+          logger.error('Cache service Redis error:', error);
+        });
+      } else {
+        // 개발 환경이 아닌 경우에도 메모리 캐시 사용
+        this.cache = new Map();
         this.isConnected = true;
-        logger.info('Cache service connected to Redis');
-      });
-
-      this.client.on('error', (error) => {
-        this.isConnected = false;
-        logger.error('Cache service Redis error:', error);
-      });
+        logger.info('Using in-memory cache (Redis not available)');
+      }
     } catch (error) {
       logger.error('Cache service initialization error:', error);
-      this.isConnected = false;
+      // 오류 발생 시 메모리 캐시로 폴백
+      this.cache = new Map();
+      this.isConnected = true;
+      logger.info('Fallback to in-memory cache due to initialization error');
     }
   }
 

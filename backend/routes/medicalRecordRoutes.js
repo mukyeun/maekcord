@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const medicalRecordController = require('../controllers/medicalRecordController');
 const { authMiddleware } = require('../middlewares/auth');
-const { AppError } = require('../middleware/errorHandler');
+const { AppError } = require('../middlewares/errorHandler');
 const logger = require('../utils/logger');
 const MedicalRecord = require('../models/MedicalRecord');
 

@@ -26,6 +26,7 @@ const statisticsRoutes = require('./routes/statisticsRoutes');
 const medicalRecordRoutes = require('./routes/medicalRecordRoutes');
 const backupScheduler = require('./schedulers/backup.scheduler');
 const backupRoutes = require('./routes/backup.routes');
+const healthRoutes = require('./routes/health');
 
 require('dotenv').config();
 
@@ -71,6 +72,7 @@ app.use((req, res, next) => {
 console.log('라우터 등록 시작...');
 
 // 기본 API 라우트
+app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/waitlist', waitlistRoutes);

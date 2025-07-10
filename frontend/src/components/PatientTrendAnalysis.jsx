@@ -151,7 +151,7 @@ const PatientTrendAnalysis = ({ patientId }) => {
 
     return (
       <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <AnalysisCard sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TrendingUpIcon sx={{ color: '#dc2626', mr: 1 }} />
@@ -170,7 +170,7 @@ const PatientTrendAnalysis = ({ patientId }) => {
           </AnalysisCard>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <AnalysisCard sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TrendingUpIcon sx={{ color: '#2563eb', mr: 1 }} />
@@ -189,7 +189,7 @@ const PatientTrendAnalysis = ({ patientId }) => {
           </AnalysisCard>
         </Grid>
 
-        <Grid item xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <AnalysisCard sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
               <TrendingUpIcon sx={{ color: '#059669', mr: 1 }} />
@@ -216,7 +216,7 @@ const PatientTrendAnalysis = ({ patientId }) => {
     
     return (
       <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={4}>
           <AnalysisCard sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>방문 빈도 분석</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -242,7 +242,7 @@ const PatientTrendAnalysis = ({ patientId }) => {
           </AnalysisCard>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={4}>
           <AnalysisCard sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>방문 간격 분석</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>

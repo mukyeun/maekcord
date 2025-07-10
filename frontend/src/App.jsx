@@ -5,11 +5,11 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './store/store';
 import koKR from 'antd/lib/locale/ko_KR';
-import Header from './components/Common/Header';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import { lightTheme, darkTheme } from './theme';
 import { useState } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
+import Header from './components/layout/Header';
 
 // 보안 컴포넌트들
 import TokenRefreshManager from './components/Auth/TokenRefreshManager';
@@ -37,7 +37,7 @@ const ReceptionDashboardPage = lazy(() => import('./routes/ReceptionDashboardPag
 const QueueDisplayPage = lazy(() => import('./routes/QueueDisplayPage'));
 const DoctorViewPage = lazy(() => import('./routes/DoctorViewPage'));
 const PatientDataTable = lazy(() => import('./components/PatientDataTable'));
-const AppointmentPage = lazy(() => import('./pages/AppointmentPage'));
+const SearchResultsPage = lazy(() => import('./routes/SearchResultsPage'));
 
 const { Content } = Layout;
 
@@ -61,7 +61,7 @@ const App = () => {
             <ConfigProvider locale={koKR}>
               <BrowserRouter>
                 <Layout>
-                  <Header onToggleDark={() => setDark(d => !d)} dark={dark} />
+                  <Header />
                   <Content style={{ marginTop: 64 }}>
                     {/* 보안 관리자 컴포넌트 */}
                     <TokenRefreshManager />
@@ -69,6 +69,7 @@ const App = () => {
                     <Suspense fallback={<LoadingSpinner />}>
                       <Routes>
                         <Route path="/" element={<Home />} />
+                        <Route path="/search" element={<SearchResultsPage />} />
                         <Route path="/patient/new" element={
                           <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
                             <PatientFormPage />
@@ -97,11 +98,6 @@ const App = () => {
                         <Route path="/patient-data" element={
                           <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
                             <PatientDataTable />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/appointments" element={
-                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                            <AppointmentPage />
                           </ProtectedRoute>
                         } />
                       </Routes>

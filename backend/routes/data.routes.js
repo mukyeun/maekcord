@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const dataController = require('../controllers/data.controller');
-const { isAdmin, isAuthenticated } = require('../middleware/auth');
+const { isAdmin, isAuthenticated } = require('../middlewares/auth');
 
 // 측정 데이터 관리
 router.post('/measurements', isAuthenticated, dataController.saveMeasurement);

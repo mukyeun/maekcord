@@ -6,14 +6,14 @@ const stagingConfig = {
   
   // API 설정
   api: {
-    baseURL: 'https://staging-api.maekcord.com/api',
+    baseURL: 'https://staging-api.maekcode.com/api',
     timeout: 12000,
     retryAttempts: 4,
   },
   
   // WebSocket 설정
   websocket: {
-    url: 'wss://staging-api.maekcord.com/ws',
+    url: 'wss://staging-api.maekcode.com/ws',
     reconnectInterval: 4000,
     maxReconnectAttempts: 15,
   },
@@ -66,7 +66,7 @@ const stagingConfig = {
   // CDN 설정
   cdn: {
     enabled: true,
-    baseURL: 'https://staging-cdn.maekcord.com',
+    baseURL: 'https://staging-cdn.maekcode.com',
   },
 };
 

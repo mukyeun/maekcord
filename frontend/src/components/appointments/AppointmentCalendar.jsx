@@ -3,8 +3,35 @@ import { Button, Space, Typography, Badge } from 'antd';
 import { PlusOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import moment from 'moment';
 import 'moment/locale/ko';
+import styled from 'styled-components';
 
 moment.locale('ko');
+
+// 홈/진료실/예약페이지와 통일된 메인 버튼
+const MainButton = styled.button`
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+  padding: 0 32px;
+  height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+    color: #fff;
+  }
+`;
+
+const CalendarCard = styled.div`
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  padding: 24px;
+  margin-bottom: 24px;
+`;
 
 const AppointmentCalendar = ({ appointments, selectedDate, onDateChange, onCreateClick }) => {
   const currentDate = moment(selectedDate);
@@ -84,7 +111,7 @@ const AppointmentCalendar = ({ appointments, selectedDate, onDateChange, onCreat
   };
 
   return (
-    <div className="appointment-calendar">
+    <CalendarCard>
       <Space style={{ marginBottom: 16, width: '100%', justifyContent: 'space-between' }}>
         <Space>
           <Button icon={<LeftOutlined />} onClick={handlePrevMonth} />
@@ -93,13 +120,9 @@ const AppointmentCalendar = ({ appointments, selectedDate, onDateChange, onCreat
           </Typography.Title>
           <Button icon={<RightOutlined />} onClick={handleNextMonth} />
         </Space>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={onCreateClick}
-        >
+        <MainButton onClick={onCreateClick}>
           새 예약
-        </Button>
+        </MainButton>
       </Space>
 
       <div className="calendar-container">
@@ -177,7 +200,7 @@ const AppointmentCalendar = ({ appointments, selectedDate, onDateChange, onCreat
           font-size: 14px;
         }
       `}</style>
-    </div>
+    </CalendarCard>
   );
 };
 

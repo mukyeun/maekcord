@@ -224,7 +224,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
               
               <Grid container spacing={2} sx={{ mt: 1 }}>
                 {record.symptoms && (
-                  <Grid item xs={12} md={6}>
+                  <Grid xs={12} md={6}>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>증상:</Typography>
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                       {record.symptoms.map((symptom, idx) => (
@@ -235,14 +235,14 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
                 )}
                 
                 {record.diagnosis && (
-                  <Grid item xs={12} md={6}>
+                  <Grid xs={12} md={6}>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>진단:</Typography>
                     <Typography variant="body2">{record.diagnosis}</Typography>
                   </Grid>
                 )}
                 
                 {record.pulseWave && (
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>맥파 데이터:</Typography>
                     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                       <Typography variant="body2">
@@ -292,7 +292,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
     return (
       <Grid container spacing={3}>
         {/* 방문 빈도 분석 */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <HistoryCard sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
               방문 빈도 분석
@@ -323,7 +323,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
 
         {/* 맥파 추이 차트 */}
         {pulseTrends && (
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <HistoryCard sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
                 맥파 추이
@@ -345,7 +345,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
 
         {/* 증상 변화 분석 */}
         {symptomChanges.length > 0 && (
-          <Grid item xs={12}>
+          <Grid xs={12}>
             <HistoryCard sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
                 증상 변화 분석
@@ -475,7 +475,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
         <DialogContent sx={{ p: 3 }}>
           <Grid container spacing={3}>
             {sortedRecords.map((record, index) => (
-              <Grid item xs={12} md={6} key={record.recordId}>
+              <Grid xs={12} md={6} key={record.recordId}>
                 <HistoryCard sx={{ p: 2 }}>
                   <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e40af', mb: 2 }}>
                     {moment(record.visitDate).format('YYYY-MM-DD')} ({record.visitType})
@@ -494,28 +494,28 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
                     <Box sx={{ mb: 2 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>맥파 데이터:</Typography>
                       <Grid container spacing={1}>
-                        <Grid item xs={6}>
+                        <Grid xs={6}>
                           <Typography variant="body2">
                             수축기: <span style={{ color: '#dc2626', fontWeight: 600 }}>
                               {record.pulseWave.systolicBP} mmHg
                             </span>
                           </Typography>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid xs={6}>
                           <Typography variant="body2">
                             이완기: <span style={{ color: '#2563eb', fontWeight: 600 }}>
                               {record.pulseWave.diastolicBP} mmHg
                             </span>
                           </Typography>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid xs={6}>
                           <Typography variant="body2">
                             심박수: <span style={{ color: '#059669', fontWeight: 600 }}>
                               {record.pulseWave.heartRate} bpm
                             </span>
                           </Typography>
                         </Grid>
-                        <Grid item xs={6}>
+                        <Grid xs={6}>
                           <Typography variant="body2">
                             맥압: <span style={{ color: '#7c3aed', fontWeight: 600 }}>
                               {record.pulseWave.pulsePressure} mmHg
@@ -550,7 +550,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
               변화 추이 분석
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <HistoryCard sx={{ p: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>혈압 변화:</Typography>
                   {sortedRecords.map((record, index) => (
@@ -563,7 +563,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
                   ))}
                 </HistoryCard>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <HistoryCard sx={{ p: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>심박수 변화:</Typography>
                   {sortedRecords.map((record, index) => (
@@ -610,7 +610,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
       {/* 필터 섹션 */}
       <Box sx={{ mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>기간</InputLabel>
               <Select
@@ -625,7 +625,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={3}>
+          <Grid xs={12} md={3}>
             <FormControl fullWidth size="small">
               <InputLabel>방문 유형</InputLabel>
               <Select
@@ -639,7 +639,7 @@ const MedicalHistoryComparison = ({ patientId, patientName }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid xs={12} md={6}>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
                 variant="outlined"

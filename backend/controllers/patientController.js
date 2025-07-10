@@ -59,9 +59,18 @@ const patientController = {
         });
       }
 
-      // 새 진료기록(records)이 있으면 $push 연산자로 추가
+      // 새 진료기록(records)이 있으면 필수 필드들을 추가하고 $push 연산자로 추가
       if (records && Array.isArray(records) && records.length > 0) {
-        updateOps.$push = { records: { $each: records, $position: 0 } }; // 최신 기록이 배열 맨 앞에 오도록
+        // 각 record에 필수 필드들을 자동으로 추가
+        const processedRecords = records.map(record => ({
+          ...record,
+          createdAt: record.createdAt || new Date(),
+          updatedAt: record.updatedAt || new Date(),
+          visitDateTime: record.visitDateTime || new Date(),
+          date: record.date || new Date().toISOString().split('T')[0] // YYYY-MM-DD 형식
+        }));
+        
+        updateOps.$push = { records: { $each: processedRecords, $position: 0 } }; // 최신 기록이 배열 맨 앞에 오도록
       }
       
       // 활동 로그 추가

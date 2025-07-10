@@ -266,14 +266,17 @@ const QueueDisplay = ({ visible, onClose }) => {
 
   // 필터링된 목록 계산
   const getFilteredList = () => {
-    if (!Array.isArray(queueList)) return [];  // 배열이 아닐 경우 빈 배열 반환
-    
+    if (!Array.isArray(queueList)) return [];
     return queueList
       .filter(patient => {
-        if (!patient?.patientId?.basicInfo?.name || !patient?.queueNumber) return false;
+        // 실제 데이터 구조에 맞게 수정
+        const name = patient?.patientId?.basicInfo?.name || patient?.name;
+        const queueNumber = patient?.queueNumber || patient?.순번;
+        if (!name || !queueNumber) return false;
+        if (!searchText) return true;
         return (
-          patient.patientId.basicInfo.name.includes(searchText) ||
-          patient.queueNumber.includes(searchText)
+          name.includes(searchText) ||
+          queueNumber.includes(searchText)
         );
       })
       .filter(patient => {
@@ -333,6 +336,12 @@ const QueueDisplay = ({ visible, onClose }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (visible) {
+      fetchQueueList();
+    }
+  }, [visible]);
+
   if (error) {
     return (
       <Modal
@@ -360,28 +369,28 @@ const QueueDisplay = ({ visible, onClose }) => {
       <Spin spinning={loading} tip="불러오는 중...">
         <Modal
           title={
-            <div className="modal-header">
-              <span>대기 환자 목록</span>
-              <div className="header-right">
-                <span>총 {filteredList.length}명</span>
-                <span>실시간 업데이트</span>
-                <div className="switch-group">
-                  <Switch 
-                    size="small" 
-                    checked={isRealtime}
-                    onChange={setIsRealtime}
-                  />
-                  <Switch
-                    size="small"
-                    checked={isVoiceEnabled}
-                    onChange={handleVoiceToggle}
-                    disabled={!isSpeechSynthesisSupported()}
-                  />
-                  <Switch
-                    size="small"
-                    checked={isSoundEnabled}
-                    onChange={handleSoundToggle}
-                  />
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'linear-gradient(135deg, #1976D2 0%, #1565C0 100%)',
+                color: 'white',
+                borderRadius: '16px 16px 0 0',
+                padding: '20px 24px',
+                margin: '-24px -24px 24px -24px',
+                fontWeight: 700,
+                fontSize: 22,
+              }}
+            >
+              <span style={{ fontSize: 24, fontWeight: 700 }}>대기 환자 목록</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <span style={{ fontSize: 16 }}>총 {filteredList.length}명</span>
+                <span style={{ fontSize: 14, opacity: 0.8 }}>실시간 업데이트</span>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Switch size="small" checked={isRealtime} onChange={setIsRealtime} />
+                  <Switch size="small" checked={isVoiceEnabled} onChange={handleVoiceToggle} disabled={!isSpeechSynthesisSupported()} />
+                  <Switch size="small" checked={isSoundEnabled} onChange={handleSoundToggle} />
                 </div>
               </div>
             </div>
@@ -391,7 +400,8 @@ const QueueDisplay = ({ visible, onClose }) => {
           width="500px"
           footer={null}
           styles={{
-            body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
+            body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', background: '#f5f7fa', borderRadius: '0 0 16px 16px', padding: 24 },
+            header: { borderRadius: '16px 16px 0 0', background: 'transparent' },
           }}
         >
           {!isSpeechSynthesisSupported() && (
@@ -492,51 +502,73 @@ const QueueDisplay = ({ visible, onClose }) => {
         </Modal>
 
         <Drawer
-          title="환자 상세 정보"
+          title={
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                background: 'linear-gradient(135deg, #1976D2 0%, #1565C0 100%)',
+                color: 'white',
+                borderRadius: '16px 16px 0 0',
+                padding: '20px 24px',
+                margin: '-24px -24px 24px -24px',
+                fontWeight: 700,
+                fontSize: 22,
+              }}
+            >
+              <UserOutlined style={{ fontSize: 28, marginRight: 8 }} />
+              환자 상세 정보
+            </div>
+          }
           placement="right"
           onClose={() => setIsDrawerVisible(false)}
           open={isDrawerVisible}
           width={400}
+          styles={{
+            body: { background: '#f5f7fa', borderRadius: '0 0 16px 16px', padding: 24 },
+            header: { borderRadius: '16px 16px 0 0', background: 'transparent' },
+          }}
         >
           {selectedPatient && (
-            <>
+            <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)', padding: 24 }}>
               <Descriptions column={1} bordered>
-                <Descriptions.Item label="이름">
-                  {selectedPatient.patientId?.basicInfo?.name || '-'}
+                <Descriptions.Item label={<span style={{ color: '#1976D2', fontWeight: 600 }}>이름</span>}>
+                  <span style={{ fontWeight: 700, fontSize: 18 }}>{selectedPatient.patientId?.basicInfo?.name || '-'}</span>
                 </Descriptions.Item>
-                <Descriptions.Item label="연락처">
+                <Descriptions.Item label={<span style={{ color: '#1976D2', fontWeight: 600 }}>연락처</span>}>
                   <Space>
                     <PhoneOutlined />
                     {selectedPatient.patientId?.basicInfo?.phone || '-'}
                   </Space>
                 </Descriptions.Item>
-                <Descriptions.Item label="접수 시간">
+                <Descriptions.Item label={<span style={{ color: '#1976D2', fontWeight: 600 }}>접수 시간</span>}>
                   <Space>
                     <CalendarOutlined />
                     {formatDate(selectedPatient.createdAt)}
                   </Space>
                 </Descriptions.Item>
-                <Descriptions.Item label="방문 유형">
-                  {selectedPatient.patientId?.basicInfo?.visitType || '-'}
+                <Descriptions.Item label={<span style={{ color: '#1976D2', fontWeight: 600 }}>방문 유형</span>}>
+                  <span style={{ fontWeight: 600 }}>{selectedPatient.patientId?.basicInfo?.visitType || '-'}</span>
                 </Descriptions.Item>
-                <Descriptions.Item label="주요 증상">
+                <Descriptions.Item label={<span style={{ color: '#1976D2', fontWeight: 600 }}>주요 증상</span>}>
                   <Space wrap>
                     {selectedPatient.patientId?.symptoms?.map((symptom, index) => (
-                      <Tag key={index} color="blue">{symptom}</Tag>
+                      <Tag key={index} color="processing" style={{ fontWeight: 600, fontSize: 15 }}>{symptom}</Tag>
                     )) || '-'}
                   </Space>
                 </Descriptions.Item>
-                <Descriptions.Item label="복용 중인 약물">
+                <Descriptions.Item label={<span style={{ color: '#1976D2', fontWeight: 600 }}>복용 중인 약물</span>}>
                   <Space wrap>
                     {selectedPatient.patientId?.medications?.map((med, index) => (
-                      <Tag key={index} color="purple" icon={<MedicineBoxOutlined />}>
+                      <Tag key={index} color="success" icon={<MedicineBoxOutlined />} style={{ fontWeight: 600, fontSize: 15 }}>
                         {med}
                       </Tag>
                     )) || '-'}
                   </Space>
                 </Descriptions.Item>
               </Descriptions>
-            </>
+            </div>
           )}
         </Drawer>
       </Spin>

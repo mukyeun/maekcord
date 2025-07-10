@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const { protect, authorize } = require('../../middleware/auth');
+const { protect, authorize } = require('../../middlewares/auth');
 const User = require('../../models/User');
 const config = require('../../config');
 const { AuthenticationError, AuthorizationError } = require('../../utils/errors');

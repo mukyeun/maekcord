@@ -6,14 +6,14 @@ const appointmentValidation = require('../validations/appointmentValidation');
 const { authMiddleware } = require('../middlewares/auth');
 const { USER_ROLES } = require('../constants');
 const { validateAppointment } = require('../middlewares/validators');
-const { AppError } = require('../middleware/errorHandler');
-const auth = require('../middleware/auth');
+const { AppError } = require('../middlewares/errorHandler');
+const auth = require('../middlewares/auth');
 const Appointment = require('../models/Appointment');
 const logger = require('../utils/logger');
 const { authenticateToken } = require('../middlewares/auth');
 const moment = require('moment');
 const mongoose = require('mongoose');
-const { ValidationError } = require('../middleware/errorHandler');
+const { ValidationError } = require('../middlewares/errorHandler');
 
 /**
  * @swagger
