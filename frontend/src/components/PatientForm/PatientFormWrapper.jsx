@@ -14,13 +14,14 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault('Asia/Seoul');
 
 const FormContainer = styled.div`
-  max-width: 1200px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 20px;
 `;
@@ -234,6 +235,15 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
     if (data.records?.pulseWave) initialRecord.pulseWave = sanitizedData.records.pulseWave;
     if (data.records?.macSang) initialRecord.macSang = sanitizedData.records.macSang;
     if (sanitizedData.stress) initialRecord.stress = sanitizedData.stress;
+
+    // 필수 필드 추가 (스키마 요구)
+    if (Object.keys(initialRecord).length > 0) {
+      const now = new Date();
+      initialRecord.createdAt = now;
+      initialRecord.updatedAt = now;
+      initialRecord.visitDateTime = now;
+      initialRecord.date = now.toISOString().slice(0, 10); // YYYY-MM-DD
+    }
 
     sanitizedData.records = Object.keys(initialRecord).length > 0 ? [initialRecord] : [];
 
@@ -535,17 +545,36 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
   return (
     <FormCard>
       <Modal
-        title="환자 정보 입력"
+        title={
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              background: 'linear-gradient(135deg, #1976D2 0%, #1565C0 100%)',
+              color: 'white',
+              borderRadius: '16px 16px 0 0',
+              padding: '20px 24px',
+              margin: '-24px -24px 24px -24px',
+              fontWeight: 700,
+              fontSize: 24,
+            }}
+          >
+            <PersonAddIcon style={{ fontSize: 32, marginRight: 8 }} />
+            환자 정보 입력
+          </div>
+        }
         open={isModalVisible}
         onCancel={handleExit}
-        width="90%"
-        style={{ top: 20 }}
+        width={800}
+        style={{ top: 100 }}
         footer={null}
         destroyOnClose={true}
         maskClosable={false}
         keyboard={true}
         styles={{
-          body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
+          body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto', background: '#f5f7fa', borderRadius: '0 0 16px 16px', padding: 16 },
+          header: { borderRadius: '16px 16px 0 0', background: 'transparent' },
         }}
       >
         {error && (
@@ -558,19 +587,22 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
                 current={currentStep}
                 onChange={setCurrentStep}
                 items={sections.map((section) => ({ title: section.title }))}
-                style={{ marginBottom: 24 }}
+                style={{ marginBottom: 32, background: 'transparent', borderRadius: 12, padding: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)' }}
+                responsive
               />
 
-              {sections[currentStep].content}
+              <div style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)', marginBottom: 24 }}>
+                {sections[currentStep].content}
+              </div>
 
-              <ActionButtons>
+              <ActionButtons style={{ marginTop: 32 }}>
                 {currentStep > 0 && (
-                  <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading}>
+                  <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading} style={{ borderRadius: 8, fontWeight: 600, fontSize: 18, padding: '8px 32px' }}>
                     이전
                   </Button>
                 )}
                 {currentStep < sections.length - 1 ? (
-                  <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading}>
+                  <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading} style={{ background: '#1976D2', borderRadius: 8, fontWeight: 700, fontSize: 18, padding: '8px 32px', boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)' }}>
                     다음
                   </Button>
                 ) : (
@@ -579,6 +611,7 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
                     onClick={handleSave}
                     loading={loading}
                     disabled={!isSaveButtonEnabled}
+                    style={{ background: '#1976D2', borderRadius: 8, fontWeight: 700, fontSize: 18, padding: '8px 32px', boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)' }}
                   >
                     저장하기
                   </Button>

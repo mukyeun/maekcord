@@ -9,6 +9,9 @@ router.get('/search', async (req, res) => {
     const { query } = req.query;
     const patients = await Patient.find({
       $or: [
+        { 'basicInfo.name': { $regex: query, $options: 'i' } },
+        { 'basicInfo.phone': { $regex: query, $options: 'i' } },
+        { 'basicInfo.residentNumber': { $regex: query, $options: 'i' } },
         { name: { $regex: query, $options: 'i' } },
         { patientId: { $regex: query, $options: 'i' } }
       ]

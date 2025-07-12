@@ -13,6 +13,21 @@ const patientDataRoutes = require('./routes/patientData');
 const dataExportRoutes = require('./routes/dataExport');
 const pulseRoutes = require('./routes/pulse');
 const visitRoutes = require('./routes/visitRoutes');
+const testRoutes = require('./routes/test.routes');
+const vitalSignRoutes = require('./routes/vitalSignRoutes');
+const pulseDataRoutes = require('./routes/pulseDataRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
+const notificationRoutes = require('./routes/notification.routes');
+const authRoutes = require('./routes/authRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
+const waitlistRoutes = require('./routes/waitlistRoutes');
+const patientRoutes = require('./routes/patientRoutes');
+const statisticsRoutes = require('./routes/statisticsRoutes');
+const medicalRecordRoutes = require('./routes/medicalRecordRoutes');
+const backupScheduler = require('./schedulers/backup.scheduler');
+const backupRoutes = require('./routes/backup.routes');
+const healthRoutes = require('./routes/health');
+
 require('dotenv').config();
 
 const app = express();
@@ -53,33 +68,36 @@ app.use((req, res, next) => {
   next();
 });
 
-// API 라우터
-const authRoutes = require('./routes/authRoutes');
-const appointmentRoutes = require('./routes/appointmentRoutes');
-const waitlistRoutes = require('./routes/waitlistRoutes');
-const patientRoutes = require('./routes/patientRoutes');
-const statisticsRoutes = require('./routes/statisticsRoutes');
-
 // 라우터 등록
 console.log('라우터 등록 시작...');
+
+// 기본 API 라우트
+app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/waitlist', waitlistRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/statistics', statisticsRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/backup', backupRoutes);
+app.use('/api/dashboard', require('./routes/dashboard'));
+
+// 환자 데이터 관련 라우트
+app.use('/api/patient-data', patientDataRoutes);
+app.use('/api/data-export', dataExportRoutes);
+
+// 진료 관련 라우트
 app.use('/api/queues', queueRoutes);
 app.use('/api/pulse-map', pulseMapRoutes);
-console.log('pulseRoutes 등록:', pulseRoutes.stack?.map(r => r.route?.path));
 app.use('/api/pulse', pulseRoutes);
 app.use('/api', visitRoutes);
+app.use('/api/test', testRoutes);
+app.use('/api/vital-signs', vitalSignRoutes);
+app.use('/api/pulse-data', pulseDataRoutes);
+app.use('/api/doctors', doctorRoutes);
+
 console.log('라우터 등록 완료');
-
-// 환자 데이터 라우트 등록
-console.log('환자 데이터 라우트 등록 중...');
-app.use('/api/patient-data', patientDataRoutes);
-console.log('환자 데이터 라우트 등록 완료');
-
-app.use('/api/data-export', dataExportRoutes);
 
 // Swagger UI 설정
 if (process.env.NODE_ENV === 'development') {
@@ -97,7 +115,7 @@ app.get('/api-docs.json', (req, res) => {
   res.send(swaggerSpec);
 });
 
-// 404 처리 - 모든 라우터 등록 후에 위치
+// 404 처리
 app.use((req, res) => {
   logger.warn(`❌ 404 Not Found: ${req.method} ${req.path}`, {
     method: req.method,
@@ -152,10 +170,10 @@ app.use((err, req, res, next) => {
       success: false,
       errorId,
       message: '입력값 검증 오류가 발생했습니다.',
-      errors: Object.values(err.errors).map(e => ({
+      errors: err.errors ? Object.values(err.errors).map(e => ({
         field: e.path,
         message: e.message
-      }))
+      })) : [{ message: err.message }]
     });
   }
 
@@ -176,5 +194,8 @@ app.use((err, req, res, next) => {
   }
   next(err);
 });
+
+// 백업 스케줄러 시작
+backupScheduler.start();
 
 module.exports = app;

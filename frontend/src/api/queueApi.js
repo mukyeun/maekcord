@@ -236,7 +236,7 @@ export const saveQueueNote = async (queueId, noteData) => {
     });
 
     // 새로운 기록 생성을 위해 endpoint 수정
-    const response = await axiosInstance.post(`${BASE_URL}/${queueId}/visit-record`, {
+    const response = await axiosInstance.put(`${BASE_URL}/${queueId}/note`, {
       ...noteData,
       createdAt: noteData.visitTime,  // 현재 시간 대신 방문 시간 사용
       isNewRecord: true  // 새로운 기록임을 표시

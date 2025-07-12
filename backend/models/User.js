@@ -7,8 +7,7 @@ const config = require('../config');
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true,
-    unique: true
+    sparse: true
   },
   password: {
     type: String,
@@ -39,7 +38,8 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: true
+    required: true,
+    default: '010-0000-0000'
   },
   department: String,
   specialization: String,
@@ -119,6 +119,7 @@ userSchema.methods.generateAuthToken = function() {
   return jwt.sign(
     { 
       id: this._id,
+      email: this.email,
       role: this.role
     },
     config.jwt.secret,

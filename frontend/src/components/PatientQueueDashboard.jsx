@@ -66,6 +66,46 @@ const PriorityIndicator = styled.div`
   }
 `;
 
+// 홈/진료실/예약 등과 통일된 메인 버튼
+const MainButton = styled.button`
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+  padding: 0 32px;
+  height: 44px;
+  font-size: 16px;
+  cursor: pointer;
+  &:hover, &:focus {
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%);
+    color: #fff;
+  }
+`;
+
+const GradientHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #1976D2 0%, #1565C0 100%);
+  color: #fff;
+  border-radius: 20px;
+  padding: 28px 32px 24px 32px;
+  font-weight: 700;
+  font-size: 32px;
+  margin-bottom: 32px;
+`;
+
+const StatCard = styled.div`
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  padding: 32px 0 24px 0;
+  text-align: center;
+  margin-bottom: 24px;
+`;
+
 const PatientQueueDashboard = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -81,9 +121,9 @@ const PatientQueueDashboard = () => {
     try {
       setLoading(true);
       // 실제 API 호출로 대체
-      const response = await fetch('/api/queue/patients');
+      const response = await fetch('/api/patients');
       const data = await response.json();
-      setPatients(data.patients);
+      setPatients(Array.isArray(data.patients) ? data.patients : []);
     } catch (err) {
       setError('대기 환자 데이터를 불러오는 중 오류가 발생했습니다.');
     } finally {
@@ -183,7 +223,7 @@ const PatientQueueDashboard = () => {
           </Box>
 
           <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={6} md={3}>
+            <Grid xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 700, color: '#1e40af' }}>
                   {patient.basicInfo?.visitCount || 0}
@@ -193,7 +233,7 @@ const PatientQueueDashboard = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} md={3}>
+            <Grid xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 700, color: '#2563eb' }}>
                   {visitFrequency.toFixed(1)}
@@ -203,7 +243,7 @@ const PatientQueueDashboard = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} md={3}>
+            <Grid xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 700, color: '#d97706' }}>
                   {moment().diff(moment(patient.basicInfo?.lastVisitDate), 'days')}
@@ -213,7 +253,7 @@ const PatientQueueDashboard = () => {
                 </Typography>
               </Box>
             </Grid>
-            <Grid item xs={6} md={3}>
+            <Grid xs={6} md={3}>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography sx={{ fontSize: '1.2rem', fontWeight: 700, color: '#7c3aed' }}>
                   {patient.basicInfo?.visitType}
@@ -311,16 +351,9 @@ const PatientQueueDashboard = () => {
 
           {/* 액션 버튼 */}
           <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-            <Button 
-              variant="contained" 
-              size="small"
-              sx={{ 
-                background: 'linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%)',
-                '&:hover': { background: 'linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%)' }
-              }}
-            >
+            <MainButton>
               진료 시작
-            </Button>
+            </MainButton>
             <Button variant="outlined" size="small">
               상세 보기
             </Button>
@@ -343,7 +376,7 @@ const PatientQueueDashboard = () => {
 
     return (
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <DashboardCard sx={{ p: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#1e40af' }}>
               {patients.length}
@@ -351,7 +384,7 @@ const PatientQueueDashboard = () => {
             <Typography sx={{ color: '#6b7280' }}>대기 환자</Typography>
           </DashboardCard>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <DashboardCard sx={{ p: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#dc2626' }}>
               {highPriorityCount}
@@ -359,7 +392,7 @@ const PatientQueueDashboard = () => {
             <Typography sx={{ color: '#6b7280' }}>높은 우선순위</Typography>
           </DashboardCard>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <DashboardCard sx={{ p: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#d97706' }}>
               {frequentVisitors}
@@ -367,7 +400,7 @@ const PatientQueueDashboard = () => {
             <Typography sx={{ color: '#6b7280' }}>빈도 높은 환자</Typography>
           </DashboardCard>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <DashboardCard sx={{ p: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '2rem', fontWeight: 700, color: '#2563eb' }}>
               {patients.filter(p => p.basicInfo?.visitType === '재진').length}
@@ -393,19 +426,50 @@ const PatientQueueDashboard = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, color: '#1e40af', mb: 3 }}>
-        <LocalHospitalIcon sx={{ mr: 2, verticalAlign: 'middle' }} />
+      <GradientHeader>
+        <LocalHospitalIcon sx={{ mr: 2, fontSize: 40, verticalAlign: 'middle' }} />
         스마트 환자 대기실
-      </Typography>
+      </GradientHeader>
 
-      {renderStatistics()}
+      {/* 통계 카드 */}
+      <Grid container spacing={2} mb={3}>
+        <Grid>
+          <Card sx={{ p: 2, textAlign: 'center', bgcolor: '#e3f2fd' }}>
+            <Typography variant="h4" color="primary" fontWeight={700}>{patients.length}</Typography>
+            <Typography variant="body2" color="text.secondary">전체 대기</Typography>
+          </Card>
+        </Grid>
+        <Grid>
+          <Card sx={{ p: 2, textAlign: 'center', bgcolor: '#fff3e0' }}>
+            <Typography variant="h4" color="warning.main" fontWeight={700}>{patients.filter(p => calculatePatientPriority(p).priority === 'high').length}</Typography>
+            <Typography variant="body2" color="text.secondary">높은 우선순위</Typography>
+          </Card>
+        </Grid>
+        <Grid>
+          <Card sx={{ p: 2, textAlign: 'center', bgcolor: '#e8f5e8' }}>
+            <Typography variant="h4" color="success.main" fontWeight={700}>{patients.filter(p => {
+                const visitCount = p.basicInfo?.visitCount || 0;
+                const months = moment().diff(moment(p.basicInfo?.firstVisitDate), 'months') + 1;
+                return (visitCount / months) > 2;
+              }).length}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">빈도 높은 환자</Typography>
+          </Card>
+        </Grid>
+        <Grid>
+          <Card sx={{ p: 2, textAlign: 'center', bgcolor: '#fce4ec' }}>
+            <Typography variant="h4" color="error.main" fontWeight={700}>{patients.filter(p => p.basicInfo?.visitType === '재진').length}</Typography>
+            <Typography variant="body2" color="text.secondary">재진 환자</Typography>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
         대기 환자 목록 (우선순위 순)
       </Typography>
 
       {patients.length === 0 ? (
-        <Alert severity="info">현재 대기 중인 환자가 없습니다.</Alert>
+        <Alert severity="info" sx={{ borderRadius: 2, mb: 2, p: 2 }}>현재 대기 중인 환자가 없습니다.</Alert>
       ) : (
         <Box>
           {patients

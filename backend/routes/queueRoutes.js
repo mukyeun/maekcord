@@ -19,7 +19,8 @@ const {
   callNextPatient,
   saveQueueNote
 } = require('../controllers/queueController');
-const { validateObjectId } = require('../middleware/validation');
+const { validate } = require('../middlewares/validation');
+const { getQueueById, getQueueStatus: getQueueStatusValidation, postQueueStatus, registerQueue: registerQueueValidation, updateQueueStatus: updateQueueStatusValidation } = require('../validations/queueValidation');
 
 // 필요한 환자 정보 필드 정의
 const PATIENT_FIELDS = [
@@ -135,7 +136,7 @@ router.post('/status', async (req, res) => {
   }
 });
 
-router.get('/status/patient', async (req, res) => {   // 환자별 대기 상태 조회 (GET 방식)
+router.get('/status/patient', validate(getQueueStatusValidation), async (req, res) => {   // 환자별 대기 상태 조회 (GET 방식)
   const { patientId, date } = req.query;
 
   // 필수 파라미터 검증
@@ -414,7 +415,7 @@ router.post('/test-data', async (req, res) => {
 router.get('/current-patient', getCurrentPatient);
 
 // 대기 상태 변경 라우트
-router.put('/:id/status', validateObjectId, async (req, res) => {
+router.put('/:id/status', validate(getQueueById), async (req, res) => {
   try {
     const { status } = req.body;
     const queueId = req.params.id;
@@ -553,6 +554,9 @@ router.post('/next', async (req, res) => {
 
 // PUT /api/queues/:queueId/note - 진단 저장
 router.put('/:queueId/note', saveQueueNote);
+
+// PUT /api/queues/:queueId/visit-record - 진단 저장 (리다이렉트)
+router.put('/:queueId/visit-record', saveQueueNote);
 
 // 에러 핸들링 미들웨어
 router.use((err, req, res, next) => {

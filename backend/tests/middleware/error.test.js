@@ -1,4 +1,4 @@
-const { errorHandler, notFound } = require('../../middleware/error');
+const { errorHandler, notFound } = require('../../middlewares/errorHandler');
 const {
   AppError,
   ValidationError,

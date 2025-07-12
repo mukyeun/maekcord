@@ -14,6 +14,7 @@ import {
   ResultsContainer,
   WaveDataGrid
 } from './styles';
+import axiosInstance from '../../api/axiosInstance';
 
 const { Title, Text } = Typography;
 
@@ -125,18 +126,12 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
 
     try {
       // 백엔드 API를 통해 실제 유비오맥파기 실행
-      const response = await fetch('/api/patients/execute-ubio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          patientName: formData.basicInfo.name,
-          patientId: formData.basicInfo.patientId
-        })
+      const response = await axiosInstance.post('/api/patients/execute-ubio', {
+        patientName: formData.basicInfo.name,
+        patientId: formData.basicInfo.patientId
       });
 
-      const result = await response.json();
+      const result = response.data;
 
       if (result.success) {
         message.destroy();
@@ -171,23 +166,11 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
 
     try {
       // 직접 read-ubio-result API 호출
-      const response = await fetch('/api/patients/read-ubio-result', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ 
-          patientName: formData.basicInfo.name
-        }),
-        credentials: 'include'
+      const response = await axiosInstance.post('/api/patients/read-ubio-result', { 
+        patientName: formData.basicInfo.name
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = response.data;
       message.destroy();
 
       if (result.success) {

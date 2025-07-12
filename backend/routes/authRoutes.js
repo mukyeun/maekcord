@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const auth = require('../middlewares/auth');
-const { validateLogin, validateRegistration, validatePasswordReset } = require('../middlewares/validators');
+const { validateRegistration, validateLogin, validatePasswordReset } = require('../middlewares/validation');
+const { authenticateUser } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -263,7 +263,7 @@ router.post('/reset-password/:token', validatePasswordReset, authController.rese
  *       401:
  *         description: 인증되지 않은 요청
  */
-router.get('/me', auth, (req, res) => {
+router.get('/me', authenticateUser, (req, res) => {
   res.json({
     success: true,
     data: {

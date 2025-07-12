@@ -45,7 +45,8 @@ import {
   Close as CloseIcon,
   TrendingUp as TrendingUpIcon,
   People as PeopleIcon,
-  HealthAndSafety as HealthIcon
+  HealthAndSafety as HealthIcon,
+  Home as HomeIcon
 } from '@mui/icons-material';
 import moment from 'moment';
 import styled, { keyframes } from 'styled-components';
@@ -113,16 +114,29 @@ const HeaderSection = styled.div`
   }
 `;
 
-const HeaderTitle = styled.h1`
-  color: white;
-  margin: 0 0 8px 0;
-  font-weight: 900;
-  font-size: 36px;
-  text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  animation: ${float} 3s ease-in-out infinite;
+const HeaderContent = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
   
   @media (max-width: 768px) {
-    font-size: 28px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+`;
+
+const HeaderTitle = styled.div`
+  display: flex;
+  align-items: center;
+  flex: 1;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 `;
 
@@ -361,6 +375,10 @@ const PatientDataTable = () => {
   const [exportLoading, setExportLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [selectedIds, setSelectedIds] = useState([]);
+
+  const handleGoHome = () => {
+    navigate('/');
+  };
 
   // 환자 데이터 조회
   const fetchPatients = async () => {
@@ -764,23 +782,34 @@ const PatientDataTable = () => {
     <PageContainer>
       {/* 헤더 섹션 */}
       <HeaderSection>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <HealthIcon sx={{ fontSize: 40, color: 'white' }} />
-          <div>
-            <HeaderTitle>환자 데이터 관리</HeaderTitle>
-            <HeaderSubtitle>전체 환자 정보를 한눈에 확인하고 관리하세요</HeaderSubtitle>
-          </div>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          <ActionButton
-            variant="outlined"
-            startIcon={<CloseIcon />}
-            onClick={handleClose}
-            sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)' }}
+        <HeaderContent>
+          <HeaderTitle>
+            <HealthIcon sx={{ fontSize: 40, color: 'white', mr: 2 }} />
+            <div>
+              <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', mb: 1 }}>
+                환자 데이터 관리
+              </Typography>
+              <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                전체 환자 정보를 조회하고 관리할 수 있습니다
+              </Typography>
+            </div>
+          </HeaderTitle>
+          <Button
+            variant="contained"
+            startIcon={<HomeIcon />}
+            onClick={handleGoHome}
+            sx={{
+              bgcolor: '#1e40af',
+              '&:hover': { bgcolor: '#1e3a8a' },
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              fontWeight: 600
+            }}
           >
-            닫기
-          </ActionButton>
-        </Box>
+            홈으로 돌아가기
+          </Button>
+        </HeaderContent>
       </HeaderSection>
 
       {/* 통계 카드 */}

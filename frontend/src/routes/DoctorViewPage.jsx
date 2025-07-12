@@ -8,7 +8,17 @@ const DoctorViewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useSelector(state => state.auth);
-  const patientId = location.state?.patientId;
+  
+  // URL 쿼리 파라미터에서 patientId 가져오기
+  const queryParams = new URLSearchParams(location.search);
+  const patientIdFromQuery = queryParams.get('patientId');
+  
+  // location.state 또는 URL 쿼리 파라미터에서 patientId 가져오기
+  const patientId = location.state?.patientId || patientIdFromQuery;
+  
+  console.log('🔍 DoctorViewPage - patientId:', patientId);
+  console.log('🔍 DoctorViewPage - location.state:', location.state);
+  console.log('🔍 DoctorViewPage - location.search:', location.search);
 
   // 인증 체크
   if (!isAuthenticated) {

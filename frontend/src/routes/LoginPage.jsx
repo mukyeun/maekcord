@@ -9,7 +9,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { loading, error } = useSelector((state) => state.auth);
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: ''
   });
 
@@ -43,12 +43,12 @@ const LoginPage = () => {
         )}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">아이디</label>
+            <label htmlFor="email">이메일</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={credentials.username}
+              type="email"
+              id="email"
+              name="email"
+              value={credentials.email}
               onChange={handleChange}
               required
             />

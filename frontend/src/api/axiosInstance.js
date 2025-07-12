@@ -17,13 +17,24 @@ axiosInstance.interceptors.request.use(
   (config) => {
     // 보안 헤더 추가
     const securityHeaders = getSecurityHeaders();
+    
+    // 토큰 가져오기
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    
     config.headers = { ...config.headers, ...securityHeaders };
     
     console.log('📤 API 요청:', {
       method: config.method,
       url: config.url,
       data: config.data,
-      params: config.params
+      params: config.params,
+      headers: {
+        ...config.headers,
+        Authorization: config.headers.Authorization ? '(토큰 있음)' : '(토큰 없음)'
+      }
     });
     
     return config;
@@ -51,14 +62,17 @@ axiosInstance.interceptors.response.use(
     
     // 토큰 만료 또는 인증 오류 처리
     if (error.response?.status === 401 || error.response?.status === 403) {
-      console.warn('🔐 인증 토큰이 만료되었습니다. 로그인 페이지로 이동합니다.');
-      
-      // 보안 정리
-      secureLogout();
-      
-      // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닌 경우에만)
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
-        window.location.href = '/';
+      // 로그인 시도 중인 경우는 리다이렉트하지 않음
+      if (!error.config.url.includes('/api/auth/login')) {
+        console.warn('🔐 인증 토큰이 만료되었습니다. 로그인 페이지로 이동합니다.');
+        
+        // 보안 정리
+        secureLogout();
+        
+        // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닌 경우에만)
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+          window.location.href = '/';
+        }
       }
     }
     

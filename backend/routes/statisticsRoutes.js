@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const statisticsController = require('../controllers/statisticsController');
-const auth = require('../middlewares/auth');
+const { authMiddleware } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -108,6 +108,9 @@ const auth = require('../middlewares/auth');
  *               description: 월 전체 재진 환자 수
  */
 
+// 미들웨어 등록 - 모든 라우트에 인증 적용
+router.use(authMiddleware);
+
 /**
  * @swagger
  * /api/statistics/daily:
@@ -136,7 +139,7 @@ const auth = require('../middlewares/auth');
  *                 data:
  *                   $ref: '#/components/schemas/DailyStats'
  */
-router.get('/daily', auth, statisticsController.getDailyStats);
+router.get('/daily', statisticsController.getDailyStats);
 
 /**
  * @swagger
@@ -166,7 +169,7 @@ router.get('/daily', auth, statisticsController.getDailyStats);
  *                 data:
  *                   $ref: '#/components/schemas/MonthlyStats'
  */
-router.get('/monthly', auth, statisticsController.getMonthlyStats);
+router.get('/monthly', statisticsController.getMonthlyStats);
 
 // 의사별 통계 (관리자 전용)
 router.get('/doctors/:doctorId', statisticsController.getDoctorStats);

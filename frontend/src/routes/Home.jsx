@@ -1,463 +1,669 @@
-import React, { useState, useEffect } from 'react';
-import { Typography, Card, Space, message, Alert, Spin, Row, Col, Statistic, Progress, Tag } from 'antd';
-import { 
-  UserOutlined, 
-  DesktopOutlined, 
-  OrderedListOutlined,
-  MedicineBoxOutlined,
-  HeartOutlined,
-  ClockCircleOutlined,
-  PhoneOutlined,
-  EnvironmentOutlined,
-  ArrowRightOutlined,
-  CheckCircleOutlined,
-  StarOutlined
-} from '@ant-design/icons';
-import styled, { keyframes } from 'styled-components';
-import { useSelector } from 'react-redux';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as queueApi from '../api/queueApi';
-import { GlassCard } from '../components/Common/Header';
-import PatientSearch from '../components/Common/PatientSearch';
+import { Box, Button, Grid, Card, TextField, InputAdornment, Avatar, Typography } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import TodayIcon from '@mui/icons-material/Today';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PeopleIcon from '@mui/icons-material/People';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../store/slices/authSlice';
+import AppointmentManagerModal from '../components/appointments/AppointmentManagerModal';
+import { useState } from 'react';
 
-const { Title, Text, Paragraph } = Typography;
+const mainActions = [
+  { label: '신규 환자 등록', icon: <AddCircleOutlineIcon />, to: '/patient/new', color: 'primary' },
+  { label: '오늘 대기 보기', icon: <PeopleIcon />, to: '/queue', color: 'secondary' },
+];
 
-// 애니메이션 정의
-const fadeInUp = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const float = keyframes`
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-`;
-
-const pulse = keyframes`
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-`;
-
-const HomeContainer = styled.div`
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
-`;
-
-const HeroSection = styled.section`
-  text-align: center;
-  margin-bottom: 60px;
-  padding: 80px 40px;
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  border-radius: 24px;
-  color: white;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(30, 64, 175, 0.3);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    pointer-events: none;
-  }
-  
-  animation: ${fadeInUp} 1s ease-out;
-`;
-
-const HeroTitle = styled(Title)`
-  color: white !important;
-  margin-bottom: 20px !important;
-  font-weight: 900 !important;
-  font-size: 56px !important;
-  text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  animation: ${float} 3s ease-in-out infinite;
-  
-  @media (max-width: 768px) {
-    font-size: 36px !important;
-  }
-`;
-
-const HeroSubtitle = styled(Text)`
-  color: rgba(255,255,255,0.9) !important;
-  font-size: 20px !important;
-  font-weight: 300;
-  margin-bottom: 30px;
-  display: block;
-`;
-
-const SearchSection = styled.section`
-  margin-bottom: 60px;
-  animation: ${fadeInUp} 1s ease-out 0.2s both;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-`;
-
-const StatsSection = styled.section`
-  margin-bottom: 60px;
-  animation: ${fadeInUp} 1s ease-out 0.2s both;
-`;
-
-const StatCard = GlassCard;
-
-const FeaturesSection = styled.section`
-  margin-bottom: 60px;
-  animation: ${fadeInUp} 1s ease-out 0.4s both;
-`;
-
-const FeatureCard = GlassCard;
-
-const InfoSection = styled.section`
-  margin-bottom: 40px;
-  animation: ${fadeInUp} 1s ease-out 0.6s both;
-`;
-
-const InfoCard = GlassCard;
-
-const ContactSection = styled.section`
-  text-align: center;
-  padding: 40px;
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-  border-radius: 24px;
-  color: white;
-  animation: ${fadeInUp} 1s ease-out 0.8s both;
-`;
-
-const Home = () => {
-  const { isAuthenticated } = useSelector(state => state.auth);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [stats, setStats] = useState({
-    totalPatients: 0,
-    waitingPatients: 0,
-    todayAppointments: 0,
-    completedToday: 0
-  });
+export default function Home() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  const [search, setSearch] = React.useState('');
+  const [candidates, setCandidates] = React.useState([]);
+  const [showCandidates, setShowCandidates] = React.useState(false);
+  const [isAppointmentModalOpen, setAppointmentModalOpen] = useState(false);
 
-  // 통계 데이터 가져오기
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // 실제 API 호출로 대체 가능
-        setStats({
-          totalPatients: 1250,
-          waitingPatients: 8,
-          todayAppointments: 45,
-          completedToday: 32
-        });
-      } catch (error) {
-        console.error('통계 데이터 조회 실패:', error);
-      }
-    };
+  // 대시보드 요약 상태로 변경
+  const [dashboardSummary, setDashboardSummary] = React.useState([
+    { label: '오늘의 대기', value: 0, icon: <PeopleIcon color="primary" /> },
+    { label: '예약', value: 0, icon: <TodayIcon color="success" /> },
+    { label: '진료중', value: 0, icon: <LocalHospitalIcon color="error" /> },
+    { label: '신규환자', value: 0, icon: <PersonAddIcon color="info" /> },
+  ]);
 
-    fetchStats();
+  // 대시보드 요약 API 호출
+  React.useEffect(() => {
+    fetch('/api/dashboard/summary')
+      .then(res => res.json())
+      .then(data => {
+        setDashboardSummary([
+          { label: '오늘의 대기', value: data.waiting, icon: <PeopleIcon color="primary" /> },
+          { label: '예약', value: data.reservations, icon: <TodayIcon color="success" /> },
+          { label: '진료중', value: data.inTreatment, icon: <LocalHospitalIcon color="error" /> },
+          { label: '신규환자', value: data.newPatients, icon: <PersonAddIcon color="info" /> },
+        ]);
+      })
+      .catch(err => {
+        console.error('대시보드 요약 API 오류:', err);
+      });
   }, []);
 
-  const handleFeatureClick = (feature) => {
-    if (!isAuthenticated) {
-      message.warning('로그인이 필요한 기능입니다.');
-      return;
+  React.useEffect(() => {
+    if (search.trim()) {
+      fetch(`/api/patients/search?query=${encodeURIComponent(search)}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`API 오류: ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          // data.data가 배열이면 그걸 사용, 아니면 data.patients, 아니면 빈 배열
+          const patients = Array.isArray(data.data)
+            ? data.data
+            : (Array.isArray(data.patients) ? data.patients : []);
+          setCandidates(patients);
+          setShowCandidates(true);
+        })
+        .catch((err) => {
+          console.error('환자 검색 API 오류:', err);
+          setCandidates([]);
+          setShowCandidates(true); // 에러 시에도 드롭다운 열기
+        });
+    } else {
+      setCandidates([]);
+      setShowCandidates(false);
     }
+  }, [search]);
 
-    switch (feature) {
-      case 'patient':
-        navigate('/patient/new');
-        break;
-      case 'reception':
-        navigate('/reception');
-        break;
-      case 'waiting':
-        navigate('/queue');
-        break;
-      case 'doctor':
-        navigate('/doctor');
-        break;
-      default:
-        break;
-    }
+  const handleCandidateClick = (patient) => {
+    navigate(`/doctor?patientId=${patient._id}`);
+    setSearch('');
+    setShowCandidates(false);
   };
 
-  const handlePatientSelect = (patient) => {
-    if (!isAuthenticated) {
-      message.warning('로그인이 필요한 기능입니다.');
-      return;
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/search?query=${encodeURIComponent(search)}`);
+      setShowCandidates(false);
     }
-    navigate('/doctor', { 
-      state: { 
-        patientId: patient._id,
-        showDoctorView: true 
-      }
-    });
   };
 
   return (
-    <HomeContainer>
-      {error && (
-        <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
-      )}
-      <Spin spinning={loading} tip="불러오는 중...">
-        <HeroSection>
-          <HeroTitle level={1}>
-            <HeartOutlined style={{ marginRight: 16, color: '#ff6b6b' }} />
-            Maekstation
-          </HeroTitle>
-          <HeroSubtitle>
-            81맥상 정량 맥진 진단 시스템
-          </HeroSubtitle>
-          <Paragraph style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, maxWidth: 600, margin: '0 auto' }}>
-            전통 한의학과 현대 기술의 만남으로 건강한 삶을 위한 정확한 진단을 제공합니다
-          </Paragraph>
-          <Tag color="gold" style={{ marginTop: 20, padding: '8px 16px', fontSize: 14 }}>
-            <StarOutlined /> AI 기반 맥진 분석 시스템
-          </Tag>
-        </HeroSection>
-
-        <SearchSection>
-          <Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>
-            환자 검색
-          </Title>
-          <PatientSearch 
-            onPatientSelect={handlePatientSelect}
-            showRecentPatients={true}
-          />
-        </SearchSection>
-
-        {/*
-          <StatsSection>
-            <Row gutter={[24, 24]}>
-              <Col xs={24} sm={12} lg={6}>
-                <StatCard>
-                  <Statistic
-                    title="총 환자 수"
-                    value={stats.totalPatients}
-                    prefix={<UserOutlined />}
-                    valueStyle={{ color: '#10B981' }}
-                  />
-                  <Progress percent={85} showInfo={false} strokeColor="#10B981" />
-                </StatCard>
-              </Col>
-              <Col xs={24} sm={12} lg={6}>
-                <StatCard>
-                  <Statistic
-                    title="대기 환자"
-                    value={stats.waitingPatients}
-                    prefix={<ClockCircleOutlined />}
-                    valueStyle={{ color: '#F59E0B' }}
-                  />
-                  <Progress percent={stats.waitingPatients * 10} showInfo={false} strokeColor="#F59E0B" />
-                </StatCard>
-              </Col>
-              <Col xs={24} sm={12} lg={6}>
-                <StatCard>
-                  <Statistic
-                    title="오늘 예약"
-                    value={stats.todayAppointments}
-                    prefix={<CheckCircleOutlined />}
-                    valueStyle={{ color: '#059669' }}
-                  />
-                  <Progress percent={75} showInfo={false} strokeColor="#059669" />
-                </StatCard>
-              </Col>
-              <Col xs={24} sm={12} lg={6}>
-                <StatCard>
-                  <Statistic
-                    title="완료 진료"
-                    value={stats.completedToday}
-                    prefix={<MedicineBoxOutlined />}
-                    valueStyle={{ color: '#047857' }}
-                  />
-                  <Progress percent={70} showInfo={false} strokeColor="#047857" />
-                </StatCard>
-              </Col>
-            </Row>
-          </StatsSection>
-        */}
-
-        <FeaturesSection>
-          <Row gutter={[32, 32]}>
-            <Col xs={24} sm={12} lg={6}>
-              <FeatureCard onClick={() => handleFeatureClick('patient')}>
-                <div className="feature-icon" style={{
-                  fontSize: 40,
-                  color: '#1e40af',
-                  background: 'rgba(30,64,175,0.12)',
-                  borderRadius: '50%',
-                  width: 60,
-                  height: 60,
+    <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh' }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
+        {/* Hero Header Section */}
+        <Box
+          sx={{
+            width: '100%',
+            background: 'linear-gradient(135deg, #1976D2 0%, #42A5F5 50%, #1565C0 100%)',
+            color: '#fff',
+            py: { xs: 6, md: 8 },
+            px: 2,
+            mb: 4,
+            textAlign: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            borderRadius: 3,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+              opacity: 0.3,
+            }
+          }}
+        >
+          <Box sx={{ maxWidth: 1200, mx: 'auto', position: 'relative', zIndex: 1 }}>
+            {/* Logo and Main Title */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+              <Box 
+                sx={{ 
+                  width: 64, 
+                  height: 64, 
+                  marginRight: 6,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  margin: '0 auto 20px auto',
-                  boxShadow: '0 4px 16px rgba(30,64,175,0.12)'
-                }}>
-                  <UserOutlined />
-                </div>
-                <Title level={3} className="feature-title">환자 정보입력</Title>
-                <Text className="feature-description">
-                  환자 기본 정보 및 맥파 데이터 입력
-                </Text>
-                <ArrowRightOutlined className="feature-arrow" />
-              </FeatureCard>
-            </Col>
-
-            <Col xs={24} sm={12} lg={6}>
-              <FeatureCard onClick={() => handleFeatureClick('reception')}>
-                <div className="feature-icon" style={{
-                  fontSize: 40,
-                  color: '#2563eb',
-                  background: 'rgba(37,99,235,0.12)',
                   borderRadius: '50%',
-                  width: 60,
-                  height: 60,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px auto',
-                  boxShadow: '0 4px 16px rgba(37,99,235,0.12)'
-                }}>
-                  <DesktopOutlined />
-                </div>
-                <Title level={3} className="feature-title">접수실</Title>
-                <Text className="feature-description">
-                  환자 접수 및 대기열 관리
-                </Text>
-                <ArrowRightOutlined className="feature-arrow" />
-              </FeatureCard>
-            </Col>
+                  background: 'linear-gradient(135deg, #1976D2 0%, #42A5F5 100%)',
+                  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+                  border: '2px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                <svg 
+                  width="36" 
+                  height="36" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}
+                >
+                  {/* 심장 모양 */}
+                  <path 
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                    fill="white"
+                  />
+                  {/* 맥파 곡선 */}
+                  <path 
+                    d="M4 12c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" 
+                    stroke="white" 
+                    strokeWidth="1.5" 
+                    fill="none"
+                    strokeLinecap="round"
+                    opacity="0.8"
+                  />
+                  <path 
+                    d="M13 12c0-2 1.5-3.5 3.5-3.5s3.5 1.5 3.5 3.5" 
+                    stroke="white" 
+                    strokeWidth="1.5" 
+                    fill="none"
+                    strokeLinecap="round"
+                    opacity="0.8"
+                  />
+                </svg>
+              </Box>
+              <Box sx={{ textAlign: 'left' }}>
+                <Typography 
+                  variant="h2" 
+                  fontWeight={900} 
+                  sx={{ 
+                    letterSpacing: 3,
+                    textShadow: '0 4px 8px rgba(0,0,0,0.3)',
+                    mb: 1
+                  }}
+                >
+                  Maekcode
+                </Typography>
+                <Typography 
+                  variant="h5" 
+                  fontWeight={600} 
+                  sx={{ 
+                    letterSpacing: 2,
+                    opacity: 0.95,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    fontFamily: 'monospace'
+                  }}
+                >
+                  81Pulse AI Analysis System
+                </Typography>
+              </Box>
+            </Box>
+            
+            {/* Description */}
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                opacity: 0.85, 
+                maxWidth: 600, 
+                mx: 'auto',
+                lineHeight: 1.6,
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+              }}
+            >
+              전통 맥진과 현대 AI 기술의 결합으로 정확하고 빠른 진단을 제공합니다.
+              실시간 환자 모니터링과 스마트 진료 관리를 통해 의료진과 환자 모두를 위한 
+              혁신적인 의료 플랫폼입니다.
+            </Typography>
+            
+            {/* Feature Highlights */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: 4, 
+              mt: 4,
+              flexWrap: 'wrap'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ 
+                  width: 8, 
+                  height: 8, 
+                  borderRadius: '50%', 
+                  bgcolor: '#4CAF50',
+                  boxShadow: '0 2px 4px rgba(76,175,80,0.3)'
+                }} />
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>AI 맥진 분석</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ 
+                  width: 8, 
+                  height: 8, 
+                  borderRadius: '50%', 
+                  bgcolor: '#FF9800',
+                  boxShadow: '0 2px 4px rgba(255,152,0,0.3)'
+                }} />
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>실시간 모니터링</Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ 
+                  width: 8, 
+                  height: 8, 
+                  borderRadius: '50%', 
+                  bgcolor: '#9C27B0',
+                  boxShadow: '0 2px 4px rgba(156,39,176,0.3)'
+                }} />
+                <Typography variant="body2" sx={{ opacity: 0.9 }}>스마트 진료 관리</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
 
-            <Col xs={24} sm={12} lg={6}>
-              <FeatureCard onClick={() => handleFeatureClick('waiting')}>
-                <div className="feature-icon" style={{
-                  fontSize: 40,
-                  color: '#3b82f6',
-                  background: 'rgba(59,130,246,0.12)',
-                  borderRadius: '50%',
-                  width: 60,
-                  height: 60,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px auto',
-                  boxShadow: '0 4px 16px rgba(59,130,246,0.12)'
-                }}>
-                  <OrderedListOutlined />
-                </div>
-                <Title level={3} className="feature-title">대기목록</Title>
-                <Text className="feature-description">
-                  실시간 대기 현황 모니터링
-                </Text>
-                <ArrowRightOutlined className="feature-arrow" />
-              </FeatureCard>
-            </Col>
+        {/* 대시보드 요약 카드 */}
+        <Grid container spacing={2} mb={3}>
+          {dashboardSummary.map((item, idx) => (
+            <Grid key={item.label}>
+              <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, boxShadow: 4, borderRadius: 3, bgcolor: '#fff' }}>
+                {item.icon}
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>{item.value}</Typography>
+                  <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+        {/* 검색창 + CTA */}
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 4, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 240, position: 'relative' }}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              placeholder="환자 이름, 연락처, 주민번호 등으로 검색하세요"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => {
+                // 엔터키로 form submit 막기 (드롭다운만 동작)
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              autoComplete="off"
+            />
+            {/* 드롭다운 */}
+            {showCandidates && (
+              <Box sx={{
+                position: 'absolute', left: 0, right: 0, top: 56, zIndex: 10,
+                bgcolor: '#fff', boxShadow: 3, borderRadius: 2, maxHeight: 300, overflowY: 'auto'
+              }}>
+                {candidates.length > 0 ? (
+                  candidates.map(patient => (
+                    <Box
+                      key={patient._id}
+                      sx={{ px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: '#f0f4ff' } }}
+                      onClick={() => handleCandidateClick(patient)}
+                    >
+                      <Typography fontWeight={700}>{patient.basicInfo?.name}</Typography>
+                      <Typography variant="body2" color="text.secondary">{patient.basicInfo?.phone}</Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography sx={{ px: 2, py: 2, color: 'gray' }}>
+                    검색 결과가 없습니다.
+                  </Typography>
+                )}
+              </Box>
+            )}
+          </div>
+          {mainActions.map(action => (
+            <Button
+              key={action.label}
+              variant="contained"
+              color={action.color}
+              startIcon={action.icon}
+              sx={{ height: 56, minWidth: 160, fontWeight: 600, borderRadius: 2, boxShadow: 2 }}
+              onClick={() => navigate(action.to)}
+            >
+              {action.label}
+            </Button>
+          ))}
+        </Box>
+        {/* 주요 기능 카드 (3x2 그리드, 카드 크기 2배, 색상/순서/아이콘 변경) */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+            gap: 4,
+            mb: 6,
+          }}
+        >
+          {/* 접수실 */}
+          <Button
+            variant="contained"
+            onClick={() => navigate('/reception')}
+            sx={{
+              minHeight: 180,
+              fontSize: '2rem',
+              bgcolor: '#4CAF50',
+              color: '#fff',
+              fontWeight: 700,
+              borderRadius: 4,
+              boxShadow: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              '&:hover': { bgcolor: '#388E3C' },
+            }}
+            fullWidth
+          >
+            <AssignmentIndIcon sx={{ fontSize: 56, mb: 2 }} />
+            접수실
+          </Button>
+          {/* 환자 정보입력 */}
+          <Button
+            variant="contained"
+            onClick={() => navigate('/patient/new')}
+            sx={{
+              minHeight: 180,
+              fontSize: '2rem',
+              bgcolor: '#1976D2',
+              color: '#fff',
+              fontWeight: 700,
+              borderRadius: 4,
+              boxShadow: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              '&:hover': { bgcolor: '#1565C0' },
+            }}
+            fullWidth
+          >
+            <PersonAddIcon sx={{ fontSize: 56, mb: 2 }} />
+            환자 정보입력
+          </Button>
+          {/* 대기목록 */}
+          <Button
+            variant="contained"
+            onClick={() => navigate('/queue')}
+            sx={{
+              minHeight: 180,
+              fontSize: '2rem',
+              bgcolor: '#29B6F6',
+              color: '#fff',
+              fontWeight: 700,
+              borderRadius: 4,
+              boxShadow: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              '&:hover': { bgcolor: '#0288D1' },
+            }}
+            fullWidth
+          >
+            <PeopleIcon sx={{ fontSize: 56, mb: 2 }} />
+            대기목록
+          </Button>
+          {/* 진료실 */}
+          <Button
+            variant="contained"
+            onClick={() => navigate('/doctor')}
+            sx={{
+              minHeight: 180,
+              fontSize: '2rem',
+              bgcolor: '#9C27B0',
+              color: '#fff',
+              fontWeight: 700,
+              borderRadius: 4,
+              boxShadow: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              '&:hover': { bgcolor: '#7B1FA2' },
+            }}
+            fullWidth
+          >
+            <LocalHospitalIcon sx={{ fontSize: 56, mb: 2 }} />
+            진료실
+          </Button>
+          {/* 예약 */}
+          <Button
+            variant="contained"
+            onClick={() => setAppointmentModalOpen(true)}
+            sx={{
+              minHeight: 180,
+              fontSize: '2rem',
+              bgcolor: '#FFA000',
+              color: '#fff',
+              fontWeight: 700,
+              borderRadius: 4,
+              boxShadow: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              '&:hover': { bgcolor: '#FF6F00' },
+            }}
+            fullWidth
+          >
+            <EventNoteIcon sx={{ fontSize: 56, mb: 2 }} />
+            예약
+          </Button>
+          {/* 환자 데이터 */}
+          <Button
+            variant="contained"
+            onClick={() => navigate('/patient-data')}
+            sx={{
+              minHeight: 180,
+              fontSize: '2rem',
+              bgcolor: '#37474F',
+              color: '#fff',
+              fontWeight: 700,
+              borderRadius: 4,
+              boxShadow: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              '&:hover': { bgcolor: '#263238' },
+            }}
+            fullWidth
+          >
+            <AssignmentIndIcon sx={{ fontSize: 56, mb: 2 }} />
+            환자 데이터
+          </Button>
+        </Box>
+        {/* 대기/접수/진료 등 실시간 요약 대시보드 (예시) */}
+        {/* 하단 정보 - 세련된 디자인 */}
+        <Box sx={{ mt: 8, mb: 4 }}>
+          {/* 섹션 제목 */}
+          <Typography 
+            variant="h4" 
+            fontWeight={700} 
+            textAlign="center" 
+            sx={{ 
+              mb: 4, 
+              color: '#1976D2',
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -8,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 60,
+                height: 3,
+                background: 'linear-gradient(90deg, #1976D2, #42A5F5)',
+                borderRadius: 2
+              }
+            }}
+          >
+            진료 안내
+          </Typography>
+          
+          {/* 정보 카드 그리드 */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
+              gap: 4,
+              maxWidth: 1200,
+              mx: 'auto'
+            }}
+          >
+            {/* 진료 시간 */}
+            <Card 
+              sx={{ 
+                p: 4, 
+                bgcolor: '#fff', 
+                borderRadius: 4, 
+                boxShadow: '0 8px 32px rgba(25, 118, 210, 0.1)',
+                border: '1px solid rgba(25, 118, 210, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Box 
+                  sx={{ 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: '50%', 
+                    bgcolor: '#4CAF50',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2,
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+                  }}
+                >
+                  <TodayIcon sx={{ color: 'white', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} color="#1976D2">
+                  진료 시간
+                </Typography>
+              </Box>
+              <Box sx={{ space: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Typography variant="body1" fontWeight={600}>평일</Typography>
+                  <Typography variant="body1" color="text.secondary">09:00 ~ 18:00</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Typography variant="body1" fontWeight={600}>토요일</Typography>
+                  <Typography variant="body1" color="text.secondary">09:00 ~ 13:00</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: '#fff3e0', borderRadius: 2 }}>
+                  <Typography variant="body1" fontWeight={600} color="#FF9800">점심시간</Typography>
+                  <Typography variant="body1" color="#FF9800">12:00 ~ 13:00</Typography>
+                </Box>
+              </Box>
+            </Card>
 
-            <Col xs={24} sm={12} lg={6}>
-              <FeatureCard onClick={() => handleFeatureClick('doctor')}>
-                <div className="feature-icon" style={{
-                  fontSize: 40,
-                  color: '#1d4ed8',
-                  background: 'rgba(29,78,216,0.12)',
-                  borderRadius: '50%',
-                  width: 60,
-                  height: 60,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 20px auto',
-                  boxShadow: '0 4px 16px rgba(29,78,216,0.12)'
-                }}>
-                  <MedicineBoxOutlined />
-                </div>
-                <Title level={3} className="feature-title">진료실</Title>
-                <Text className="feature-description">
-                  맥파 분석 및 진료 기록
-                </Text>
-                <ArrowRightOutlined className="feature-arrow" />
-              </FeatureCard>
-            </Col>
-          </Row>
-        </FeaturesSection>
+            {/* 진료 안내 */}
+            <Card 
+              sx={{ 
+                p: 4, 
+                bgcolor: '#fff', 
+                borderRadius: 4, 
+                boxShadow: '0 8px 32px rgba(25, 118, 210, 0.1)',
+                border: '1px solid rgba(25, 118, 210, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Box 
+                  sx={{ 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: '50%', 
+                    bgcolor: '#9C27B0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2,
+                    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.3)'
+                  }}
+                >
+                  <LocalHospitalIcon sx={{ color: 'white', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} color="#1976D2">
+                  진료 안내
+                </Typography>
+              </Box>
+              <Box sx={{ space: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#4CAF50', mr: 2 }} />
+                  <Typography variant="body1">AI 맥진 진단 서비스</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#FF9800', mr: 2 }} />
+                  <Typography variant="body1">실시간 대기/접수/진료 현황</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#9C27B0', mr: 2 }} />
+                  <Typography variant="body1">환자 맞춤 건강 관리</Typography>
+                </Box>
+              </Box>
+            </Card>
 
-        <InfoSection>
-          <Row gutter={[24, 24]}>
-            <Col xs={24} md={8}>
-              <InfoCard title="진료 시간">
-                <ul>
-                  <li>평일: 09:00 - 18:00</li>
-                  <li>토요일: 09:00 - 13:00</li>
-                  <li>일요일 및 공휴일: 휴진</li>
-                  <li>점심시간: 12:00 - 13:00</li>
-                </ul>
-              </InfoCard>
-            </Col>
-
-            <Col xs={24} md={8}>
-              <InfoCard title="진료 안내">
-                <ul>
-                  <li>AI 기반 맥진 분석</li>
-                  <li>비대면 진료 가능</li>
-                  <li>주차 가능 (무료)</li>
-                  <li>건강보험 적용</li>
-                </ul>
-              </InfoCard>
-            </Col>
-
-            <Col xs={24} md={8}>
-              <InfoCard title="연락처">
-                <ul>
-                  <li><PhoneOutlined /> 051-612-0120</li>
-                  <li><EnvironmentOutlined /> 부산광역시 XX구 XX로 XX</li>
-                  <li>이메일: info@maekstation.com</li>
-                  <li>카카오톡: @maekstation</li>
-                </ul>
-              </InfoCard>
-            </Col>
-          </Row>
-        </InfoSection>
-
-        <ContactSection>
-          <Title level={2} style={{ color: 'white', marginBottom: 16 }}>
-            건강한 삶을 위한 첫걸음
-          </Title>
-          <Paragraph style={{ color: 'rgba(255,255,255,0.9)', fontSize: 18, marginBottom: 24 }}>
-            도원한의원에서 정확한 진단과 치료를 받아보세요
-          </Paragraph>
-          <Space size="large">
-            <Tag color="white" style={{ color: '#1e40af', fontSize: 16, padding: '8px 16px' }}>
-              <PhoneOutlined /> 예약 문의
-            </Tag>
-            <Tag color="white" style={{ color: '#1e40af', fontSize: 16, padding: '8px 16px' }}>
-              <EnvironmentOutlined /> 오시는 길
-            </Tag>
-          </Space>
-        </ContactSection>
-      </Spin>
-    </HomeContainer>
+            {/* 연락처 */}
+            <Card 
+              sx={{ 
+                p: 4, 
+                bgcolor: '#fff', 
+                borderRadius: 4, 
+                boxShadow: '0 8px 32px rgba(25, 118, 210, 0.1)',
+                border: '1px solid rgba(25, 118, 210, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
+                }
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Box 
+                  sx={{ 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: '50%', 
+                    bgcolor: '#1976D2',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2,
+                    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)'
+                  }}
+                >
+                  <SearchIcon sx={{ color: 'white', fontSize: 24 }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} color="#1976D2">
+                  연락처
+                </Typography>
+              </Box>
+              <Box sx={{ space: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976D2', mr: 2 }} />
+                  <Typography variant="body1" fontWeight={600}>☎ 051-621-0730</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976D2', mr: 2 }} />
+                  <Typography variant="body1">부산광역시 XX XX XX</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976D2', mr: 2 }} />
+                  <Typography variant="body1">이메일: info@maekstation.com</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', p: 2, bgcolor: '#f8f9fa', borderRadius: 2 }}>
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976D2', mr: 2 }} />
+                  <Typography variant="body1">카카오톡: @maekstation</Typography>
+                </Box>
+              </Box>
+            </Card>
+          </Box>
+        </Box>
+      </Box>
+      {/* 예약 전체 관리 모달 */}
+      <AppointmentManagerModal
+        open={isAppointmentModalOpen}
+        onClose={() => setAppointmentModalOpen(false)}
+      />
+    </Box>
   );
-};
-
-export default Home; 
+} 

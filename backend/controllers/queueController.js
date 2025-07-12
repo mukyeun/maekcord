@@ -323,16 +323,18 @@ exports.updateQueueStatus = asyncHandler(async (req, res) => {
 });
 
 // 5분마다 실행
-setInterval(async () => {
-  try {
-    const cleaned = await Counter.cleanupLocks();
-    if (cleaned > 0) {
-      console.log(`🧹 만료된 락 ${cleaned}개 정리됨`);
+if (process.env.NODE_ENV !== 'test') {
+  setInterval(async () => {
+    try {
+      const cleaned = await Counter.cleanupLocks();
+      if (cleaned > 0) {
+        logger.info(`Cleaned up ${cleaned} expired locks`);
+      }
+    } catch (error) {
+      logger.error('Lock cleanup failed:', error);
     }
-  } catch (error) {
-    console.error('락 정리 실패:', error);
-  }
-}, 5 * 60 * 1000);
+  }, 5 * 60 * 1000);
+}
 
 mongoose.connection.on('error', (err) => {
   console.error('MongoDB 연결 오류:', err);
@@ -738,7 +740,7 @@ exports.callNextPatient = asyncHandler(async (req, res) => {
 const saveQueueNote = async (req, res) => {
   try {
     const { queueId } = req.params;
-    const { symptoms, memo, stress, pulseAnalysis, visitTime } = req.body;
+    const { symptoms, memo, stress, pulseAnalysis, visitTime, visitDateTime } = req.body;
     
     console.log('진료 노트 저장 요청:', {
       queueId,
@@ -746,6 +748,7 @@ const saveQueueNote = async (req, res) => {
       hasStress: !!stress,
       hasPulseAnalysis: !!pulseAnalysis,
       providedVisitTime: visitTime,
+      providedVisitDateTime: visitDateTime,
       requestTime: moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss')
     });
 
@@ -758,39 +761,149 @@ const saveQueueNote = async (req, res) => {
       });
     }
 
-    // 입력된 방문 시간 사용 (없으면 현재 시간)
-    const visitDateTime = visitTime 
-      ? moment(visitTime).tz('Asia/Seoul')
-      : moment().tz('Asia/Seoul');
+    // 입력된 방문 시간 사용 (우선순위: visitDateTime > visitTime > 현재시간)
+    let visitDateTimeMoment;
+    if (visitDateTime) {
+      visitDateTimeMoment = moment(visitDateTime);
+    } else if (visitTime) {
+      visitDateTimeMoment = moment(visitTime).tz('Asia/Seoul');
+    } else {
+      visitDateTimeMoment = moment().tz('Asia/Seoul');
+    }
 
-    const finalDateTime = visitDateTime.format('YYYY-MM-DD HH:mm:ss');
+    const finalDateTime = visitDateTimeMoment.format('YYYY-MM-DD HH:mm:ss');
     
     console.log('시간 설정:', {
       providedVisitTime: visitTime,
+      providedVisitDateTime: visitDateTime,
       finalDateTime: finalDateTime
     });
     
     const newRecord = {
-      date: visitDateTime.toDate(),
-      visitDateTime: visitDateTime.toDate(),
-      createdAt: visitDateTime.toDate(),  // 방문 시간으로 설정
-      updatedAt: visitDateTime.toDate(),  // 방문 시간으로 설정
+      date: visitDateTimeMoment.toDate(),
+      visitDateTime: visitDateTimeMoment.toDate(),
+      createdAt: visitDateTimeMoment.toDate(),  // 방문 시간으로 설정
+      updatedAt: visitDateTimeMoment.toDate(),  // 방문 시간으로 설정
       symptoms: symptoms || [],
       memo: memo || '',
-      stress: stress || '',
+      // stress 필드 올바르게 처리
+      stress: (() => {
+        if (stress && typeof stress === 'object') {
+          return {
+            level: stress.level || '',
+            score: stress.score || 0,
+            items: Array.isArray(stress.items) ? stress.items.filter(item => typeof item === 'string') : [],
+            measuredAt: visitDateTimeMoment.toDate()
+          };
+        } else if (typeof stress === 'string' && stress.trim() !== '') {
+          // 문자열을 파싱해서 객체로 변환
+          const match = stress.match(/([가-힣]+)\s*\((\d+)점\)/);
+          return match
+            ? {
+                level: match[1],
+                score: Number(match[2]),
+                items: [],
+                measuredAt: visitDateTimeMoment.toDate()
+              }
+            : {
+                level: stress,
+                score: 0,
+                items: [],
+                measuredAt: visitDateTimeMoment.toDate()
+              };
+        } else {
+          // 기본값
+          return {
+            level: '',
+            score: 0,
+            items: [],
+            measuredAt: visitDateTimeMoment.toDate()
+          };
+        }
+      })(),
       pulseAnalysis: pulseAnalysis || '',
       pulseWave: queue.patientId.latestPulseWave || {}
     };
 
-    // 기존 records 배열이 없으면 생성
-    if (!queue.patientId.records) {
-      queue.patientId.records = [];
+    // 문제가 있는 환자 데이터를 완전히 새로 생성
+    try {
+      // 기존 환자 데이터에서 기본 정보만 추출
+      const basicInfo = queue.patientId.basicInfo || {};
+      const latestPulseWave = queue.patientId.latestPulseWave || {};
+      
+      // 기존 records에서 유효한 것만 필터링
+      let validRecords = [];
+      if (Array.isArray(queue.patientId.records)) {
+        for (const record of queue.patientId.records) {
+          try {
+            // 필수 날짜 필드
+            if (!record.visitDateTime || !record.createdAt || !record.updatedAt) {
+              console.log('❌ 잘못된 기록 제거 (필수 날짜 필드 누락):', record);
+              continue;
+            }
+            // pulseWave.lastUpdated
+            if (!record.pulseWave || !record.pulseWave.lastUpdated) {
+              console.log('❌ 잘못된 기록 제거 (pulseWave.lastUpdated 누락):', record);
+              continue;
+            }
+            // stress.measuredAt
+            if (!record.stress || !record.stress.measuredAt) {
+              console.log('❌ 잘못된 기록 제거 (stress.measuredAt 누락):', record);
+              continue;
+            }
+            // stress.items
+            if (record.stress && typeof record.stress.items === 'string') {
+              try {
+                const parsed = JSON.parse(record.stress.items);
+                if (!Array.isArray(parsed)) {
+                  console.log('❌ 잘못된 기록 제거 (stress.items 파싱 실패):', record.stress.items);
+                  continue;
+                }
+                // 파싱된 배열을 문자열 배열로 변환
+                record.stress.items = parsed.map(item => 
+                  typeof item === 'string' ? item : 
+                  typeof item === 'object' && item.name ? item.name : 
+                  String(item)
+                );
+              } catch (parseError) {
+                console.log('❌ 잘못된 기록 제거 (stress.items JSON 파싱 실패):', record.stress.items);
+                continue;
+              }
+            }
+            validRecords.push(record);
+          } catch (error) {
+            console.log('❌ 잘못된 기록 제거 (예외 발생):', error.message);
+            continue;
+          }
+        }
+      }
+
+      // 새로운 환자 데이터 구조 생성
+      const cleanPatientData = {
+        basicInfo: basicInfo,
+        latestPulseWave: latestPulseWave,
+        records: [newRecord, ...validRecords] // 새 기록을 맨 앞에 추가
+      };
+
+      // 환자 데이터를 완전히 교체
+      queue.patientId.set(cleanPatientData);
+      
+      console.log('✅ 환자 데이터 완전히 새로 생성:', {
+        patientId: queue.patientId._id,
+        patientName: basicInfo.name,
+        recordsCount: validRecords.length + 1,
+        validRecordsCount: validRecords.length
+      });
+
+    } catch (patientError) {
+      console.error('❌ 환자 데이터 재생성 실패:', patientError);
+      
+      // 대안: 최소한의 데이터로 새 기록만 추가
+      queue.patientId.records = [newRecord];
+      console.log('✅ 최소 데이터로 새 기록 추가');
     }
 
-    // 새 기록을 배열의 앞쪽에 추가 (최신 기록이 앞으로 오도록)
-    queue.patientId.records.unshift(newRecord);
-
-    // 환자 정보 업데이트
+    // 환자 정보 저장
     await queue.patientId.save();
 
     console.log('진료 기록 저장 완료:', {
@@ -806,6 +919,7 @@ const saveQueueNote = async (req, res) => {
       record: newRecord,
       todayStats: {
         providedVisitTime: visitTime,
+        providedVisitDateTime: visitDateTime,
         actualRecordTime: finalDateTime
       }
     });

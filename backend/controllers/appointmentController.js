@@ -670,145 +670,139 @@ const appointmentController = {
   getAppointment: async (req, res, next) => {
     try {
       const { id } = req.params;
+
       const appointment = await Appointment.findById(id)
-        .populate('patientId', 'name patientId contact');
+        .populate('patientId', 'name patientId');
 
       if (!appointment) {
         throw new NotFoundError('예약을 찾을 수 없습니다.');
       }
-
-      logger.info(`Retrieved appointment details: ${id}`);
 
       res.json({
         success: true,
         data: appointment
       });
     } catch (error) {
-      logger.error('Appointment detail retrieval failed:', error);
+      logger.error(`Failed to retrieve appointment ${req.params.id}:`, error);
       next(error);
     }
   },
 
-  // 의사별 일일 예약 통계 조회
-  getDoctorDailyStats: async (req, res) => {
+  // 의사 일일 통계
+  getDoctorDailyStats: async (req, res, next) => {
     try {
       const { date } = req.query;
+      const doctorId = req.user.id;
+
+      if (!date) {
+        throw new ValidationError('날짜를 지정해주세요.');
+      }
+
+      const startDate = moment(date).startOf('day');
+      const endDate = moment(date).endOf('day');
+
       const stats = await Appointment.aggregate([
         {
           $match: {
-            doctorId: req.user.userId,
-            startTime: {
-              $gte: new Date(date),
-              $lt: new Date(new Date(date).setDate(new Date(date).getDate() + 1))
+            doctorId: new mongoose.Types.ObjectId(doctorId),
+            dateTime: {
+              $gte: startDate.toDate(),
+              $lte: endDate.toDate()
             }
           }
         },
         {
           $group: {
-            _id: "$status",
+            _id: '$status',
             count: { $sum: 1 }
           }
         }
       ]);
 
-      res.json({
-        success: true,
-        data: stats,
-        message: "일일 통계 조회 성공"
+      const formattedStats = {
+        total: 0,
+        scheduled: 0,
+        completed: 0,
+        cancelled: 0,
+        noShow: 0
+      };
+
+      stats.forEach(stat => {
+        formattedStats[stat._id] = stat.count;
+        formattedStats.total += stat.count;
       });
-    } catch (error) {
-      logger.error('Error in getDoctorDailyStats:', error);
-      res.status(500).json({
-        success: false,
-        message: "일일 통계 조회 중 오류가 발생했습니다."
-      });
-    }
-  },
-
-  // 예약 재활성화
-  reactivateAppointment: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const newData = req.body;
-      const userId = req.user.userId;
-
-      // 예약 조회 및 권한 확인
-      const appointment = await Appointment.findById(id);
-      if (!appointment) {
-        return res.status(404).json({
-          success: false,
-          message: "예약을 찾을 수 없습니다."
-        });
-      }
-
-      // 의사 본인의 예약이거나 관리자만 재활성화 가능
-      if (appointment.doctorId.toString() !== userId && req.user.role !== 'admin') {
-        return res.status(403).json({
-          success: false,
-          message: "예약을 재활성화할 권한이 없습니다."
-        });
-      }
-
-      const reactivatedAppointment = await appointmentService.reactivateAppointment(id, newData);
-
-      // 재활성화 알림 발송
-      await notificationService.sendAppointmentReactivatedNotification(reactivatedAppointment);
 
       res.json({
         success: true,
-        data: reactivatedAppointment,
-        message: "예약이 재활성화되었습니다."
+        data: formattedStats
       });
-
     } catch (error) {
-      logger.error('Error in reactivateAppointment:', error);
-      res.status(500).json({
-        success: false,
-        message: "예약 재활성화 중 오류가 발생했습니다.",
-        error: error.message
-      });
+      next(error);
     }
   },
 
-  // 월간 통계
-  getDoctorMonthlyStats: async (req, res) => {
+  // 의사 월간 통계
+  getDoctorMonthlyStats: async (req, res, next) => {
     try {
       const { year, month } = req.query;
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
+      const doctorId = req.user.id;
+
+      if (!year || !month) {
+        throw new ValidationError('년도와 월을 지정해주세요.');
+      }
+
+      const startDate = moment(`${year}-${month}-01`).startOf('month');
+      const endDate = moment(startDate).endOf('month');
 
       const stats = await Appointment.aggregate([
         {
           $match: {
-            doctorId: req.user.userId,
-            startTime: {
-              $gte: startDate,
-              $lte: endDate
+            doctorId: new mongoose.Types.ObjectId(doctorId),
+            dateTime: {
+              $gte: startDate.toDate(),
+              $lte: endDate.toDate()
             }
           }
         },
         {
           $group: {
             _id: {
-              day: { $dayOfMonth: "$startTime" },
-              status: "$status"
+              day: { $dayOfMonth: '$dateTime' },
+              status: '$status'
             },
             count: { $sum: 1 }
+          }
+        },
+        {
+          $sort: {
+            '_id.day': 1
           }
         }
       ]);
 
+      const formattedStats = {};
+      for (let day = 1; day <= endDate.date(); day++) {
+        formattedStats[day] = {
+          total: 0,
+          scheduled: 0,
+          completed: 0,
+          cancelled: 0,
+          noShow: 0
+        };
+      }
+
+      stats.forEach(stat => {
+        const { day, status } = stat._id;
+        formattedStats[day][status] = stat.count;
+        formattedStats[day].total += stat.count;
+      });
+
       res.json({
         success: true,
-        data: stats,
-        message: "월간 통계 조회 성공"
+        data: formattedStats
       });
     } catch (error) {
-      logger.error('Error in getDoctorMonthlyStats:', error);
-      res.status(500).json({
-        success: false,
-        message: "월간 통계 조회 중 오류가 발생했습니다."
-      });
+      next(error);
     }
   }
 };

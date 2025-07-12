@@ -64,7 +64,7 @@ export const isTest = () => process.env.NODE_ENV === 'test';
 
 // 환경 정보 로깅
 if (config.debug) {
-  console.log(`🚀 Maekcord Frontend - ${currentEnvironment.toUpperCase()} 환경`);
+  console.log(`🚀 Maekcode Frontend - ${currentEnvironment.toUpperCase()} 환경`);
   console.log('📋 환경 설정:', {
     api: apiConfig.baseURL,
     websocket: websocketConfig.url,

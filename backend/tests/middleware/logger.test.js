@@ -1,4 +1,4 @@
-const { requestLogger, errorLogger } = require('../../middleware/logger');
+const { requestLogger, errorLogger } = require('../../middlewares/requestLogger');
 const logger = require('../../utils/logger');
 
 describe('Logger Middleware Test', () => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Modal, Table, Tag, Button, Space, Drawer, Descriptions, message, Dropdown, Input, Select, Alert, Spin, Empty, Card } from 'antd';
 import { UserOutlined, ReloadOutlined, BellOutlined, MoreOutlined, SearchOutlined, LoadingOutlined, EllipsisOutlined, BugOutlined, MedicineBoxOutlined } from '@ant-design/icons';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import {
   DashboardWrapper,
   StyledTable,
@@ -16,7 +17,7 @@ import * as queueApi from '../../api/queueApi';
 import styled, { css, keyframes } from 'styled-components';
 import QueueDisplay from '../QueueDisplay/QueueDisplay';
 import { soundManager } from '../../utils/sound';
-import { wsClient } from '../../utils/websocket';
+import { useWebSocket } from '../../hooks/useWebSocket';
 import { debounce } from 'lodash';
 import './styles.css';
 import { speak, announceWaitingRoom, announceConsultingRoom, announcePatientCall } from '../../utils/speechUtils';
@@ -136,6 +137,7 @@ const ReceptionDashboard = (props) => {
   const [lastCalledPatient, setLastCalledPatient] = useState(null);
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector(state => state.auth);
+  const { isReady, send } = useWebSocket();
 
   // 검색창 ref 선언
   const searchInputRef = useRef(null);
@@ -264,21 +266,27 @@ const ReceptionDashboard = (props) => {
         });
         
         // WebSocket을 통해 진료실로 환자 데이터 전송
-        wsClient.send({
-          type: 'PATIENT_CALLED_TO_DOCTOR',
-          patient: {
-            _id: queue._id,
-            patientId: queue.patientId,
-            queueNumber: queue.queueNumber,
-            status: 'called',
-            symptoms: queue.symptoms || [],
-            memo: queue.memo || '',
-            stress: queue.stress || '',
-            pulseAnalysis: queue.pulseAnalysis || '',
-            registeredAt: queue.registeredAt,
-            calledAt: new Date()
+        if (isReady) {
+          try {
+            await send('PATIENT_CALLED_TO_DOCTOR', {
+              _id: queue._id,
+              patientId: queue.patientId,
+              queueNumber: queue.queueNumber,
+              status: 'called',
+              symptoms: queue.symptoms || [],
+              memo: queue.memo || '',
+              stress: queue.stress || '',
+              pulseAnalysis: queue.pulseAnalysis || '',
+              registeredAt: queue.registeredAt,
+              calledAt: new Date()
+            });
+          } catch (wsError) {
+            console.error('WebSocket 메시지 전송 실패:', wsError);
+            // WebSocket 전송 실패는 치명적이지 않으므로 계속 진행
           }
-        });
+        } else {
+          console.warn('WebSocket이 준비되지 않아 실시간 알림을 보내지 못했습니다.');
+        }
         
         // 음성 안내 실행 (지원되는 경우)
         if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -334,12 +342,21 @@ const ReceptionDashboard = (props) => {
         updateItem(record._id, { status: newStatus });
 
         // WebSocket 이벤트 전송
-        wsClient.send({
-          type: 'QUEUE_UPDATE',
-          queueId: record._id,
-          status: newStatus,
-          timestamp: new Date().toISOString()
-        });
+        if (isReady) {
+          try {
+            await send('QUEUE_UPDATE', {
+              queueId: record._id,
+              status: newStatus,
+              timestamp: new Date().toISOString()
+            });
+            console.log('✅ WebSocket 메시지 전송 성공');
+          } catch (wsError) {
+            console.error('WebSocket 메시지 전송 실패:', wsError);
+            // WebSocket 전송 실패는 치명적이지 않으므로 계속 진행
+          }
+        } else {
+          console.warn('WebSocket이 준비되지 않아 실시간 알림을 보내지 못했습니다.');
+        }
       } else {
         throw new Error(response?.message || '상태 업데이트에 실패했습니다.');
       }
@@ -605,51 +622,83 @@ const ReceptionDashboard = (props) => {
         </TableCard>
 
         <Drawer
-          title="환자 상세 정보"
+          title={
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                color: 'white',
+                borderRadius: '16px 16px 0 0',
+                padding: '20px 24px',
+                margin: '-24px -24px 24px -24px',
+                fontWeight: 700,
+                fontSize: 24,
+              }}
+            >
+              <AssignmentIndIcon style={{ fontSize: 32, marginRight: 8 }} />
+              환자 상세 정보
+            </div>
+          }
           placement="right"
           onClose={() => setDetailVisible(false)}
           open={detailVisible}
           width={600}
+          styles={{
+            body: { background: '#f5f7fa', borderRadius: '0 0 16px 16px', padding: 32 },
+            header: { borderRadius: '16px 16px 0 0', background: 'transparent' },
+          }}
         >
           {selectedPatient && (
-            <div className="drawer-content">
-              <div className="detail-card">
-                <div className="title">기본 정보</div>
-                <div className="patient-info">
-                  <div className="info-item">
-                    <div className="label">이름</div>
-                    <div className="value">{selectedPatient.basicInfo.name}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {/* 기본 정보 카드 */}
+              <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 2px 16px rgba(76, 175, 80, 0.08)', padding: 32, marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                  <AssignmentIndIcon style={{ fontSize: 32, color: '#4CAF50' }} />
+                  <span style={{ fontWeight: 700, fontSize: 22, color: '#388E3C' }}>기본 정보</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ minWidth: 80, color: '#6b7280', fontWeight: 600 }}>이름</div>
+                    <div style={{ fontWeight: 700, fontSize: 18 }}>{selectedPatient.basicInfo.name}</div>
                   </div>
-                  <div className="info-item">
-                    <div className="label">생년월일</div>
-                    <div className="value">{selectedPatient.basicInfo.birthDate}</div>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ minWidth: 80, color: '#6b7280', fontWeight: 600 }}>생년월일</div>
+                    <div style={{ fontWeight: 500 }}>{selectedPatient.basicInfo.birthDate}</div>
                   </div>
-                  <div className="info-item">
-                    <div className="label">연락처</div>
-                    <div className="value">{selectedPatient.basicInfo.phone}</div>
+                  <div style={{ display: 'flex', gap: 16 }}>
+                    <div style={{ minWidth: 80, color: '#6b7280', fontWeight: 600 }}>연락처</div>
+                    <div style={{ fontWeight: 500 }}>{selectedPatient.basicInfo.phone}</div>
                   </div>
                 </div>
               </div>
-              <div className="detail-card">
-                <div className="title">진료 정보</div>
+              {/* 진료 정보 카드 */}
+              <div style={{ background: 'white', borderRadius: 16, boxShadow: '0 2px 16px rgba(76, 175, 80, 0.08)', padding: 32 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                  <MedicineBoxOutlined style={{ fontSize: 28, color: '#388E3C' }} />
+                  <span style={{ fontWeight: 700, fontSize: 22, color: '#388E3C' }}>진료 정보</span>
+                </div>
                 <Descriptions column={1}>
-                  <Descriptions.Item label="주요 증상">
+                  <Descriptions.Item label={<span style={{ color: '#388E3C', fontWeight: 600 }}>주요 증상</span>}>
                     <Space wrap>
                       {selectedPatient.patientId?.symptoms?.map((symptom, index) => (
-                        <Tag key={index} color="blue">{symptom}</Tag>
+                        <Tag key={index} color="success" style={{ fontWeight: 600, fontSize: 15 }}>{symptom}</Tag>
                       )) || '-'}
                     </Space>
                   </Descriptions.Item>
-                  <Descriptions.Item label="복용 중인 약물">
+                  <Descriptions.Item label={<span style={{ color: '#388E3C', fontWeight: 600 }}>복용 중인 약물</span>}>
                     <Space wrap>
                       {selectedPatient.patientId?.medications?.map((med, index) => (
-                        <Tag key={index} color="purple" icon={<MedicineBoxOutlined />}>
+                        <Tag key={index} color="processing" icon={<MedicineBoxOutlined />} style={{ fontWeight: 600, fontSize: 15 }}>
                           {med}
                         </Tag>
                       )) || '-'}
                     </Space>
                   </Descriptions.Item>
-                  <Descriptions.Item label="방문 유형">{selectedPatient.basicInfo.visitType}</Descriptions.Item>
+                  <Descriptions.Item label={<span style={{ color: '#388E3C', fontWeight: 600 }}>방문 유형</span>}>
+                    <span style={{ fontWeight: 600 }}>{selectedPatient.basicInfo.visitType}</span>
+                  </Descriptions.Item>
                 </Descriptions>
               </div>
             </div>
