@@ -1084,13 +1084,14 @@ const PulseVisualization = ({
                 { name: 'HR', label: '심박동수', value: HR }
               ].map((param) => {
                 const range = PARAMETER_RANGES[param.name];
-                const position = ((param.value - range.min) / (range.max - range.min)) * 100;
+                const safeValue = Number(param.value) || 0;
+                const position = ((safeValue - range.min) / (range.max - range.min)) * 100;
                 const avgValue = range.mean;
                 
                 return (
                   <div key={param.name} style={{ marginBottom: 30 }}>
                     <ParameterName>
-                      {param.label} <ValueText>{param.value.toFixed(2)}</ValueText>
+                      {param.label} <ValueText>{(Number(param.value) || 0).toFixed(2)}</ValueText>
                     </ParameterName>
                     <ParameterBar>
                       <CenterLine />
@@ -1098,7 +1099,7 @@ const PulseVisualization = ({
                       <ValueIndicator 
                         style={{ 
                           left: `${position}%`,
-                          background: getValueColor(param.value, avgValue, range.max - range.min)
+                          background: getValueColor(safeValue, avgValue, range.max - range.min)
                         }} 
                       />
                       <RangeText style={{ left: 0 }}>{range.min.toFixed(2)}</RangeText>
@@ -1120,85 +1121,85 @@ const PulseVisualization = ({
               <ClassificationRow>
                 <ParameterInfo>
                   <ParameterName>말초혈관수축도</ParameterName>
-                  <ParameterValue>{PVC.toFixed(2)}</ParameterValue>
+                  <ParameterValue>{(Number(PVC) || 0).toFixed(2)}</ParameterValue>
                 </ParameterInfo>
                 <BarContainer>
                   <CenterLine />
                   <ValueMarker 
                     style={{ 
-                      left: `${((PVC - PARAMETER_RANGES.PVC.min) / (PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)) * 100}%`,
-                      background: getValueColor(PVC, PARAMETER_RANGES.PVC.mean, PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min),
-                      color: getValueColor(PVC, PARAMETER_RANGES.PVC.mean, PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)
+                      left: `${(((Number(PVC) || 0) - PARAMETER_RANGES.PVC.min) / (PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)) * 100}%`,
+                      background: getValueColor(Number(PVC) || 0, PARAMETER_RANGES.PVC.mean, PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min),
+                      color: getValueColor(Number(PVC) || 0, PARAMETER_RANGES.PVC.mean, PARAMETER_RANGES.PVC.max - PARAMETER_RANGES.PVC.min)
                     }} 
                   />
-                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.PVC.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left:0}}>{PARAMETER_RANGES.PVC.min.toFixed(2)}</RangeValue>
                   <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.PVC.mean.toFixed(2)}</RangeValue>
                   <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.PVC.max.toFixed(2)}</RangeValue>
                 </BarContainer>
-                <Tag color={getTagColor(pulseTypes.PVC)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.PVC}</Tag>
+                <Tag color={getTagColor(pulseTypes.PVC)} style={{ minWidth: 60, textAlign: 'center' }}>{pulseTypes.PVC}</Tag>
               </ClassificationRow>
 
               <ClassificationRow>
                 <ParameterInfo>
                   <ParameterName>혈관점탄도</ParameterName>
-                  <ParameterValue>{BV.toFixed(2)}</ParameterValue>
+                  <ParameterValue>{(Number(BV) || 0).toFixed(2)}</ParameterValue>
                 </ParameterInfo>
                 <BarContainer>
                   <CenterLine />
                   <ValueMarker 
                     style={{ 
-                      left: `${((BV - PARAMETER_RANGES.BV.min) / (PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)) * 100}%`,
-                      background: getValueColor(BV, PARAMETER_RANGES.BV.mean, PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min),
-                      color: getValueColor(BV, PARAMETER_RANGES.BV.mean, PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)
+                      left: `${(((Number(BV) || 0) - PARAMETER_RANGES.BV.min) / (PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)) * 100}%`,
+                      background: getValueColor(Number(BV) || 0, PARAMETER_RANGES.BV.mean, PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min),
+                      color: getValueColor(Number(BV) || 0, PARAMETER_RANGES.BV.mean, PARAMETER_RANGES.BV.max - PARAMETER_RANGES.BV.min)
                     }} 
                   />
-                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.BV.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left:0}}>{PARAMETER_RANGES.BV.min.toFixed(2)}</RangeValue>
                   <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.BV.mean.toFixed(2)}</RangeValue>
                   <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.BV.max.toFixed(2)}</RangeValue>
                 </BarContainer>
-                <Tag color={getTagColor(pulseTypes.BV)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.BV}</Tag>
+                <Tag color={getTagColor(pulseTypes.BV)} style={{ minWidth: 60, textAlign: 'center' }}>{pulseTypes.BV}</Tag>
               </ClassificationRow>
 
               <ClassificationRow>
                 <ParameterInfo>
                   <ParameterName>일회박출량</ParameterName>
-                  <ParameterValue>{SV.toFixed(2)}</ParameterValue>
+                  <ParameterValue>{(Number(SV) || 0).toFixed(2)}</ParameterValue>
                 </ParameterInfo>
                 <BarContainer>
                   <CenterLine />
                   <ValueMarker 
                     style={{ 
-                      left: `${((SV - PARAMETER_RANGES.SV.min) / (PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)) * 100}%`,
-                      background: getValueColor(SV, PARAMETER_RANGES.SV.mean, PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min),
-                      color: getValueColor(SV, PARAMETER_RANGES.SV.mean, PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)
+                      left: `${(((Number(SV) || 0) - PARAMETER_RANGES.SV.min) / (PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)) * 100}%`,
+                      background: getValueColor(Number(SV) || 0, PARAMETER_RANGES.SV.mean, PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min),
+                      color: getValueColor(Number(SV) || 0, PARAMETER_RANGES.SV.mean, PARAMETER_RANGES.SV.max - PARAMETER_RANGES.SV.min)
                     }} 
                   />
-                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.SV.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left:0}}>{PARAMETER_RANGES.SV.min.toFixed(2)}</RangeValue>
                   <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.SV.mean.toFixed(2)}</RangeValue>
                   <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.SV.max.toFixed(2)}</RangeValue>
                 </BarContainer>
-                <Tag color={getTagColor(pulseTypes.SV)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.SV}</Tag>
+                <Tag color={getTagColor(pulseTypes.SV)} style={{ minWidth: 60, textAlign: 'center' }}>{pulseTypes.SV}</Tag>
               </ClassificationRow>
 
               <ClassificationRow>
                 <ParameterInfo>
                   <ParameterName>심박동수</ParameterName>
-                  <ParameterValue>{HR.toFixed(2)}</ParameterValue>
+                  <ParameterValue>{(Number(HR) || 0).toFixed(2)}</ParameterValue>
                 </ParameterInfo>
                 <BarContainer>
                   <CenterLine />
                   <ValueMarker 
                     style={{ 
-                      left: `${((HR - PARAMETER_RANGES.HR.min) / (PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)) * 100}%`,
-                      background: getValueColor(HR, PARAMETER_RANGES.HR.mean, PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min),
-                      color: getValueColor(HR, PARAMETER_RANGES.HR.mean, PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)
+                      left: `${(((Number(HR) || 0) - PARAMETER_RANGES.HR.min) / (PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)) * 100}%`,
+                      background: getValueColor(Number(HR) || 0, PARAMETER_RANGES.HR.mean, PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min),
+                      color: getValueColor(Number(HR) || 0, PARAMETER_RANGES.HR.mean, PARAMETER_RANGES.HR.max - PARAMETER_RANGES.HR.min)
                     }} 
                   />
-                  <RangeValue style={{ left: 0 }}>{PARAMETER_RANGES.HR.min.toFixed(2)}</RangeValue>
+                  <RangeValue style={{ left:0}}>{PARAMETER_RANGES.HR.min.toFixed(2)}</RangeValue>
                   <RangeValue style={{ left: '50%' }}>{PARAMETER_RANGES.HR.mean.toFixed(2)}</RangeValue>
                   <RangeValue style={{ right: 0 }}>{PARAMETER_RANGES.HR.max.toFixed(2)}</RangeValue>
                 </BarContainer>
-                <Tag color={getTagColor(pulseTypes.HR)} style={{ minWidth: '60px', textAlign: 'center' }}>{pulseTypes.HR}</Tag>
+                <Tag color={getTagColor(pulseTypes.HR)} style={{ minWidth: 60, textAlign: 'center' }}>{pulseTypes.HR}</Tag>
               </ClassificationRow>
 
               <Divider />

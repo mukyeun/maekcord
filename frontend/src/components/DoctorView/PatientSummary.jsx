@@ -95,7 +95,7 @@ const PatientSummary = ({ data, patientId }) => {
 
   const loadVisitHistory = async () => {
     try {
-      const response = await axios.get(`/api/patients/${patientId}/visits`);
+      const response = await axios.get(`/api/visits/patients/${patientId}/visits`);
       if (response.data.success) {
         setVisitHistory(response.data.visits);
       }
@@ -108,7 +108,7 @@ const PatientSummary = ({ data, patientId }) => {
   const loadVisitRecord = async (date) => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/patients/${patientId}/visits/${date}`);
+      const response = await axios.get(`/api/visits/patients/${patientId}/visits/${date}`);
       if (response.data.success) {
         setHistoricalData(response.data.visit);
       }

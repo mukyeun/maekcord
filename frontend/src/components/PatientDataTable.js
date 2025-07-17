@@ -1140,6 +1140,58 @@ const PatientDataTable = () => {
         />
       </Box>
 
+      {/* 모달 하단 버튼 영역 */}
+      <Box sx={{ 
+        position: 'fixed', 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        background: 'rgba(255, 255, 255, 0.95)', 
+        backdropFilter: 'blur(10px)',
+        borderTop: '1px solid rgba(30, 64, 175, 0.1)',
+        padding: '16px 24px',
+        zIndex: 1000,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)'
+      }}>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <ActionButton
+            variant="contained"
+            onClick={() => window.location.href = '/'}
+            sx={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+              }
+            }}
+          >
+            홈으로 가기
+          </ActionButton>
+        </Box>
+        
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <ActionButton
+            variant="outlined"
+            onClick={handleClose}
+            sx={{
+              borderColor: '#1e40af',
+              color: '#1e40af',
+              '&:hover': {
+                borderColor: '#1e3a8a',
+                background: 'rgba(30, 64, 175, 0.1)'
+              }
+            }}
+          >
+            닫기
+          </ActionButton>
+        </Box>
+      </Box>
+
+      {/* 하단 여백 추가 */}
+      <Box sx={{ height: '80px' }} />
+
       {/* 환자 상세 정보 다이얼로그 */}
       <Dialog
         open={detailDialogOpen}

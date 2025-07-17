@@ -1,7 +1,6 @@
 import axiosInstance from './axiosInstance';
 
 export const login = async (email, password) => {
-  const response = await axiosInstance.post('/api/auth/login', { email, password });
-  // 서버 응답 데이터는 response.data.data에 있습니다.
-  return response.data.data;
+  const response = await axiosInstance.post('/auth/login', { email, password });
+  return response.data.data; // data.data를 반환하여 token과 user를 직접 받을 수 있도록 함
 };

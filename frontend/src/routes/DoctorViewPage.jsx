@@ -8,7 +8,12 @@ const DoctorViewPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useSelector(state => state.auth);
-  const patientId = location.state?.patientId;
+  
+  // URL 파라미터에서 patientId 읽어오기
+  const searchParams = new URLSearchParams(location.search);
+  const patientId = searchParams.get('patientId') || location.state?.patientId;
+
+  console.log('DoctorViewPage - patientId:', patientId); // 디버깅
 
   // 인증 체크
   if (!isAuthenticated) {
@@ -20,22 +25,12 @@ const DoctorViewPage = () => {
   };
 
   return (
-    <div style={{ 
-      maxWidth: 1200, 
-      margin: '0 auto', 
-      padding: 32,
-      background: '#fff', 
-      borderRadius: 18, 
-      boxShadow: '0 4px 24px rgba(24,144,255,0.08)',
-      minHeight: 'calc(100vh - 64px)'
-    }}>
-      <DoctorView 
-        visible={true} 
-        onClose={handleClose} 
-        isFullPage={true}
-        selectedPatientId={patientId}
-      />
-    </div>
+    <DoctorView 
+      visible={true} 
+      onClose={handleClose} 
+      selectedPatientId={patientId}
+      isFullPage={true}
+    />
   );
 };
 

@@ -41,6 +41,10 @@ const Logo = styled(Title)`
   color: #1e40af !important;
   font-size: 36px !important;
   font-weight: 800 !important;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const ActionButton = styled(Button)`
@@ -226,7 +230,7 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
     <HeaderBar>
       <Logo>
         <MenuOutlined style={{ marginRight: 12, fontSize: 22 }} />
-        Maekstation
+        Maekcode
       </Logo>
       <Nav>
         <NavItem href="/">대시보드</NavItem>

@@ -8,7 +8,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault('Asia/Seoul');
 
-const BASE_URL = '/api/queues';
+const BASE_URL = '/queues';
 
 /**
  * 대기열 등록 API
@@ -78,7 +78,7 @@ export const getTodayQueueList = async () => {
  * 환자 호출
  */
 export const callPatient = async (queueId) => {
-  return await axiosInstance.put(`/api/queues/${queueId}/call`, {
+  return await axiosInstance.put(`/queues/${queueId}/call`, {
     changedBy: 'reception',
     previousStatus: 'waiting',
     newStatus: 'called',

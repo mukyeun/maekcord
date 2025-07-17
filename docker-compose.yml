@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # MongoDB 데이터베이스
+  mongodb:
+    image: mongo:7.0
+    container_name: maekcord-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: maekcode
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./backend/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - maekcord-network
+
+  # Redis 캐시 (선택사항)
+  redis:
+    image: redis:7-alpine
+    container_name: maekcord-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - maekcord-network
+
+  # 백엔드 API 서버
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend-builder
+    container_name: maekcord-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/maekcode?authSource=admin
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 24h
+      CORS_ORIGIN: http://localhost:3000
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./backend/logs:/app/backend/logs
+      - ./backend/uploads:/app/backend/uploads
+    networks:
+      - maekcord-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # 프론트엔드 개발 서버
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-builder
+    container_name: maekcord-frontend-dev
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:5000
+      REACT_APP_WS_URL: ws://localhost:5000
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/frontend/src
+      - ./frontend/public:/app/frontend/public
+    networks:
+      - maekcord-network
+    command: npm start
+
+  # Nginx 리버스 프록시 (프로덕션)
+  nginx:
+    image: nginx:alpine
+    container_name: maekcord-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./frontend/build:/usr/share/nginx/html:ro
+    depends_on:
+      - backend
+    networks:
+      - maekcord-network
+
+  # PM2 프로세스 매니저 (프로덕션)
+  pm2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: maekcord-pm2
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/maekcode?authSource=admin
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 24h
+      CORS_ORIGIN: http://localhost
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./backend/logs:/app/backend/logs
+      - ./backend/uploads:/app/backend/uploads
+    networks:
+      - maekcord-network
+    command: pm2-runtime start backend/ecosystem.config.js --env production
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  maekcord-network:
+    driver: bridge 

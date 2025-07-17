@@ -64,14 +64,13 @@ router.use((req, res, next) => {
   next();
 });
 
-// 환자 호출 API - 다른 라우트보다 먼저 정의
-router.put('/:id/call', callPatient);
-
-// ✅ 기본 라우트
-router.get('/', getTodayQueueList);                    // 대기열 목록 조회
-router.post('/', registerQueue);                       // 대기열 등록
+// ✅ 기본 라우트 (구체적인 경로를 먼저 정의)
 router.get('/today', getTodayQueueList);              // 오늘 대기 목록 조회
 router.get('/status', getQueueStatus);                // 대기 현황 통계
+router.get('/test', (req, res) => {
+  res.json({ success: true, message: 'Queue router is working!' });
+});
+router.get('/current-patient', getCurrentPatient);     // 현재 진료 중인 환자 조회
 
 // POST /api/queues/status - 환자별 대기 상태 조회 (POST 방식)
 router.post('/status', async (req, res) => {
@@ -193,6 +192,101 @@ router.get('/status/patient', async (req, res) => {   // 환자별 대기 상태
     });
   }
 });
+
+// 다음 환자 호출
+router.post('/next', async (req, res) => {
+  try {
+    logger.info('🔍 다음 환자 호출 시작');
+
+    // 1. 현재 날짜 범위 설정
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // 2. 대기 중인 환자 찾기
+    const nextQueue = await Queue.findOne({
+      status: 'waiting',
+      isArchived: false,
+      registeredAt: {
+        $gte: today,
+        $lt: tomorrow
+      }
+    })
+    .sort({ sequenceNumeric: 1 })
+    .populate('patientId', PATIENT_FIELDS);
+
+    if (!nextQueue) {
+      return res.json({
+        success: true,
+        data: null,
+        message: '대기 중인 환자가 없습니다.'
+      });
+    }
+
+    // 3. 환자 상태 업데이트
+    nextQueue.status = 'called';
+    nextQueue.calledAt = new Date();
+    await nextQueue.save();
+
+    // 4. 대기열 히스토리 기록
+    await QueueHistory.create({
+      queueId: nextQueue._id,
+      patientId: nextQueue.patientId._id,
+      previousStatus: 'waiting',
+      newStatus: 'called',
+      changedBy: req.user?.id || 'SYSTEM',
+      changedAt: new Date()
+    });
+
+    // 5. WebSocket 알림 전송
+    broadcastPatientCalled({
+      type: 'PATIENT_CALLED',
+      queueId: nextQueue._id,
+      patient: {
+        id: nextQueue.patientId._id,
+        name: nextQueue.patientId.basicInfo.name
+      },
+      status: 'called',
+      timestamp: new Date().toISOString()
+    });
+
+    // 6. 전체 큐 목록 업데이트 브로드캐스트
+    const updatedQueueList = await Queue.find({ 
+      status: { $in: ACTIVE_STATUSES },
+      isArchived: false,
+      registeredAt: {
+        $gte: today,
+        $lt: tomorrow
+      }
+    })
+    .populate('patientId', PATIENT_FIELDS)
+    .sort({ sequenceNumeric: 1 })
+    .lean();
+
+    broadcastQueueUpdate(updatedQueueList);
+
+    res.json({
+      success: true,
+      data: nextQueue,
+      message: '다음 환자 호출 성공'
+    });
+
+  } catch (error) {
+    logger.error('❌ 다음 환자 호출 실패:', error);
+    res.status(500).json({
+      success: false,
+      message: '다음 환자 호출 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// ✅ 기본 라우트
+router.get('/', getTodayQueueList);                    // 대기열 목록 조회
+router.post('/', registerQueue);                       // 대기열 등록
+
+// 환자 호출 API - 파라미터가 있는 라우트는 나중에 정의
+router.put('/:id/call', callPatient);
 
 // ✅ 대기열 상세 라우트
 router.get('/:id/history', async (req, res) => {      // 대기 이력 조회
@@ -410,9 +504,6 @@ router.post('/test-data', async (req, res) => {
   }
 });
 
-// 현재 진료 중인 환자 조회
-router.get('/current-patient', getCurrentPatient);
-
 // 대기 상태 변경 라우트
 router.put('/:id/status', validateObjectId, async (req, res) => {
   try {
@@ -459,94 +550,6 @@ router.put('/:id/status', validateObjectId, async (req, res) => {
     res.status(500).json({ 
       success: false, 
       message: '상태 업데이트 중 오류가 발생했습니다.' 
-    });
-  }
-});
-
-// 다음 환자 호출
-router.post('/next', async (req, res) => {
-  try {
-    logger.info('🔍 다음 환자 호출 시작');
-
-    // 1. 현재 날짜 범위 설정
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // 2. 대기 중인 환자 찾기
-    const nextQueue = await Queue.findOne({
-      status: 'waiting',
-      isArchived: false,
-      registeredAt: {
-        $gte: today,
-        $lt: tomorrow
-      }
-    })
-    .sort({ sequenceNumeric: 1 })
-    .populate('patientId', PATIENT_FIELDS);
-
-    if (!nextQueue) {
-      return res.json({
-        success: true,
-        data: null,
-        message: '대기 중인 환자가 없습니다.'
-      });
-    }
-
-    // 3. 환자 상태 업데이트
-    nextQueue.status = 'called';
-    nextQueue.calledAt = new Date();
-    await nextQueue.save();
-
-    // 4. 대기열 히스토리 기록
-    await QueueHistory.create({
-      queueId: nextQueue._id,
-      patientId: nextQueue.patientId._id,
-      previousStatus: 'waiting',
-      newStatus: 'called',
-      changedBy: req.user?.id || 'SYSTEM',
-      changedAt: new Date()
-    });
-
-    // 5. WebSocket 알림 전송
-    broadcastPatientCalled({
-      type: 'PATIENT_CALLED',
-      queueId: nextQueue._id,
-      patient: {
-        id: nextQueue.patientId._id,
-        name: nextQueue.patientId.basicInfo.name
-      },
-      status: 'called',
-      timestamp: new Date().toISOString()
-    });
-
-    // 6. 전체 큐 목록 업데이트 브로드캐스트
-    const updatedQueueList = await Queue.find({ 
-      status: { $in: ACTIVE_STATUSES },
-      isArchived: false,
-      registeredAt: {
-        $gte: today,
-        $lt: tomorrow
-      }
-    })
-    .populate('patientId', PATIENT_FIELDS)
-    .sort({ sequenceNumeric: 1 })
-    .lean();
-
-    broadcastQueueUpdate(updatedQueueList);
-
-    res.json({
-      success: true,
-      data: nextQueue,
-      message: '다음 환자 호출 성공'
-    });
-
-  } catch (error) {
-    logger.error('❌ 다음 환자 호출 실패:', error);
-    res.status(500).json({
-      success: false,
-      message: '다음 환자 호출 중 오류가 발생했습니다.'
     });
   }
 });

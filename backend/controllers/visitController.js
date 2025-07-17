@@ -1,11 +1,12 @@
 const Patient = require('../models/Patient');
 const moment = require('moment-timezone');
+const mongoose = require('mongoose');
 
 // 환자의 모든 진료 기록 조회
 exports.getPatientVisitHistory = async (req, res) => {
   try {
     const { patientId } = req.params;
-    console.log('📋 진료 기록 목록 조회 요청:', { patientId });
+    console.log('📋 진료 기록 목록 조회 요청:', { patientId, type: typeof patientId });
     
     if (!patientId) {
       console.error('❌ 환자 ID가 없음');
@@ -15,11 +16,31 @@ exports.getPatientVisitHistory = async (req, res) => {
       });
     }
 
-    console.log('🔍 환자 조회 시도:', patientId);
-    const patient = await Patient.findById(patientId);
+    // ObjectId 유효성 검사 및 변환
+    let objectId;
+    try {
+      if (mongoose.Types.ObjectId.isValid(patientId)) {
+        objectId = new mongoose.Types.ObjectId(patientId);
+      } else {
+        console.error('❌ 유효하지 않은 ObjectId 형식:', patientId);
+        return res.status(400).json({
+          success: false,
+          message: '유효하지 않은 환자 ID 형식입니다.'
+        });
+      }
+    } catch (error) {
+      console.error('❌ ObjectId 변환 실패:', error);
+      return res.status(400).json({
+        success: false,
+        message: '환자 ID 형식이 올바르지 않습니다.'
+      });
+    }
+
+    console.log('🔍 환자 조회 시도:', { originalId: patientId, objectId: objectId.toString() });
+    const patient = await Patient.findById(objectId);
 
     if (!patient) {
-      console.log('❌ 환자를 찾을 수 없음:', patientId);
+      console.log('❌ 환자를 찾을 수 없음:', { patientId, objectId: objectId.toString() });
       return res.status(404).json({
         success: false,
         message: '환자를 찾을 수 없습니다.'
@@ -127,12 +148,32 @@ exports.getPatientVisitRecord = async (req, res) => {
     const { patientId, date } = req.params;
     console.log('진료 기록 상세 조회 요청:', { patientId, date });
 
-    const patient = await Patient.findById(patientId)
+    // ObjectId 유효성 검사 및 변환
+    let objectId;
+    try {
+      if (mongoose.Types.ObjectId.isValid(patientId)) {
+        objectId = new mongoose.Types.ObjectId(patientId);
+      } else {
+        console.error('❌ 유효하지 않은 ObjectId 형식:', patientId);
+        return res.status(400).json({
+          success: false,
+          message: '유효하지 않은 환자 ID 형식입니다.'
+        });
+      }
+    } catch (error) {
+      console.error('❌ ObjectId 변환 실패:', error);
+      return res.status(400).json({
+        success: false,
+        message: '환자 ID 형식이 올바르지 않습니다.'
+      });
+    }
+
+    const patient = await Patient.findById(objectId)
       .populate('records')
       .populate('latestPulseWave');
 
     if (!patient) {
-      console.log('환자를 찾을 수 없음:', patientId);
+      console.log('환자를 찾을 수 없음:', { patientId, objectId: objectId.toString() });
       return res.status(404).json({ success: false, message: '환자를 찾을 수 없습니다.' });
     }
 
