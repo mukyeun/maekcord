@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Tabs, Card, Tag, Space, Button, Input, message, Spin, Form, Select, Alert, Descriptions, Row, Col, Divider, Switch, Typography, DatePicker, Statistic, Badge } from 'antd';
-import { FileTextOutlined, SaveOutlined, UserOutlined, HeartOutlined, MedicineBoxOutlined, BookOutlined, HistoryOutlined, DashboardOutlined, CalendarOutlined } from '@ant-design/icons';
+import { FileTextOutlined, SaveOutlined, UserOutlined, HeartOutlined, MedicineBoxOutlined, BookOutlined, HistoryOutlined, DashboardOutlined, CalendarOutlined, CloseOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import * as queueApi from '../../api/queueApi';
 import * as pulseApi from '../../api/pulseApi';
@@ -12,6 +12,7 @@ import MedicalHistoryComparison from './MedicalHistoryComparison';
 import PatientSummary from './PatientSummary';
 import api from '../../api/axios';
 import moment from 'moment';
+import UnifiedModal from '../Common/UnifiedModal';
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
@@ -19,32 +20,78 @@ const { Text } = Typography;
 
 const StyledCard = styled(Card)`
   margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 2 16 rgba(25 1180, 08 border: 1px solid rgba(25, 1182101 
+  .ant-card-head[object Object]background: linear-gradient(135deg, #f8fc 0%, #e2e8f0100
+    border-bottom: 1px solid rgba(25, 118, 0.1);
+    border-radius: 16x 00
+    padding: 16x 24  }
+  
+  .ant-card-head-title [object Object]
+    font-weight: 700
+    font-size: 18px;
+    color: #100000  }
+  
+  .ant-card-body[object Object]
+    padding: 24px;
+    background: white;
+    border-radius: 0066 }
 `;
 
 const PulseAnalysisCard = styled(Card)`
   margin-bottom: 16px;
-  .ant-card-head {
-    background-color: #f0f8ff;
+  border-radius: 16px;
+  box-shadow: 0 2 16 rgba(25 1180, 08 border: 1px solid rgba(25, 1182101 
+  .ant-card-head[object Object]background: linear-gradient(135deg, #f0ff 0%, #e6f3ff100
+    border-bottom: 1px solid rgba(25, 118, 0.1);
+    border-radius: 16x 00
+    padding: 16x 24  }
+  
+  .ant-card-head-title [object Object]
+    font-weight: 700
+    font-size: 18px;
+    color: #100000  }
+  
+  .ant-card-body[object Object]
+    padding: 24px;
+    background: white;
+    border-radius: 0066
   }
 `;
 
 const MacSangCard = styled(Card)`
   margin-bottom: 16px;
-  .ant-card-head {
-    background-color: #fff0f6;
-  }
+  border-radius: 16px;
+  box-shadow: 0 2 16 rgba(25 1180, 08 border: 1px solid rgba(25, 1182101 
+  .ant-card-head[object Object]background: linear-gradient(135deg, #fff0f6%, #ffe6f0100
+    border-bottom: 1px solid rgba(25, 118, 0.1);
+    border-radius: 16x 00
+    padding: 16x 24  }
+  
+  .ant-card-head-title [object Object]
+    font-weight: 700
+    font-size: 18px;
+    color: #100000  }
+  
+  .ant-card-body[object Object]
+    padding: 24px;
+    background: white;
+    border-radius: 0066
 `;
 
 const HistoryButton = styled(Button)`
-  margin-left: 8px;
-  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+  margin-left: 8background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
   border: none;
   color: white;
+  border-radius: 8px;
+  font-weight:60;
+  height: 40x;
+  padding: 0 20x;
   
-  &:hover {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%);
+  &:hover[object Object]background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b100;
     color: white;
-  }
+    transform: translateY(-1px);
+    box-shadow: 0 4x 12x rgba(30, 64750.3
 `;
 
 const HistoryControls = styled.div`
@@ -52,10 +99,46 @@ const HistoryControls = styled.div`
   display: flex;
   gap: 1rem;
   align-items: center;
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 06 border:1px solid #f0f0f0;
 `;
 
-const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
-  console.log('DoctorView rendered:', { visible, selectedPatientId }); // 디버깅
+const ActionButton = styled(Button)`
+  background: linear-gradient(135deg, #1081%, #059669%);
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-weight:60;
+  height: 40x;
+  padding: 0 20x;
+  
+  &:hover[object Object]background: linear-gradient(135deg, #059669%, #047857100;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4 12 rgba(16,185290.3
+  }
+`;
+
+const TabContainer = styled.div`
+  .ant-tabs-tab {
+    border-radius: 8px 8px 0 0;
+    margin-right: 4px;
+    font-weight: 600  }
+  
+  .ant-tabs-tab-active[object Object]background: linear-gradient(135deg, #1e40af 0%, #1e3a8a100;
+    color: white;
+  }
+  
+  .ant-tabs-content-holder[object Object] background: white;
+    border-radius: 0 16x;
+    padding: 24px;
+    box-shadow: 0 2 16 rgba(25 118, 210
+`;
+
+const DoctorView = ({ visible, onClose, selectedPatientId = null, isFullPage = false }) => {
+  console.log('DoctorView rendered:', { visible, selectedPatientId, isFullPage }); // 디버깅
 
   const [currentPatient, setCurrentPatient] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -71,6 +154,7 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
   const [visitHistory, setVisitHistory] = useState([]);
   const [selectedVisitDate, setSelectedVisitDate] = useState(null);
   const [historicalData, setHistoricalData] = useState(null);
+  const [isViewingHistoricalRecord, setIsViewingHistoricalRecord] = useState(false);
   const [visitTime, setVisitTime] = useState(''); // 진료 시간 상태 추가
   
   const [pulseData, setPulseData] = useState({
@@ -111,6 +195,7 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
     try {
       setLoading(true);
       setError(null);
+      setSelectedVisitDate(null); // 과거 기록 조회 상태 리셋
       const todayQueueListResponse = await queueApi.getTodayQueueList();
       const queueList = todayQueueListResponse.data || [];
       
@@ -190,27 +275,37 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
   };
 
   const loadSelectedPatient = async (patientId) => {
-    console.log('loadSelectedPatient called:', patientId); // 디버깅
+    console.log('🔍 loadSelectedPatient called:', patientId); // 디버깅
     if (!patientId) return;
     
     try {
       setLoading(true);
       setError(null);
+      setSelectedVisitDate(null); // 과거 기록 조회 상태 리셋
       
-      // 1. 환자 정보 조회
+      console.log('🔍 환자 정보 조회 시작...'); // 디버깅
+      
+      //1 정보 조회
       const patientResponse = await patientApi.getPatientById(patientId);
-      console.log('Patient data response:', patientResponse); // 디버깅
-      
-      if (!patientResponse.data?.success) {
+      console.log('🔍 Patient data response:', patientResponse); // 디버깅
+
+      if (!patientResponse.success) {
+        console.error('❌ 환자 정보 조회 실패:', patientResponse); // 디버깅
         throw new Error('환자 정보를 불러올 수 없습니다.');
       }
       
-      const patientData = patientResponse.data.data;
+      // API 응답 구조에 따라 데이터 추출
+      const patientData = patientResponse.data?.patientData || patientResponse.data?.data || patientResponse.data;
+      console.log('🔍 환자 데이터:', patientData); // 디버깅
+      
+      if (!patientData) {
+        throw new Error('환자 데이터를 찾을 수 없습니다.');
+      }
       
       // 2. 해당 환자의 대기열 정보 조회 또는 생성
       let queueData;
       const queueResponse = await queueApi.getTodayQueueList();
-      console.log('Queue data response:', queueResponse); // 디버깅
+      console.log('🔍 Queue data response:', queueResponse); // 디버깅
       
       const existingQueue = queueResponse.data?.find(q => 
         q.patientId?._id === patientId
@@ -218,13 +313,16 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
       
       if (existingQueue) {
         queueData = existingQueue;
+        console.log('🔍 기존 대기열 발견:', queueData); // 디버깅
       } else {
+        console.log('🔍 새 대기열 생성...'); // 디버깅
         // 대기열에 없으면 새로 등록
         const createQueueResponse = await queueApi.registerQueue({
           patientId: patientId,
           date: new Date().toISOString().split('T')[0]
         });
         queueData = createQueueResponse.data;
+        console.log('🔍 새 대기열 생성됨:', queueData); // 디버깅
       }
       
       // 환자 정보와 대기열 정보 결합
@@ -233,12 +331,12 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
         patientId: patientData
       };
       
-      console.log('Setting current patient:', combinedData); // 디버깅
+      console.log('🔍 Setting current patient:', combinedData); // 디버깅
       setCurrentPatient(combinedData);
       setStatus('consulting');
       
     } catch (error) {
-      console.error('선택된 환자 정보 로드 실패:', error);
+      console.error('❌선택된 환자 정보 로드 실패:', error);
       setError('환자 정보를 불러오는데 실패했습니다.');
       message.error('환자 정보를 불러오는데 실패했습니다.');
     } finally {
@@ -325,6 +423,12 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
       loadSelectedPatient(selectedPatientId);
     } else if (visible) {
       loadCurrentPatient();
+    }
+    
+    // 모달이 열릴 때 selectedVisitDate 초기화
+    if (visible) {
+      setSelectedVisitDate(null);
+      setHistoricalData(null);
     }
   }, [visible, selectedPatientId]);
 
@@ -626,44 +730,44 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
   const loadVisitHistory = async (patientId) => {
     try {
       console.log('진료 기록 목록 조회 시도:', patientId);
-      const historyResponse = await patientApi.getPatientVisitHistory(patientId);
-      console.log('진료 기록 목록 응답:', historyResponse);
+      const records = currentPatient.patientId.records || [];
+      console.log('진료 기록 목록 응답:', {
+        totalRecords: records.length,
+        firstRecord: records[0],
+        lastRecord: records[records.length - 1]
+      });
       
       // API 응답 구조 상세 로깅
       console.log('API 응답 구조:', {
-        success: historyResponse.success,
-        hasData: !!historyResponse.data,
-        dataStructure: historyResponse.data ? Object.keys(historyResponse.data) : [],
-        records: historyResponse.data?.records || []
+        success: true, // 데이터가 이미 현재 환자 정보에 포함되어 있으므로 항상 true
+        hasData: !!records,
+        dataStructure: records ? Object.keys(records) : [],
+        records: records
       });
       
-      let records = [];
+      let recordsToDisplay = [];
       
       // records 배열이 직접 응답에 있는 경우
-      if (historyResponse.data?.records && Array.isArray(historyResponse.data.records)) {
-        records = historyResponse.data.records;
-      }
-      // records 배열이 data 객체 안에 있는 경우
-      else if (historyResponse.data?.data?.records && Array.isArray(historyResponse.data.data.records)) {
-        records = historyResponse.data.data.records;
+      if (records && Array.isArray(records)) {
+        recordsToDisplay = records;
       }
       
-      if (records.length > 0) {
+      if (recordsToDisplay.length > 0) {
         console.log('진료 기록 발견:', {
-          recordCount: records.length,
-          firstRecord: records[0],
-          lastRecord: records[records.length - 1]
+          recordCount: recordsToDisplay.length,
+          firstRecord: recordsToDisplay[0],
+          lastRecord: recordsToDisplay[recordsToDisplay.length - 1]
         });
         
         // 날짜순으로 정렬 (최신순)
-        records.sort((a, b) => {
+        recordsToDisplay.sort((a, b) => {
           const dateA = moment(a.visitDateTime || a.date || a.createdAt);
           const dateB = moment(b.visitDateTime || b.date || b.createdAt);
           return dateB.valueOf() - dateA.valueOf();
         });
         
         // 각 기록의 시간 정보 로깅
-        records.forEach((record, index) => {
+        recordsToDisplay.forEach((record, index) => {
           const recordTime = moment(record.visitDateTime || record.date || record.createdAt);
           console.log(`기록 ${index + 1}:`, {
             visitDateTime: record.visitDateTime,
@@ -694,14 +798,14 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
           }
         });
         
-        setVisitHistory(records);
+        setVisitHistory(recordsToDisplay);
         console.log('진료 기록 설정 완료:', {
-          totalRecords: records.length,
-          firstRecord: records[0],
-          lastRecord: records[records.length - 1]
+          totalRecords: recordsToDisplay.length,
+          firstRecord: recordsToDisplay[0],
+          lastRecord: recordsToDisplay[recordsToDisplay.length - 1]
         });
       } else {
-        console.log('과거 진료 기록 없음 - 응답 구조:', historyResponse.data);
+        console.log('과거 진료 기록 없음 - 응답 구조:', currentPatient.patientId.records);
         setVisitHistory([]);
       }
     } catch (error) {
@@ -756,6 +860,13 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
       });
     };
 
+    // 디버깅: 상태 확인
+    console.log('🔍 renderPulseAnalysis - 상태 확인:', {
+      selectedVisitDate: selectedVisitDate ? selectedVisitDate.format('YYYY-MM-DD HH:mm:ss') : null,
+      historicalData: !!historicalData,
+      hasHistoricalData: historicalData ? Object.keys(historicalData) : null
+    });
+
     return (
       <PulseAnalysisCard title="맥파 분석 데이터">
         <Form layout="vertical">
@@ -786,14 +897,14 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
             <Col span={6}><Form.Item label="e/a"><Input value={pulseData['e/a']} onChange={e => handleInputChange('e/a', e.target.value)} /></Form.Item></Col>
           </Row>
           {!selectedVisitDate && (
-            <Button type="primary" onClick={handleSavePulseData} icon={<SaveOutlined />}>
+            <ActionButton type="primary" onClick={handleSavePulseData} icon={<SaveOutlined />}>
               맥파 데이터 저장
-            </Button>
+            </ActionButton>
           )}
-          {selectedVisitDate && (
+          {isViewingHistoricalRecord && (
             <Alert
-              message="과거 진료 기록을 조회 중입니다"
-              description="과거 기록은 수정할 수 없습니다"
+              message="과거 진료 기록 조회 중"
+              description="과거 기록은 읽기 전용입니다"
               type="info"
               showIcon
             />
@@ -837,9 +948,9 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
             suffixIcon={<CalendarOutlined />}
           />
           {selectedVisitDate && (
-            <Button type="primary" onClick={returnToCurrent}>
+            <ActionButton type="primary" onClick={returnToCurrent}>
               현재 상태로 돌아가기
-            </Button>
+            </ActionButton>
           )}
         </Space>
         
@@ -853,9 +964,9 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
               <Tag color="blue">{visitHistory.length}건</Tag>
             </Space>
           }
-          style={{ marginTop: 8 }}
+          style={{ marginTop: 8, borderRadius: 12, boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)' }}
         >
-          <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: 150, overflowY: 'auto' }}>
             {visitHistory.map((visit, index) => {
               // 시간 정보 처리
               const visitDateTime = moment(visit.visitDateTime || visit.date || visit.createdAt);
@@ -880,18 +991,34 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
                   key={`${visitDateTime.format('YYYY-MM-DD-HH-mm')}-${index}`}
                   onClick={() => handleDateChange(visitDateTime)}
                   style={{
-                    padding: '8px',
+                    padding: '12px',
                     cursor: 'pointer',
                     backgroundColor: isSelected ? '#e6f7ff' : 'transparent',
                     borderBottom: '1px solid #f0f0f0',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    borderRadius: '8px',
+                    marginBottom: '4px',
+                    transition: 'all 0.3s ease',
+                    border: isSelected ? '2px solid #1890ff solid transparent' : 'none'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSelected) {
+                      e.target.style.backgroundColor = '#f5f5f5';
+                      e.target.style.transform = 'translateY(-1px)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isSelected) {
+                      e.target.style.backgroundColor = 'transparent';
+                      e.target.style.transform = 'translateY(0)';
+                    }
                   }}
                 >
                   <Space>
-                    <CalendarOutlined />
-                    <span>
+                    <CalendarOutlined style={{ color: '#1890ff' }} />
+                    <span style={{ fontWeight: isSelected ? 600 : 400 }}>
                       {dateStr} {timeStr}
                       {visitDateTime.isSame(now, 'day') && (
                         <Tag color="orange" style={{ marginLeft: 8 }}>오늘</Tag>
@@ -1085,117 +1212,119 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
     const recordData = historicalData || {};
 
     return (
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab={<span><UserOutlined />환자 정보</span>} key="1">
-          <HistoryControls>
-            {renderVisitHistorySelector()}
-          </HistoryControls>
+      <TabContainer>
+        <Tabs activeKey={activeTab} onChange={setActiveTab}>
+          <TabPane tab={<span><UserOutlined />환자 정보</span>} key="1">
+            <HistoryControls>
+              {renderVisitHistorySelector()}
+            </HistoryControls>
 
-          <StyledCard 
-            title={
-              <Space>
-                <UserOutlined />
-                <span>기본 정보</span>
-              </Space>
-            }
-          >
-            <Descriptions bordered column={2}>
-              {getBasicInfoData(currentPatient).map((item, index) => (
-                <Descriptions.Item key={index} label={item.label}>
-                  {item.value}
-                </Descriptions.Item>
-              ))}
-            </Descriptions>
-          </StyledCard>
+            <StyledCard 
+              title={
+                <Space>
+                  <UserOutlined />
+                  <span>기본 정보</span>
+                </Space>
+              }
+            >
+              <Descriptions bordered column={2}>
+                {getBasicInfoData(currentPatient).map((item, index) => (
+                  <Descriptions.Item key={index} label={item.label}>
+                    {item.value}
+                  </Descriptions.Item>
+                ))}
+              </Descriptions>
+            </StyledCard>
 
-          {/* 과거 진료 기록 표시 */}
-          {renderHistoricalRecord(recordData)}
-        </TabPane>
+            {/* 과거 진료 기록 표시 */}
+            {renderHistoricalRecord(recordData)}
+          </TabPane>
 
-        <TabPane tab="증상/메모" key="2">
-          <StyledCard title="증상 및 메모">
-            <Form layout="vertical">
-              <Form.Item label="증상">
-                <Select
-                  mode="multiple"
-                  placeholder="증상을 선택하세요"
-                  value={symptoms}
-                  onChange={setSymptoms}
-                  options={symptomOptions}
-                  style={{ width: '100%' }}
-                  disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
-              <Form.Item label="메모">
-                <TextArea
-                  rows={4}
-                  placeholder="진료 메모를 입력하세요"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                  disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
-              <Form.Item label="스트레스">
-                <Input
-                  placeholder="스트레스 정보"
-                  value={stress}
-                  onChange={(e) => setStress(e.target.value)}
-                  disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
-              {!selectedVisitDate && (
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
-                  저장
-                </Button>
-              )}
-              {selectedVisitDate && (
-                <Alert
-                  message="과거 진료 기록을 조회 중입니다"
-                  description="과거 기록은 수정할 수 없습니다"
-                  type="info"
-                  showIcon
-                />
-              )}
-            </Form>
-          </StyledCard>
-        </TabPane>
+          <TabPane tab="증상/메모" key="2">
+            <StyledCard title="증상 및 메모">
+              <Form layout="vertical">
+                <Form.Item label="증상">
+                  <Select
+                    mode="multiple"
+                    placeholder="증상을 선택하세요"
+                    value={symptoms}
+                    onChange={setSymptoms}
+                    options={symptomOptions}
+                    style={{ width: '100%' }}
+                    disabled={!!selectedVisitDate}
+                  />
+                </Form.Item>
+                <Form.Item label="메모">
+                  <TextArea
+                    rows={4}
+                    placeholder="진료 메모를 입력하세요"
+                    value={memo}
+                    onChange={(e) => setMemo(e.target.value)}
+                    disabled={!!selectedVisitDate}
+                  />
+                </Form.Item>
+                <Form.Item label="스트레스">
+                  <Input
+                    placeholder="스트레스 정보"
+                    value={stress}
+                    onChange={(e) => setStress(e.target.value)}
+                    disabled={!!selectedVisitDate}
+                  />
+                </Form.Item>
+                {!selectedVisitDate && (
+                  <ActionButton type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
+                    저장
+                  </ActionButton>
+                )}
+                {selectedVisitDate && historicalData && Object.keys(historicalData).length > 0 && selectedVisitDate.isBefore(moment(), 'day') && (
+                  <Alert
+                    message="과거 진료 기록을 조회 중입니다"
+                    description="과거 기록은 수정할 수 없습니다"
+                    type="info"
+                    showIcon
+                  />
+                )}
+              </Form>
+            </StyledCard>
+          </TabPane>
 
-        <TabPane tab="맥파분석" key="3">
-          <PulseAnalysisCard title="맥파 분석">
-            {renderPulseAnalysis()}
-          </PulseAnalysisCard>
-        </TabPane>
+          <TabPane tab="맥파분석" key="3">
+            <PulseAnalysisCard title="맥파 분석">
+              {renderPulseAnalysis()}
+            </PulseAnalysisCard>
+          </TabPane>
 
-        <TabPane tab="81맥상" key="4">
-          <MacSangCard title="81맥상 분석">
-            <PulseVisualization pulseData={pulseData} />
-            <Form layout="vertical" style={{ marginTop: '16px' }}>
-              <Form.Item label="맥상 분석 결과">
-                <TextArea
-                  rows={6}
-                  placeholder="81맥상 분석 결과를 입력하세요"
-                  value={pulseAnalysis}
-                  onChange={(e) => setPulseAnalysis(e.target.value)}
-                  disabled={!!selectedVisitDate}
-                />
-              </Form.Item>
-              {!selectedVisitDate && (
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
-                  저장
-                </Button>
-              )}
-              {selectedVisitDate && (
-                <Alert
-                  message="과거 진료 기록을 조회 중입니다"
-                  description="과거 기록은 수정할 수 없습니다"
-                  type="info"
-                  showIcon
-                />
-              )}
-            </Form>
-          </MacSangCard>
-        </TabPane>
-      </Tabs>
+          <TabPane tab="81맥상" key="4">
+            <MacSangCard title="81맥상 분석">
+              <PulseVisualization pulseData={pulseData} />
+              <Form layout="vertical" style={{ marginTop: '16px' }}>
+                <Form.Item label="맥상 분석 결과">
+                  <TextArea
+                    rows={6}
+                    placeholder="81맥상 분석 결과를 입력하세요"
+                    value={pulseAnalysis}
+                    onChange={(e) => setPulseAnalysis(e.target.value)}
+                    disabled={!!selectedVisitDate}
+                  />
+                </Form.Item>
+                {!selectedVisitDate && (
+                  <ActionButton type="primary" icon={<SaveOutlined />} onClick={handleSaveNote}>
+                    저장
+                  </ActionButton>
+                )}
+                {selectedVisitDate && historicalData && Object.keys(historicalData).length > 0 && selectedVisitDate.isBefore(moment(), 'day') && (
+                  <Alert
+                    message="과거 진료 기록을 조회 중입니다"
+                    description="과거 기록은 읽기 전용입니다"
+                    type="info"
+                    showIcon
+                  />
+                )}
+              </Form>
+            </MacSangCard>
+          </TabPane>
+        </Tabs>
+      </TabContainer>
     );
   };
 
@@ -1225,48 +1354,49 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
     }
 
     console.log('선택된 날짜/시간:', date.format('YYYY-MM-DD HH:mm:ss'));
-    setSelectedVisitDate(date);
     
     try {
       setLoading(true);
       if (!currentPatient?.patientId?._id) return;
 
-      const response = await patientApi.getPatientVisitHistory(currentPatient.patientId._id);
-      console.log('과거 진료 기록 응답:', response);
+      const records = currentPatient.patientId.records || [];
+      console.log('과거 진료 기록 응답:', {
+        totalRecords: records.length,
+        firstRecord: records[0],
+        lastRecord: records[records.length - 1]
+      });
       
       // API 응답에서 records 배열 추출
-      let records = [];
-      if (response.data?.records && Array.isArray(response.data.records)) {
-        records = response.data.records;
-      } else if (response.data?.data?.records && Array.isArray(response.data.data.records)) {
-        records = response.data.data.records;
+      let recordsToDisplay = [];
+      if (records && Array.isArray(records)) {
+        recordsToDisplay = records;
       }
 
       // 날짜별로 정렬하고 시간 정보 처리
-      records.sort((a, b) => {
+      recordsToDisplay.sort((a, b) => {
         const dateA = moment(a.visitDateTime || a.date || a.createdAt);
         const dateB = moment(b.visitDateTime || b.date || b.createdAt);
         return dateB.valueOf() - dateA.valueOf();
       });
 
       // 각 기록에 기본 시간 할당
-      records = records.map((record, index) => ({
+      recordsToDisplay = recordsToDisplay.map((record, index) => ({
         ...record,
         visitDateTime: assignDefaultTime(record, index)
       }));
 
       console.log('시간 정보가 처리된 진료 기록:', {
-        totalRecords: records.length,
-        recordDates: records.map(r => ({
+        totalRecords: recordsToDisplay.length,
+        recordDates: recordsToDisplay.map(r => ({
           date: moment(r.visitDateTime).format('YYYY-MM-DD'),
           time: moment(r.visitDateTime).format('HH:mm:ss')
         }))
       });
 
-      if (records && records.length > 0) {
+      if (recordsToDisplay && recordsToDisplay.length > 0) {
         // 선택된 날짜의 기록 찾기
         const targetDate = date.format('YYYY-MM-DD');
-        const selectedRecords = records.filter(record => {
+        const selectedRecords = recordsToDisplay.filter(record => {
           const recordDate = moment(record.visitDateTime).format('YYYY-MM-DD');
           return recordDate === targetDate;
         });
@@ -1347,14 +1477,17 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
           const formattedTime = moment(selectedRecord.visitDateTime).format('YYYY년 MM월 DD일 HH시 mm분');
           setVisitTime(formattedTime);
           
+          // 실제 과거 기록이 로드된 경우에만 상태 설정
           setHistoricalData(selectedRecord);
+          setSelectedVisitDate(date);
+          setIsViewingHistoricalRecord(true); // 과거 기록 조회 상태 표시
           
           // 과거 기록임을 표시
           message.info('과거 진료 기록을 조회합니다. 과거 기록은 수정할 수 없습니다.');
         } else {
           console.log('선택한 날짜의 기록을 찾을 수 없음:', {
             targetDate: date.format('YYYY-MM-DD'),
-            availableDates: records.map(r => 
+            availableDates: recordsToDisplay.map(r => 
               moment(r.visitDateTime).format('YYYY-MM-DD')
             )
           });
@@ -1362,7 +1495,7 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
           returnToCurrent();
         }
       } else {
-        console.log('진료 기록이 없음:', response.data);
+        console.log('진료 기록이 없음:', records);
         message.warning('과거 진료 기록이 없습니다.');
         returnToCurrent();
       }
@@ -1377,9 +1510,10 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
 
   // 현재 상태로 돌아가기
   const returnToCurrent = () => {
-    console.log('현재 상태로 돌아가기');
+    console.log('현재 상태로 돌아가기 - 상태 초기화');
     setSelectedVisitDate(null);
     setHistoricalData(null);
+    setIsViewingHistoricalRecord(false); // 과거 기록 조회 상태 해제
     
     // 현재 환자 정보로 모든 상태 초기화
     if (currentPatient?.patientId) {
@@ -1412,6 +1546,12 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
         HR: currentPulseWave.HR || currentPulseWave.heartRate || ''
       };
       setPulseData(convertPulseDataToNumbers(pulseWaveData));
+      
+      console.log('✅ 현재 상태로 복원 완료:', {
+        patientName: currentPatient.patientId?.basicInfo?.name,
+        selectedVisitDate: null,
+        historicalData: null
+      });
     }
   };
 
@@ -1426,27 +1566,101 @@ const DoctorView = ({ visible, onClose, selectedPatientId = null }) => {
 
   // 모달 렌더링
   return (
-    <Modal
-      title={
-        currentPatient
-          ? `진료실 - ${currentPatient.patientId?.basicInfo?.name} (Q${String(currentPatient.queueNumber).padStart(3, '0')})`
-          : '진료실'
-      }
-      open={visible}
-      onCancel={onClose}
-      footer={null}
-      width={1200}
-      centered
-      destroyOnClose={true}
-    >
-      {/* 진료 시간 입력 필드 추가 (숨김) */}
-      <input
-        type="text"
-        className="visit-time-input"
-        style={{ display: 'none' }}
-      />
-      {renderContent()}
-    </Modal>
+    <>
+      {console.log('🔍 DoctorView 렌더링:', { visible, currentPatient, loading, error, isFullPage })}
+      {isFullPage ? (
+        // 전체 페이지 모드
+        <div style={{ 
+          maxWidth: 1200, 
+          margin: '0 auto', 
+          padding: 32,
+          background: '#fff',
+          borderRadius: 18,
+          boxShadow: '0 4px 24px rgba(24, 0, 0, 0.08)',
+          minHeight: 'calc(100vh - 64px)',
+          position: 'relative'
+        }}>
+          {/* 헤더 섹션 */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 24,
+            padding: '20px 0',
+            borderBottom: '2px solid #f0f0f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <UserOutlined style={{ fontSize: 32, color: '#1976D2' }} />
+              <div>
+                <h1 style={{ 
+                  margin: 0, 
+                  fontSize: '28px', 
+                  fontWeight: 700,
+                  color: '#1976D2',
+                  background: 'linear-gradient(135deg, #1976D2 0%, #1565C0 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>
+                  {currentPatient
+                    ? `${currentPatient.patientId?.basicInfo?.name} (Q${String(currentPatient.queueNumber).padStart(3, '0')})`
+                    : '진료실'
+                  }
+                </h1>
+                <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
+                  환자 진료 및 기록 관리
+                </p>
+              </div>
+            </div>
+            <Button
+              type="primary"
+              icon={<CloseOutlined />}
+              onClick={onClose}
+              style={{
+                background: 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)',
+                border: 'none',
+                borderRadius: '8px',
+                height: '40px',
+                width: '40px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            />
+          </div>
+          
+          {/* 진료 시간 입력 필드 추가 (숨김) */}
+          <input
+            type="text"
+            className="visit-time-input"
+            style={{ display: 'none' }}
+          />
+          {renderContent()}
+        </div>
+      ) : (
+        // 모달 모드
+        <UnifiedModal
+          title={
+            currentPatient
+              ? `${currentPatient.patientId?.basicInfo?.name} (Q${String(currentPatient.queueNumber).padStart(3, '0')})`
+              : '진료실'
+          }
+          icon={UserOutlined}
+          open={visible}
+          onClose={onClose}
+          width={1200}
+          style={{ top: 50 }}
+        >
+          {/* 진료 시간 입력 필드 추가 (숨김) */}
+          <input
+            type="text"
+            className="visit-time-input"
+            style={{ display: 'none' }}
+          />
+          {renderContent()}
+        </UnifiedModal>
+      )}
+    </>
   );
 };
 

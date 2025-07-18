@@ -6,9 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { 
   MenuOutlined, 
   UserOutlined, 
-  DesktopOutlined, 
-  OrderedListOutlined,
-  MedicineBoxOutlined,
   LoginOutlined,
   LogoutOutlined,
   TableOutlined,
@@ -16,31 +13,20 @@ import {
   ExclamationCircleOutlined
 } from '@ant-design/icons';
 import { loginUser, logout, checkSecurityStatus } from '../../store/slices/authSlice';
-import ReceptionDashboard from '../ReceptionDashboard/ReceptionDashboard';
-import QueueDisplay from '../QueueDisplay/QueueDisplay';
-import DoctorView from '../DoctorView/DoctorView';
 import WebSocketStatus from './WebSocketStatus';
 import PerformanceMonitor from './PerformanceMonitor';
 
 const { Title } = Typography;
-
-const StyledHeader = styled(Layout.Header)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 24px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  position: fixed;
-  width: 100%;
-  z-index: 1000;
-`;
 
 const Logo = styled(Title)`
   margin: 0 !important;
   color: #1e40af !important;
   font-size: 36px !important;
   font-weight: 800 !important;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const ActionButton = styled(Button)`
@@ -77,6 +63,8 @@ const HeaderBar = styled.header`
 const Nav = styled.nav`
   display: flex;
   gap: 2rem;
+  align-items: center;
+  
   @media (max-width: 700px) {
     display: none;
   }
@@ -88,8 +76,13 @@ const NavItem = styled.a`
   font-size: 1rem;
   text-decoration: none;
   transition: color 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  
   &:hover {
     color: ${({ theme }) => theme.primary};
+    background: rgba(30, 64, 175, 0.1);
   }
 `;
 
@@ -156,9 +149,6 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
   const navigate = useNavigate();
   const { isAuthenticated, user, loading, securityStatus } = useSelector((state) => state.auth);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
-  const [isDoctorViewVisible, setIsDoctorViewVisible] = useState(false);
-  const [isReceptionDashboardVisible, setIsReceptionDashboardVisible] = useState(false);
-  const [isQueueDisplayVisible, setIsQueueDisplayVisible] = useState(false);
 
   // 보안 상태 체크
   useEffect(() => {
@@ -226,12 +216,12 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
     <HeaderBar>
       <Logo>
         <MenuOutlined style={{ marginRight: 12, fontSize: 22 }} />
-        Maekstation
+        Maekcode
       </Logo>
       <Nav>
-        <NavItem href="/">대시보드</NavItem>
-        <NavItem href="/patients">환자관리</NavItem>
-        <NavItem href="/stats">통계</NavItem>
+        <NavItem href="/">🏠 대시보드</NavItem>
+        <NavItem href="/patients">👥 환자관리</NavItem>
+        <NavItem href="/stats">📊 통계</NavItem>
       </Nav>
       <UserMenu>
         <WebSocketStatus compact showDetails />

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { getSecurityHeaders, secureLogout } from '../utils/security';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  baseURL: 'http://localhost:5000/api',
   timeout: 10000,
   withCredentials: true,
   headers: {
@@ -15,15 +15,21 @@ const axiosInstance = axios.create({
 // 요청 인터셉터
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 보안 헤더 추가
+    // 보안 헤더 추가 (인증 토큰 포함)
     const securityHeaders = getSecurityHeaders();
-    config.headers = { ...config.headers, ...securityHeaders };
+    config.headers = {
+      ...config.headers,
+      ...securityHeaders,
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    };
     
     console.log('📤 API 요청:', {
       method: config.method,
       url: config.url,
       data: config.data,
-      params: config.params
+      params: config.params,
+      headers: config.headers
     });
     
     return config;
@@ -70,7 +76,7 @@ export default axiosInstance;
 
 export const getCurrentPatient = async () => {
   try {
-    const response = await axiosInstance.get('/api/queue/current-patient');
+    const response = await axiosInstance.get('/queue/current-patient');
     return response.data;
   } catch (error) {
     console.error('현재 진료 환자 조회 실패:', error);

@@ -14,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import UnifiedModal from '../Common/UnifiedModal';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -534,19 +536,13 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
 
   return (
     <FormCard>
-      <Modal
+      <UnifiedModal
         title="환자 정보 입력"
+        icon={PersonAddIcon}
         open={isModalVisible}
-        onCancel={handleExit}
-        width="90%"
-        style={{ top: 20 }}
-        footer={null}
-        destroyOnClose={true}
-        maskClosable={false}
-        keyboard={true}
-        styles={{
-          body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
-        }}
+        onClose={handleExit}
+        width={800}
+        style={{ top: 100 }}
       >
         {error && (
           <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
@@ -558,19 +554,22 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
                 current={currentStep}
                 onChange={setCurrentStep}
                 items={sections.map((section) => ({ title: section.title }))}
-                style={{ marginBottom: 24 }}
+                style={{ marginBottom: 32, background: 'transparent', borderRadius: 12, padding: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)' }}
+                responsive
               />
 
-              {sections[currentStep].content}
+              <div style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)', marginBottom: 24 }}>
+                {sections[currentStep].content}
+              </div>
 
-              <ActionButtons>
+              <ActionButtons style={{ marginTop: 32 }}>
                 {currentStep > 0 && (
-                  <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading}>
+                  <Button onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 0))} disabled={loading} style={{ borderRadius: 8, fontWeight: 600, fontSize: 18, padding: '8px 32px' }}>
                     이전
                   </Button>
                 )}
                 {currentStep < sections.length - 1 ? (
-                  <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading}>
+                  <Button type="primary" onClick={() => setCurrentStep((prev) => Math.min(prev + 1, sections.length - 1))} disabled={loading} style={{ background: '#1976D2', borderRadius: 8, fontWeight: 700, fontSize: 18, padding: '8px 32px', boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)' }}>
                     다음
                   </Button>
                 ) : (
@@ -579,6 +578,7 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
                     onClick={handleSave}
                     loading={loading}
                     disabled={!isSaveButtonEnabled}
+                    style={{ background: '#1976D2', borderRadius: 8, fontWeight: 700, fontSize: 18, padding: '8px 32px', boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)' }}
                   >
                     저장하기
                   </Button>
@@ -587,7 +587,7 @@ const PatientFormWrapper = ({ onClose, onSaveSuccess = () => {}, visible = false
             </FormContainer>
           </Form>
         </Spin>
-      </Modal>
+      </UnifiedModal>
     </FormCard>
   );
 };

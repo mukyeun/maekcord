@@ -27,10 +27,92 @@ const connectDB = async () => {
       .toArray();
     console.log('queues 샘플 데이터:', sampleQueues);
 
+    // 데이터베이스 인덱스 생성
+    await createIndexes();
+
   } catch (error) {
     console.error('MongoDB 연결 실패:', error);
     process.exit(1);
   }
+};
+
+// 성능 최적화를 위한 인덱스 생성
+const createIndexes = async () => {
+  try {
+    console.log('🔍 데이터베이스 인덱스 생성 중...');
+
+    // 사용자 컬렉션 인덱스
+    await mongoose.connection.db.collection('users').createIndex({ email: 1 }, { unique: true });
+    await mongoose.connection.db.collection('users').createIndex({ username: 1 }, { unique: true });
+    await mongoose.connection.db.collection('users').createIndex({ role: 1 });
+    await mongoose.connection.db.collection('users').createIndex({ createdAt: -1 });
+
+    // 환자 컬렉션 인덱스
+    await mongoose.connection.db.collection('patients').createIndex({ 'basicInfo.name': 1 });
+    await mongoose.connection.db.collection('patients').createIndex({ 'basicInfo.phone': 1 });
+    await mongoose.connection.db.collection('patients').createIndex({ 'basicInfo.patientId': 1 }, { unique: true });
+    await mongoose.connection.db.collection('patients').createIndex({ createdAt: -1 });
+    await mongoose.connection.db.collection('patients').createIndex({ 'basicInfo.name': 'text', 'basicInfo.phone': 'text' });
+
+    // 대기열 컬렉션 인덱스
+    await mongoose.connection.db.collection('queues').createIndex({ status: 1 });
+    await mongoose.connection.db.collection('queues').createIndex({ createdAt: -1 });
+    await mongoose.connection.db.collection('queues').createIndex({ patientId: 1 });
+    await mongoose.connection.db.collection('queues').createIndex({ queueNumber: 1 });
+    await mongoose.connection.db.collection('queues').createIndex({ 
+      status: 1, 
+      createdAt: -1 
+    });
+
+    // 예약 컬렉션 인덱스
+    await mongoose.connection.db.collection('appointments').createIndex({ appointmentDate: 1 });
+    await mongoose.connection.db.collection('appointments').createIndex({ patientId: 1 });
+    await mongoose.connection.db.collection('appointments').createIndex({ status: 1 });
+    await mongoose.connection.db.collection('appointments').createIndex({ 
+      appointmentDate: 1, 
+      appointmentTime: 1 
+    });
+
+    // 로그 컬렉션 인덱스
+    await mongoose.connection.db.collection('logs').createIndex({ level: 1 });
+    await mongoose.connection.db.collection('logs').createIndex({ timestamp: -1 });
+    await mongoose.connection.db.collection('logs').createIndex({ 
+      level: 1, 
+      timestamp: -1 
+    });
+
+    console.log('✅ 데이터베이스 인덱스 생성 완료');
+
+  } catch (error) {
+    console.error('❌ 인덱스 생성 실패:', error);
+  }
+};
+
+// 쿼리 성능 모니터링
+const monitorQueryPerformance = () => {
+  mongoose.connection.on('query', (query) => {
+    console.log('🔍 MongoDB 쿼리:', {
+      collection: query.collection,
+      operation: query.op,
+      query: query.query,
+      duration: query.duration
+    });
+  });
+};
+
+// 연결 풀 설정
+const configureConnectionPool = () => {
+  mongoose.connection.on('connected', () => {
+    console.log('🔗 MongoDB 연결 풀 설정 완료');
+  });
+
+  mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB 연결 오류:', err);
+  });
+
+  mongoose.connection.on('disconnected', () => {
+    console.log('🔌 MongoDB 연결 끊김');
+  });
 };
 
 module.exports = connectDB;

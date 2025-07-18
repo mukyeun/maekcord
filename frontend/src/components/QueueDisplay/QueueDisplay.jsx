@@ -1,396 +1,207 @@
 // src/components/QueueDisplay/QueueDisplay.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { Modal, List, Typography, Space, Alert, Switch, Radio, Input, Drawer, Descriptions, Tag, Tabs, message, Button, Spin } from 'antd';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  SoundOutlined, 
-  UserOutlined, 
-  ClockCircleOutlined,
-  AudioMutedOutlined,
-  SearchOutlined,
-  PhoneOutlined,
-  CalendarOutlined,
-  MedicineBoxOutlined
-} from '@ant-design/icons';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { Modal, List, Tag, Button, Space, Switch, Alert, Spin, Empty } from 'antd';
+import { UserOutlined, ClockCircleOutlined, BellOutlined, SoundOutlined, AudioOutlined } from '@ant-design/icons';
+import styled from 'styled-components';
 import * as queueApi from '../../api/queueApi';
-import { wsClient } from '../../utils/websocket';
-import { speak, initSpeech, announcePatientCall, getVoices, speakText, isSpeechSynthesisSupported, safeSpeak } from '../../utils/speechUtils';
 import { soundManager } from '../../utils/sound';
-import styled from 'styled-components';  // styled-components import 추가
-
-const { Title, Text } = Typography;
-const { Search } = Input;
-
-// 상태별 설정
-const STATUS_CONFIG = {
-  waiting: { 
-    color: 'gold', 
-    text: '대기중', 
-    icon: <ClockCircleOutlined /> 
-  },
-  called: { 
-    color: 'green', 
-    text: '호출됨', 
-    icon: <SoundOutlined /> 
-  },
-  consulting: { 
-    color: 'blue', 
-    text: '진료중', 
-    icon: <UserOutlined /> 
-  },
-  done: { 
-    color: 'default', 
-    text: '완료', 
-    icon: null 
-  }
-};
-
-// 애니메이션 설정
-const listItemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: 20 }
-};
-
-// ✅ 1. styled-components 먼저 선언
-const StyledCard = styled.div`
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  margin-bottom: 16px;
-`;
+import { speak, announceWaitingRoom, announceConsultingRoom, announcePatientCall } from '../../utils/speechUtils';
+import UnifiedModal from '../Common/UnifiedModal';
 
 const QueueItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-`;
-
-const WaitingTime = styled.span`
-  color: ${props => props.isLong ? '#ff4d4f' : '#8c8c8c'};
-  font-size: 14px;
-`;
-
-const StatusBadge = styled.span`
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  background-color: ${props => {
-    switch (props.status) {
-      case 'waiting': return '#1890ff';
-      case 'called': return '#faad14';
-      case 'consulting': return '#52c41a';
-      default: return '#d9d9d9';
-    }
-  }};
-  color: white;
-`;
-
-// ✅ 2. motion components 선언
-const MotionCard = motion.create(StyledCard);
-
-const QueueDisplay = ({ visible, onClose }) => {
-  const [queueList, setQueueList] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [lastCalledPatient, setLastCalledPatient] = useState(null);
-  const [error, setError] = useState(null);
-  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [searchText, setSearchText] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [isDrawerVisible, setIsDrawerVisible] = useState(false);
-  const [isRealtime, setIsRealtime] = useState(true);
-  const [isVoiceEnabled, setIsVoiceEnabled] = useState(() => {
-    return localStorage.getItem('queueVoiceEnabled') !== 'false' && isSpeechSynthesisSupported();
-  });
-  const [activeTab, setActiveTab] = useState('1');
-
-  // ReceptionDashboard에서 테스트 데이터로 큐 생성
-  const testPatients = [
-    {
-      _id: '1',
-      patientId: {
-        basicInfo: {
-          name: '김환자',
-          phone: '010-1234-5678',
-          visitType: '초진'
-        },
-        symptoms: ['두통', '어지러움']
-      },
-      status: 'waiting',
-      queueNumber: '001',
-      createdAt: new Date().toISOString()
-    },
-    {
-      _id: '2',
-      patientId: {
-        basicInfo: {
-          name: '이환자',
-          phone: '010-2345-6789',
-          visitType: '재진'
-        },
-        symptoms: ['복통']
-      },
-      status: 'waiting',
-      queueNumber: '002',
-      createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString() // 30분 전
-    }
-  ];
-
-  // localStorage에서 소리 설정 불러오기
-  useEffect(() => {
-    const savedSoundSetting = localStorage.getItem('queueSoundEnabled');
-    if (savedSoundSetting !== null) {
-      setIsSoundEnabled(savedSoundSetting === 'true');
-    }
-  }, []);
-
-  useEffect(() => {
-    const savedVoiceSetting = localStorage.getItem('queueVoiceEnabled');
-    if (savedVoiceSetting !== null) {
-      setIsVoiceEnabled(savedVoiceSetting === 'true');
-    }
-  }, []);
-
-  // 소리 설정 저장
-  const handleSoundToggle = (checked) => {
-    setIsSoundEnabled(checked);
-    localStorage.setItem('queueSoundEnabled', checked.toString());
-  };
-
-  const handleVoiceToggle = (checked) => {
-    if (checked && !isSpeechSynthesisSupported()) {
-      message.warning('이 브라우저는 음성 합성을 지원하지 않습니다.');
-      return;
-    }
-
-    setIsVoiceEnabled(checked);
-    localStorage.setItem('queueVoiceEnabled', checked);
+  padding: 16px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.called {
+    background: linear-gradient(135deg, #52c41a 0%, #389e0d 100%);
+    color: white;
     
-    // 음성 테스트
-    if (checked) {
-      try {
-        safeSpeak('음성 안내가 켜졌습니다.')
-          .catch(error => console.error('음성 테스트 실패:', error));
-      } catch (err) {
-        console.error('음성 합성 사용 불가', err);
-        message.error('음성 합성을 사용할 수 없습니다.');
-        setIsVoiceEnabled(false);
-        localStorage.setItem('queueVoiceEnabled', 'false');
-      }
+    .ant-tag {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
+  }
+  
+  &.consulting {
+    background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+    color: white;
+    
+    .ant-tag {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+  }
+`;
+
+const PatientInfo = styled.div`
+  flex: 1;
+  
+  .patient-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .patient-details {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+`;
+
+const QueueNumber = styled.div`
+  text-align: center;
+  margin-right: 16px;
+  
+  .number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1890ff;
+  }
+  
+  .label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+`;
+
+const StatusTag = styled(Tag)`
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 4px 12px;
+`;
+
+const ControlPanel = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+`;
+
+const SwitchGroup = styled.div`
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  
+  .switch-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+`;
+
+const QueueDisplay = ({ visible, onClose, queueList = [] }) => {
+  const [isRealtime, setIsRealtime] = useState(true);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
+  const [isSoundEnabled, setIsSoundEnabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [lastCalledQueue, setLastCalledQueue] = useState(null);
+
+  // 음성 합성 지원 여부 확인
+  const isSpeechSynthesisSupported = () => {
+    return 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
   };
 
-  const calculateWaitingTime = (createdAt) => {
-    const waitingTime = Math.floor((Date.now() - new Date(createdAt)) / 1000 / 60);
-    return waitingTime < 60 
-      ? `${waitingTime}분`
-      : `${Math.floor(waitingTime / 60)}시간 ${waitingTime % 60}분`;
-  };
+  // 대기열 목록 필터링
+  const filteredList = useMemo(() => {
+    return queueList.filter(queue => 
+      queue.status === 'waiting' || queue.status === 'called' || queue.status === 'consulting'
+    );
+  }, [queueList]);
 
-  const playCallSound = () => {
-    if (isSoundEnabled) {
-      soundManager.playDingDong();
-    }
-  };
-
-  const handlePatientCalled = useCallback(async (patient) => {
-    try {
-      if (!patient?.patientId?.basicInfo?.name) return;
-      
-      if (isVoiceEnabled && isSpeechSynthesisSupported()) {
-        await safeSpeak(`${patient.patientId.basicInfo.name}님 진료실로 들어오세요.`);
-      }
-    } catch (e) {
-      console.error('음성합성 실패:', e);
-    }
-  }, [isVoiceEnabled]);
-
-  // 대기 목록 조회
-  const fetchQueueList = async () => {
+  // 환자 호출 처리
+  const handleCallPatient = useCallback(async (queue) => {
     try {
       setLoading(true);
-      console.log('📋 QueueDisplay - 대기 목록 조회 시작');
-      const response = await queueApi.getTodayQueueList();
-      console.log('🔍 QueueDisplay - 서버 응답:', response);
-
-      // 응답 데이터 처리
-      let queueData;
-      if (response && Array.isArray(response.data)) {
-        queueData = response.data;
-      } else if (Array.isArray(response)) {
-        queueData = response;
-      } else if (response?.data?.data && Array.isArray(response.data.data)) {
-        queueData = response.data.data;
-      } else {
-        throw new Error('유효하지 않은 대기 목록 데이터');
+      
+      // 대기열 상태 업데이트
+      await queueApi.updateQueueStatus(queue._id, 'called');
+      
+      // 음성 안내
+      if (isVoiceEnabled && isSpeechSynthesisSupported()) {
+        announcePatientCall(queue.patientId?.basicInfo?.name, queue.queueNumber);
       }
-
-      console.log('✅ QueueDisplay - 처리된 대기 목록:', queueData);
-      setQueueList(queueData);
+      
+      // 소리 재생
+      if (isSoundEnabled) {
+        soundManager.playCallSound();
+      }
+      
+      setLastCalledQueue(queue);
+      
+      // 3초 후 호출 상태 해제
+      setTimeout(() => {
+        setLastCalledQueue(null);
+      }, 3000);
+      
     } catch (error) {
-      console.error('❌ QueueDisplay - 대기 목록 조회 실패:', error);
-      message.error('대기 목록을 불러오는데 실패했습니다.');
-      setQueueList([]);
+      console.error('환자 호출 실패:', error);
+      setError('환자 호출 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [isVoiceEnabled, isSoundEnabled]);
 
-  // WebSocket 메시지 처리
-  const handleWebSocketMessage = useCallback((data) => {
-    console.log('📨 QueueDisplay - WebSocket 메시지 수신:', data);
-    
-    if (data.type === 'QUEUE_UPDATE' && Array.isArray(data.queue)) {
-      console.log('📋 QueueDisplay - 큐 목록 업데이트:', data.queue);
-      setQueueList(data.queue);
-    } else if (data.type === 'PATIENT_CALLED') {
-      console.log('📞 QueueDisplay - 환자 호출 이벤트:', data);
-      
-      // 호출된 환자 정보 설정
-      if (data.patient) {
-        setLastCalledPatient(data.patient);
-        
-        // 음성 안내 실행
-        if (isVoiceEnabled && isSpeechSynthesisSupported()) {
-          handlePatientCalled(data.patient);
-        }
-      }
-      
-      // 환자 호출 시 목록 새로고침
-      fetchQueueList();
-    } else if (data.type === 'PONG' || data.type === 'pong' || data.type === 'CONNECTED') {
-      // 연결 확인 및 ping-pong 메시지 - 무시
-      console.log('🔗 WebSocket 연결 확인 메시지:', data.type);
-    } else {
-      console.log('⚠️ QueueDisplay - 처리되지 않은 WebSocket 메시지:', data);
-    }
-  }, [isVoiceEnabled, handlePatientCalled]);
+  // 실시간 토글 처리
+  const handleRealtimeToggle = useCallback((checked) => {
+    setIsRealtime(checked);
+  }, []);
 
-  // WebSocket 연결 설정
-  useEffect(() => {
-    if (!visible) return;
-
-    let isComponentMounted = true;
-
-    const setupWebSocket = () => {
-      if (!isComponentMounted) return;
-
-      console.log('🔄 QueueDisplay - WebSocket 연결 설정');
-      wsClient.connect();
-      
-      // 연결 후 즉시 대기 목록 조회
-      fetchQueueList();
-      
-      return wsClient.addListener(handleWebSocketMessage);
-    };
-
-    const removeListener = setupWebSocket();
-
-    return () => {
-      console.log('🔌 QueueDisplay - WebSocket 정리');
-      isComponentMounted = false;
-      if (removeListener) removeListener();
-    };
-  }, [visible, handleWebSocketMessage]);
-
-  // 컴포넌트 마운트/언마운트 시 대기 목록 조회
-  useEffect(() => {
-    if (visible) {
-      console.log('🔄 QueueDisplay - 초기 대기 목록 조회');
-      fetchQueueList();
-    }
-  }, [visible]);
-
-  // 필터링된 목록 계산
-  const getFilteredList = () => {
-    if (!Array.isArray(queueList)) return [];  // 배열이 아닐 경우 빈 배열 반환
-    
-    return queueList
-      .filter(patient => {
-        if (!patient?.patientId?.basicInfo?.name || !patient?.queueNumber) return false;
-        return (
-          patient.patientId.basicInfo.name.includes(searchText) ||
-          patient.queueNumber.includes(searchText)
-        );
-      })
-      .filter(patient => {
-        switch (activeTab) {
-          case '2': return patient.status === 'waiting';
-          case '3': return patient.status === 'called';
-          case '4': return patient.status === 'consulting';
-          default: return true;
-        }
-      });
-  };
-
-  const filteredList = getFilteredList();
-
-  const handlePatientClick = (patient) => {
-    setSelectedPatient(patient);
-    setIsDrawerVisible(true);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleString('ko-KR');
-  };
-
-  const handleSearch = (e) => {
-    setSearchText(e.target.value);
-  };
-
-  // voices 대신 getVoices() 함수 사용
-  const availableVoices = getVoices();
-
-  useEffect(() => {
-    console.log('대기 목록 데이터:', queueList);
-  }, [queueList]);
-
-  useEffect(() => {
-    try {
-      if (!isSpeechSynthesisSupported()) {
-        console.warn('⚠️ 음성 합성 지원 안 됨');
-        setIsVoiceEnabled(false);
-        localStorage.setItem('queueVoiceEnabled', 'false');
-        return;
-      }
-
-      if (lastCalledPatient?.patientId?.basicInfo?.name && isVoiceEnabled) {
-        safeSpeak(`${lastCalledPatient.patientId.basicInfo.name}님 진료실로 들어오세요.`);
-      }
-    } catch (e) {
-      console.error('음성합성 중 오류:', e);
-    }
-  }, [lastCalledPatient, isVoiceEnabled]);
-
-  // 음성 합성 음성 목록 초기화 (최초 1회)
-  useEffect(() => {
-    if (isSpeechSynthesisSupported()) {
-      window.speechSynthesis.getVoices(); // 초기화 트리거
+  // 음성 토글 처리
+  const handleVoiceToggle = useCallback((checked) => {
+    setIsVoiceEnabled(checked);
+    if (checked && !isSpeechSynthesisSupported()) {
+      console.warn('이 브라우저는 음성 합성을 지원하지 않습니다.');
     }
   }, []);
 
-  if (error) {
-    return (
-      <Modal
-        title="오류"
-        open={visible}
-        onCancel={onClose}
-      >
-        <div className="error-message">
-          {error}
-          <Button onClick={fetchQueueList}>다시 시도</Button>
-        </div>
-      </Modal>
-    );
-  }
+  // 소리 토글 처리
+  const handleSoundToggle = useCallback((checked) => {
+    setIsSoundEnabled(checked);
+  }, []);
 
-  if (!isSpeechSynthesisSupported()) {
-    console.warn('음성 합성 사용 불가');
-  }
+  // 상태별 태그 색상
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'waiting': return 'orange';
+      case 'called': return 'green';
+      case 'consulting': return 'blue';
+      case 'done': return 'default';
+      default: return 'default';
+    }
+  };
+
+  // 상태별 텍스트
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'waiting': return '대기 중';
+      case 'called': return '호출됨';
+      case 'consulting': return '진료 중';
+      case 'done': return '완료';
+      default: return status;
+    }
+  };
 
   return (
     <div>
@@ -398,187 +209,96 @@ const QueueDisplay = ({ visible, onClose }) => {
         <Alert message="오류" description={error} type="error" showIcon style={{ marginBottom: 16 }} />
       )}
       <Spin spinning={loading} tip="불러오는 중...">
-        <Modal
-          title={
-            <div className="modal-header">
-              <span>대기 환자 목록</span>
-              <div className="header-right">
-                <span>총 {filteredList.length}명</span>
-                <span>실시간 업데이트</span>
-                <div className="switch-group">
+        <UnifiedModal
+          title="대기 환자 목록"
+          icon={UserOutlined}
+          open={visible}
+          onClose={onClose}
+          width={600}
+        >
+          <div style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: '0 2px 16px rgba(25, 118, 210, 0.08)', marginBottom: 24 }}>
+            <ControlPanel>
+              <div>
+                <span style={{ fontWeight: 600, fontSize: 16 }}>총 {filteredList.length}명</span>
+                <span style={{ marginLeft: 8, color: '#666', fontSize: 14 }}>실시간 업데이트</span>
+              </div>
+              <SwitchGroup>
+                <div className="switch-item">
                   <Switch 
                     size="small" 
                     checked={isRealtime}
-                    onChange={setIsRealtime}
+                    onChange={handleRealtimeToggle}
                   />
+                  <span>실시간</span>
+                </div>
+                <div className="switch-item">
                   <Switch
                     size="small"
                     checked={isVoiceEnabled}
                     onChange={handleVoiceToggle}
                     disabled={!isSpeechSynthesisSupported()}
                   />
+                  <AudioOutlined />
+                </div>
+                <div className="switch-item">
                   <Switch
                     size="small"
                     checked={isSoundEnabled}
                     onChange={handleSoundToggle}
                   />
+                  <SoundOutlined />
                 </div>
-              </div>
-            </div>
-          }
-          open={visible}
-          onCancel={onClose}
-          width="500px"
-          footer={null}
-          styles={{
-            body: { maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }
-          }}
-        >
-          {!isSpeechSynthesisSupported() && (
-            <Alert
-              message="음성 안내 지원 안됨"
-              description="이 브라우저는 음성 합성을 지원하지 않습니다."
-              type="warning"
-              showIcon
-              style={{ marginBottom: 16 }}
-            />
-          )}
+              </SwitchGroup>
+            </ControlPanel>
 
-          <div className="notification-bar">
-            <span>🔊 {lastCalledPatient && lastCalledPatient.status === 'called' && lastCalledPatient.patientId?.basicInfo?.name}님 진료실로 와주세요</span>
-            <span className="close">×</span>
-          </div>
+            {!isSpeechSynthesisSupported() && (
+              <Alert
+                message="음성 안내 지원 안됨"
+                description="이 브라우저는 음성 합성을 지원하지 않습니다."
+                type="warning"
+                showIcon
+                style={{ marginBottom: 16 }}
+              />
+            )}
 
-          <div className="tab-container">
-            <Tabs 
-              defaultActiveKey="1" 
-              onChange={setActiveTab}
-              items={[
-                { label: '전체', key: '1' },
-                { label: '대기', key: '2' },
-                { label: '호출', key: '3' },
-                { label: '진료중', key: '4' }
-              ]}
-            />
-
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="이름 또는 번호 검색"
-              className="search-input"
-              value={searchText}
-              onChange={handleSearch}
-            />
-          </div>
-
-          <List
-            loading={loading}
-            dataSource={filteredList}
-            locale={{ emptyText: '대기 환자가 없습니다.' }}
-            renderItem={(item) => {
-              const statusInfo = STATUS_CONFIG[item.status] || STATUS_CONFIG.waiting;
-              const isJustCalled = item._id === lastCalledPatient?._id;
-
-              console.log(item.patientId?.basicInfo?.name, item.queueNumber, item.createdAt);
-
-              return (
-                <AnimatePresence mode="wait">
-                  <MotionCard
-                    key={item._id}
-                    isJustCalled={isJustCalled}
-                    hoverable
-                    onClick={() => handlePatientClick(item)}
-                    variants={listItemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            {filteredList.length === 0 ? (
+              <Empty 
+                description="대기 중인 환자가 없습니다"
+                style={{ margin: '40px 0' }}
+              />
+            ) : (
+              <List
+                dataSource={filteredList}
+                renderItem={(queue) => (
+                  <QueueItem 
+                    key={queue._id}
+                    className={queue.status}
+                    onClick={() => handleCallPatient(queue)}
+                    style={{ cursor: 'pointer' }}
                   >
-                    <QueueItem>
-                      <Space direction="vertical" size={2}>
-                        <Space align="center">
-                          <Title level={4} style={{ margin: 0 }}>
-                            {item.patientId?.basicInfo?.name || '이름 없음'}
-                          </Title>
-                          <Text type="secondary">({item.queueNumber || '-'})</Text>
-                        </Space>
-                        <Space>
-                          <Text type="secondary">
-                            {item.patientId?.basicInfo?.visitType || '-'}
-                          </Text>
-                          <WaitingTime>
-                            대기시간: {calculateWaitingTime(item.createdAt)}
-                          </WaitingTime>
-                        </Space>
-                      </Space>
-                      <StatusBadge 
-                        status={statusInfo.color} 
-                        text={
-                          <Space>
-                            {statusInfo.icon}
-                            {statusInfo.text}
-                          </Space>
-                        }
-                      />
-                    </QueueItem>
-                  </MotionCard>
-                </AnimatePresence>
-              );
-            }}
-          />
-
-          <div className="pagination-info">
-            총 {filteredList.length}개 <span className="current-page">1</span> 10 / 페이지
+                    <QueueNumber>
+                      <div className="number">Q{String(queue.queueNumber).padStart(3, '0')}</div>
+                      <div className="label">대기번호</div>
+                    </QueueNumber>
+                    
+                    <PatientInfo>
+                      <div className="patient-name">
+                        {queue.patientId?.basicInfo?.name || '이름 없음'}
+                      </div>
+                      <div className="patient-details">
+                        {queue.visitType || '초진'} • {queue.patientId?.basicInfo?.phone || '연락처 없음'}
+                      </div>
+                    </PatientInfo>
+                    
+                    <StatusTag color={getStatusColor(queue.status)}>
+                      {getStatusText(queue.status)}
+                    </StatusTag>
+                  </QueueItem>
+                )}
+              />
+            )}
           </div>
-        </Modal>
-
-        <Drawer
-          title="환자 상세 정보"
-          placement="right"
-          onClose={() => setIsDrawerVisible(false)}
-          open={isDrawerVisible}
-          width={400}
-        >
-          {selectedPatient && (
-            <>
-              <Descriptions column={1} bordered>
-                <Descriptions.Item label="이름">
-                  {selectedPatient.patientId?.basicInfo?.name || '-'}
-                </Descriptions.Item>
-                <Descriptions.Item label="연락처">
-                  <Space>
-                    <PhoneOutlined />
-                    {selectedPatient.patientId?.basicInfo?.phone || '-'}
-                  </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="접수 시간">
-                  <Space>
-                    <CalendarOutlined />
-                    {formatDate(selectedPatient.createdAt)}
-                  </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="방문 유형">
-                  {selectedPatient.patientId?.basicInfo?.visitType || '-'}
-                </Descriptions.Item>
-                <Descriptions.Item label="주요 증상">
-                  <Space wrap>
-                    {selectedPatient.patientId?.symptoms?.map((symptom, index) => (
-                      <Tag key={index} color="blue">{symptom}</Tag>
-                    )) || '-'}
-                  </Space>
-                </Descriptions.Item>
-                <Descriptions.Item label="복용 중인 약물">
-                  <Space wrap>
-                    {selectedPatient.patientId?.medications?.map((med, index) => (
-                      <Tag key={index} color="purple" icon={<MedicineBoxOutlined />}>
-                        {med}
-                      </Tag>
-                    )) || '-'}
-                  </Space>
-                </Descriptions.Item>
-              </Descriptions>
-            </>
-          )}
-        </Drawer>
+        </UnifiedModal>
       </Spin>
     </div>
   );

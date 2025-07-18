@@ -33,7 +33,40 @@ module.exports = {
         };
       }
 
-      // 경로 별칭 설정
+      // 개발 환경에서 청크 분할 최적화
+      if (env === 'development') {
+        webpackConfig.optimization = {
+          ...webpackConfig.optimization,
+          splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+              vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                name: 'vendors',
+                chunks: 'all',
+                priority: 10,
+                reuseExistingChunk: true,
+              },
+              antd: {
+                test: /[\\/]node_modules[\\/](antd|@ant-design)[\\/]/,
+                name: 'antd',
+                chunks: 'all',
+                priority: 20,
+                reuseExistingChunk: true,
+              },
+              react: {
+                test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+                name: 'react',
+                chunks: 'all',
+                priority: 30,
+                reuseExistingChunk: true,
+              },
+            },
+          },
+        };
+      }
+
+      // Ant Design 아이콘 청크 로딩 문제 해결
       webpackConfig.resolve = {
         ...webpackConfig.resolve,
         alias: {
@@ -49,6 +82,33 @@ module.exports = {
         },
         forceCase: false // 대소문자 구분 비활성화
       };
+
+      // 청크 로딩 실패 시 재시도 설정
+      webpackConfig.output = {
+        ...webpackConfig.output,
+        chunkFilename: 'static/js/[name].[contenthash:8].chunk.js',
+        filename: 'static/js/[name].[contenthash:8].js',
+      };
+
+      // 청크 로딩 최적화
+      webpackConfig.optimization = {
+        ...webpackConfig.optimization,
+        runtimeChunk: 'single',
+        moduleIds: 'deterministic',
+        chunkIds: 'deterministic',
+      };
+
+      // Ant Design 아이콘 청크 로딩 문제 완전 해결
+      webpackConfig.module.rules.push({
+        test: /[\\/]node_modules[\\/]@ant-design[\\/]icons[\\/]/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+            plugins: ['@babel/plugin-transform-runtime']
+          }
+        }
+      });
 
       return webpackConfig;
     },

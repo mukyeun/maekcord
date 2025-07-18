@@ -24,15 +24,7 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use(cors({
   origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'x-timestamp',
-    'x-client-version',
-    'X-Timestamp',
-    'X-Client-Version'
-  ],
+  allowedHeaders: ['*'], // 모든 헤더 허용
   credentials: true,
   optionsSuccessStatus: 200
 }));
@@ -63,15 +55,22 @@ const statisticsRoutes = require('./routes/statisticsRoutes');
 // 라우터 등록
 console.log('라우터 등록 시작...');
 app.use('/api/auth', authRoutes);
+console.log('✅ auth 라우터 등록 완료');
 app.use('/api/appointments', appointmentRoutes);
+console.log('✅ appointments 라우터 등록 완료');
 app.use('/api/waitlist', waitlistRoutes);
+console.log('✅ waitlist 라우터 등록 완료');
 app.use('/api/patients', patientRoutes);
+console.log('✅ patients 라우터 등록 완료');
 app.use('/api/statistics', statisticsRoutes);
+console.log('✅ statistics 라우터 등록 완료');
 app.use('/api/queues', queueRoutes);
+console.log('✅ queues 라우터 등록 완료 - 등록된 라우트:', queueRoutes.stack?.map(r => r.route?.path));
 app.use('/api/pulse-map', pulseMapRoutes);
+console.log('✅ pulse-map 라우터 등록 완료');
 console.log('pulseRoutes 등록:', pulseRoutes.stack?.map(r => r.route?.path));
 app.use('/api/pulse', pulseRoutes);
-app.use('/api', visitRoutes);
+app.use('/api/visits', visitRoutes);
 console.log('라우터 등록 완료');
 
 // 환자 데이터 라우트 등록

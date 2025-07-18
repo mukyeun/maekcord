@@ -1,11 +1,42 @@
 {
-  "name": "maekcord_a-backend",
+  "name": "maekcord",
   "version": "1.0.0",
-  "description": "맥진 데이터 관리 시스템 백엔드",
+  "description": "맥진 진단 시스템 - 통합 프로젝트",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "docker:build": "docker build -t maekcord .",
+    "docker:build:dev": "docker build --target backend-builder -t maekcord-dev .",
+    "docker:build:prod": "docker build --target production -t maekcord-prod .",
+    "docker:up": "docker-compose up -d",
+    "docker:up:dev": "docker-compose up -d mongodb redis backend frontend-dev",
+    "docker:up:prod": "docker-compose up -d mongodb redis pm2 nginx",
+    "docker:down": "docker-compose down",
+    "docker:restart": "docker-compose restart",
+    "docker:logs": "docker-compose logs -f",
+    "docker:logs:backend": "docker-compose logs -f backend",
+    "docker:logs:frontend": "docker-compose logs -f frontend-dev",
+    "dev:docker": "npm run docker:up:dev",
+    "dev:local": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm start",
+    "prod:docker": "npm run docker:build:prod && npm run docker:up:prod",
+    "prod:local": "cd backend && npm start",
+    "clean": "docker-compose down -v && docker system prune -f",
+    "clean:all": "docker-compose down -v && docker system prune -af",
+    "status": "docker-compose ps",
+    "shell:backend": "docker-compose exec backend sh",
+    "shell:frontend": "docker-compose exec frontend-dev sh",
+    "shell:db": "docker-compose exec mongodb mongosh",
+    "db:backup": "docker-compose exec mongodb mongodump --out /data/backup",
+    "db:restore": "docker-compose exec mongodb mongorestore /data/backup",
+    "db:reset": "docker-compose down -v && docker-compose up -d mongodb",
+    "test:docker": "docker-compose exec backend npm test",
+    "test:local": "cd backend && npm test",
+    "deploy:dev": "npm run docker:build:dev && npm run docker:up:dev",
+    "deploy:prod": "npm run docker:build:prod && npm run docker:up:prod",
+    "deploy:update": "docker-compose pull && docker-compose up -d"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -16,6 +47,19 @@
     "swagger-ui-express": "^4.6.2"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
-  }
+    "nodemon": "^2.0.22",
+    "concurrently": "^8.2.0"
+  },
+  "keywords": [
+    "medical",
+    "pulse",
+    "diagnosis",
+    "queue",
+    "management",
+    "docker",
+    "nodejs",
+    "react"
+  ],
+  "author": "Maekcord Development Team",
+  "license": "MIT"
 } 

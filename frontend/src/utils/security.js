@@ -217,8 +217,7 @@ export const getSecurityHeaders = () => {
   const headers = {
     'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest',
-    'X-Client-Version': '1.0.0', // 클라이언트 버전 추적
-    'X-Timestamp': Date.now().toString()
+    'X-Client-Version': '1.0.0' // 클라이언트 버전 추적
   };
 
   if (token) {

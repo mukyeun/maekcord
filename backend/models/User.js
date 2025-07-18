@@ -84,6 +84,7 @@ const userSchema = new mongoose.Schema({
 
 // 인덱스 설정
 userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ username: 1 }, { unique: true, sparse: true, name: 'username_1' });
 userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
 

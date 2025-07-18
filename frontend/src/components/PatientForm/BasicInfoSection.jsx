@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Card, Row, Col, Input, Select, Typography, AutoComplete, message, Button, Modal, List, Avatar, Space, Tag } from 'antd';
 import styled from 'styled-components';
-import { SearchOutlined, UserOutlined, PhoneOutlined, IdcardOutlined } from '@ant-design/icons';
+import { SearchOutlined, UserOutlined, PhoneOutlined } from '@ant-design/icons';
 import userInfoIcon from '../../assets/icons/user-info.svg';
 import { searchPatient } from '../../api/patientApi';
 
@@ -548,8 +548,7 @@ const BasicInfoSection = ({ data, onChange }) => {
                   )}
                   {patient.basicInfo?.residentNumber && (
                     <div className="detail-item">
-                      <IdcardOutlined />
-                      <span>{patient.basicInfo.residentNumber}</span>
+                      <span>주민등록번호: {patient.basicInfo.residentNumber}</span>
                     </div>
                   )}
                   {patient.basicInfo?.gender && (
