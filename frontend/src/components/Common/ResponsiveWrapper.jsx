@@ -70,6 +70,44 @@ export const useTouchGestures = (onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDo
   return { onTouchStart, onTouchMove, onTouchEnd };
 };
 
+// 접근성 훅
+export const useAccessibility = (options = {}) => {
+  const [isReducedMotion, setIsReducedMotion] = useState(false);
+  const [isHighContrast, setIsHighContrast] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const mediaQueryReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQueryHighContrast = window.matchMedia('(prefers-contrast: high)');
+    const mediaQueryDarkMode = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const handleReducedMotion = (e) => setIsReducedMotion(e.matches);
+    const handleHighContrast = (e) => setIsHighContrast(e.matches);
+    const handleDarkMode = (e) => setIsDarkMode(e.matches);
+
+    setIsReducedMotion(mediaQueryReducedMotion.matches);
+    setIsHighContrast(mediaQueryHighContrast.matches);
+    setIsDarkMode(mediaQueryDarkMode.matches);
+
+    mediaQueryReducedMotion.addEventListener('change', handleReducedMotion);
+    mediaQueryHighContrast.addEventListener('change', handleHighContrast);
+    mediaQueryDarkMode.addEventListener('change', handleDarkMode);
+
+    return () => {
+      mediaQueryReducedMotion.removeEventListener('change', handleReducedMotion);
+      mediaQueryHighContrast.removeEventListener('change', handleHighContrast);
+      mediaQueryDarkMode.removeEventListener('change', handleDarkMode);
+    };
+  }, []);
+
+  return {
+    isReducedMotion,
+    isHighContrast,
+    isDarkMode,
+    accessibilityClass: `${isReducedMotion ? 'reduced-motion' : ''} ${isHighContrast ? 'high-contrast' : ''} ${isDarkMode ? 'dark-mode' : ''}`.trim()
+  };
+};
+
 const ResponsiveWrapper = ({ 
   children, 
   mobileProps = {}, 
@@ -107,7 +145,9 @@ export const ResponsiveGrid = ({
   tabletCols = 2,
   desktopCols = 3,
   largeCols = 4,
-  responsive = true
+  responsive = true,
+  className = '',
+  style = {}
 }) => {
   const breakpoint = useResponsive();
   
@@ -117,7 +157,11 @@ export const ResponsiveGrid = ({
      breakpoint.isLarge ? largeCols : desktopCols) : desktopCols;
 
   return (
-    <Row gutter={gutter}>
+    <Row 
+      gutter={gutter} 
+      className={`responsive-grid ${className}`}
+      style={style}
+    >
       {React.Children.map(children, (child, index) => (
         <Col
           key={index}
@@ -126,6 +170,7 @@ export const ResponsiveGrid = ({
           md={24 / desktopCols}
           lg={24 / largeCols}
           xl={24 / largeCols}
+          className="responsive-grid-item"
         >
           {child}
         </Col>
@@ -142,7 +187,9 @@ export const ResponsiveContainer = ({
   mobilePadding = '8px',
   tabletPadding = '12px',
   largePadding = '24px',
-  fluid = false
+  fluid = false,
+  className = '',
+  style = {}
 }) => {
   const responsive = useResponsive();
 
@@ -162,12 +209,14 @@ export const ResponsiveContainer = ({
 
   return (
     <div
+      className={`responsive-container ${className}`}
       style={{
         maxWidth: getMaxWidth(),
         margin: '0 auto',
         padding: getPadding(),
         width: '100%',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        ...style
       }}
     >
       {children}
@@ -186,6 +235,8 @@ export const ResponsiveText = ({
   tabletWeight = 400,
   desktopWeight = 500,
   largeWeight = 500,
+  className = '',
+  style = {},
   ...props 
 }) => {
   const responsive = useResponsive();
@@ -206,9 +257,11 @@ export const ResponsiveText = ({
 
   return (
     <span 
+      className={`responsive-text ${className}`}
       style={{ 
         fontSize: `${getFontSize()}px`,
-        fontWeight: getFontWeight()
+        fontWeight: getFontWeight(),
+        ...style
       }} 
       {...props}
     >
@@ -227,6 +280,8 @@ export const ResponsiveButton = ({
   tabletIcon = false,
   desktopIcon = true,
   largeIcon = true,
+  className = '',
+  style = {},
   ...props 
 }) => {
   const responsive = useResponsive();
@@ -246,11 +301,13 @@ export const ResponsiveButton = ({
 
   return (
     <button 
+      className={`responsive-button ${className}`}
       size={getSize()}
+      style={style}
       {...(getIconOnly() && { 'aria-label': children })}
       {...props}
     >
-      {getIconOnly() ? null : children}
+      {children}
     </button>
   );
 };
@@ -267,8 +324,12 @@ export const AccessibilityWrapper = ({
   tabIndex,
   onFocus,
   onBlur,
+  className = '',
+  style = {},
   ...props 
 }) => {
+  const accessibility = useAccessibility();
+
   return (
     <div
       role={role}
@@ -280,6 +341,8 @@ export const AccessibilityWrapper = ({
       tabIndex={tabIndex}
       onFocus={onFocus}
       onBlur={onBlur}
+      className={`accessibility-wrapper ${accessibility.accessibilityClass} ${className}`}
+      style={style}
       {...props}
     >
       {children}
@@ -299,69 +362,49 @@ export const KeyboardNavigationWrapper = ({
   onArrowDown,
   onArrowLeft,
   onArrowRight,
+  className = '',
+  style = {},
   ...props 
 }) => {
-  const handleKeyDown = useCallback((event) => {
-    if (onKeyDown) {
-      onKeyDown(event);
-    }
-
-    switch (event.key) {
+  const handleKeyDown = useCallback((e) => {
+    switch (e.key) {
       case 'Enter':
-        if (onEnter) {
-          event.preventDefault();
-          onEnter(event);
-        } else if (event.target.onClick) {
-          event.target.onClick();
-        }
+        onEnter?.(e);
         break;
       case ' ':
-        if (onSpace) {
-          event.preventDefault();
-          onSpace(event);
-        } else if (event.target.onClick) {
-          event.preventDefault();
-          event.target.onClick();
-        }
+        e.preventDefault();
+        onSpace?.(e);
         break;
       case 'Escape':
-        if (onEscape) {
-          event.preventDefault();
-          onEscape(event);
-        }
+        onEscape?.(e);
         break;
       case 'ArrowUp':
-        if (onArrowUp) {
-          event.preventDefault();
-          onArrowUp(event);
-        }
+        e.preventDefault();
+        onArrowUp?.(e);
         break;
       case 'ArrowDown':
-        if (onArrowDown) {
-          event.preventDefault();
-          onArrowDown(event);
-        }
+        e.preventDefault();
+        onArrowDown?.(e);
         break;
       case 'ArrowLeft':
-        if (onArrowLeft) {
-          event.preventDefault();
-          onArrowLeft(event);
-        }
+        e.preventDefault();
+        onArrowLeft?.(e);
         break;
       case 'ArrowRight':
-        if (onArrowRight) {
-          event.preventDefault();
-          onArrowRight(event);
-        }
+        e.preventDefault();
+        onArrowRight?.(e);
         break;
+      default:
+        onKeyDown?.(e);
     }
-  }, [onKeyDown, onEnter, onSpace, onEscape, onArrowUp, onArrowDown, onArrowLeft, onArrowRight]);
+  }, [onEnter, onSpace, onEscape, onArrowUp, onArrowDown, onArrowLeft, onArrowRight, onKeyDown]);
 
   return (
     <div
       tabIndex={tabIndex}
       onKeyDown={handleKeyDown}
-      style={{ outline: 'none' }}
+      className={`keyboard-navigation-wrapper ${className}`}
+      style={style}
       {...props}
     >
       {children}
@@ -369,7 +412,7 @@ export const KeyboardNavigationWrapper = ({
   );
 };
 
-// 로딩 상태 래퍼 (개선된 버전)
+// 로딩 래퍼 (개선된 버전)
 export const LoadingWrapper = ({ 
   children, 
   loading = false,
@@ -378,75 +421,35 @@ export const LoadingWrapper = ({
   errorText = '오류가 발생했습니다.',
   retry = null,
   skeleton = false,
-  skeletonCount = 3
+  skeletonCount = 3,
+  className = '',
+  style = {}
 }) => {
-  const responsive = useResponsive();
-
   if (loading) {
     if (skeleton) {
       return (
-        <div style={{ padding: responsive.isMobile ? '16px' : '24px' }}>
+        <div className={`loading-skeleton ${className}`} style={style}>
           {Array.from({ length: skeletonCount }).map((_, index) => (
-            <div
-              key={index}
-              style={{
-                height: '20px',
-                background: '#f0f0f0',
-                marginBottom: '8px',
-                borderRadius: '4px',
-                animation: 'pulse 1.5s ease-in-out infinite'
-              }}
-            />
+            <div key={index} className="skeleton-item" />
           ))}
         </div>
       );
     }
-
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        padding: responsive.isMobile ? '32px' : '40px',
-        flexDirection: 'column'
-      }}>
-        <div className="loading-spinner"></div>
-        <p style={{ 
-          marginTop: '16px', 
-          color: '#666',
-          fontSize: responsive.isMobile ? '14px' : '16px'
-        }}>
-          {loadingText}
-        </p>
+      <div className={`loading-wrapper ${className}`} style={style}>
+        <div className="loading-spinner" />
+        <div className="loading-text">{loadingText}</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        padding: responsive.isMobile ? '32px' : '40px',
-        flexDirection: 'column'
-      }}>
-        <p style={{ 
-          color: '#ff4d4f', 
-          marginBottom: '16px',
-          fontSize: responsive.isMobile ? '14px' : '16px',
-          textAlign: 'center'
-        }}>
-          {errorText}
-        </p>
+      <div className={`error-wrapper ${className}`} style={style}>
+        <div className="error-icon">⚠️</div>
+        <div className="error-text">{errorText}</div>
         {retry && (
-          <button 
-            onClick={retry} 
-            style={{ 
-              padding: responsive.isMobile ? '8px 12px' : '8px 16px',
-              fontSize: responsive.isMobile ? '14px' : '16px'
-            }}
-          >
+          <button onClick={retry} className="retry-button">
             다시 시도
           </button>
         )}
@@ -454,10 +457,10 @@ export const LoadingWrapper = ({
     );
   }
 
-  return children;
+  return <div className={className} style={style}>{children}</div>;
 };
 
-// 터치 제스처 래퍼
+// 터치 제스처 래퍼 (개선된 버전)
 export const TouchGestureWrapper = ({ 
   children, 
   onSwipeLeft, 
@@ -466,22 +469,280 @@ export const TouchGestureWrapper = ({
   onSwipeDown,
   threshold = 50,
   preventDefault = true,
+  className = '',
+  style = {},
   ...props 
 }) => {
-  const touchHandlers = useTouchGestures(
-    onSwipeLeft, 
-    onSwipeRight, 
-    onSwipeUp, 
-    onSwipeDown, 
-    threshold
-  );
+  const touchGestures = useTouchGestures(onSwipeLeft, onSwipeRight, onSwipeUp, onSwipeDown, threshold);
 
   return (
     <div
-      {...touchHandlers}
-      style={{ 
-        touchAction: preventDefault ? 'none' : 'auto',
-        ...props.style 
+      {...touchGestures}
+      className={`touch-gesture-wrapper ${className}`}
+      style={style}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+// 모바일 최적화 컴포넌트 (개선된 버전)
+export const MobileOptimized = ({ 
+  children, 
+  fallback = null,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  if (!responsive.isMobile) {
+    return fallback || null;
+  }
+
+  return (
+    <div className={`mobile-optimized ${className}`} style={style} {...props}>
+      {children}
+    </div>
+  );
+};
+
+// 데스크톱 최적화 컴포넌트 (개선된 버전)
+export const DesktopOptimized = ({ 
+  children, 
+  fallback = null,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  if (responsive.isMobile || responsive.isTablet) {
+    return fallback || null;
+  }
+
+  return (
+    <div className={`desktop-optimized ${className}`} style={style} {...props}>
+      {children}
+    </div>
+  );
+};
+
+// 반응형 이미지 (개선된 버전)
+export const ResponsiveImage = ({ 
+  src, 
+  alt, 
+  mobileSrc,
+  tabletSrc,
+  desktopSrc,
+  largeSrc,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  const getSrc = () => {
+    if (responsive.isMobile && mobileSrc) return mobileSrc;
+    if (responsive.isTablet && tabletSrc) return tabletSrc;
+    if (responsive.isLarge && largeSrc) return largeSrc;
+    if (responsive.isDesktop && desktopSrc) return desktopSrc;
+    return src;
+  };
+
+  return (
+    <img
+      src={getSrc()}
+      alt={alt}
+      className={`responsive-image ${className}`}
+      style={style}
+      loading="lazy"
+      {...props}
+    />
+  );
+};
+
+// 반응형 비디오 (새로 추가)
+export const ResponsiveVideo = ({ 
+  src, 
+  mobileSrc,
+  tabletSrc,
+  desktopSrc,
+  largeSrc,
+  className = '',
+  style = {},
+  controls = true,
+  autoPlay = false,
+  muted = false,
+  loop = false,
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  const getSrc = () => {
+    if (responsive.isMobile && mobileSrc) return mobileSrc;
+    if (responsive.isTablet && tabletSrc) return tabletSrc;
+    if (responsive.isLarge && largeSrc) return largeSrc;
+    if (responsive.isDesktop && desktopSrc) return desktopSrc;
+    return src;
+  };
+
+  return (
+    <div className={`responsive-video-container ${className}`} style={style}>
+      <video
+        src={getSrc()}
+        controls={controls}
+        autoPlay={autoPlay}
+        muted={muted}
+        loop={loop}
+        className="responsive-video"
+        {...props}
+      />
+    </div>
+  );
+};
+
+// 반응형 카드 (새로 추가)
+export const ResponsiveCard = ({ 
+  children, 
+  mobileProps = {},
+  tabletProps = {},
+  desktopProps = {},
+  largeProps = {},
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  const getCardProps = () => {
+    if (responsive.isMobile) return mobileProps;
+    if (responsive.isTablet) return tabletProps;
+    if (responsive.isLarge) return largeProps;
+    return desktopProps;
+  };
+
+  return (
+    <div
+      className={`responsive-card ${className}`}
+      style={style}
+      {...getCardProps()}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+// 반응형 네비게이션 (새로 추가)
+export const ResponsiveNavigation = ({ 
+  children, 
+  mobileMenu = null,
+  tabletMenu = null,
+  desktopMenu = null,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const getMenu = () => {
+    if (responsive.isMobile) return mobileMenu;
+    if (responsive.isTablet) return tabletMenu;
+    return desktopMenu;
+  };
+
+  return (
+    <nav className={`responsive-navigation ${className}`} style={style} {...props}>
+      {responsive.isMobile && mobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)} />
+      )}
+      {getMenu() || children}
+    </nav>
+  );
+};
+
+// 반응형 폼 (새로 추가)
+export const ResponsiveForm = ({ 
+  children, 
+  mobileLayout = 'stack',
+  tabletLayout = 'grid',
+  desktopLayout = 'grid',
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  const getLayout = () => {
+    if (responsive.isMobile) return mobileLayout;
+    if (responsive.isTablet) return tabletLayout;
+    return desktopLayout;
+  };
+
+  return (
+    <form
+      className={`responsive-form responsive-form-${getLayout()} ${className}`}
+      style={style}
+      {...props}
+    >
+      {children}
+    </form>
+  );
+};
+
+// 반응형 테이블 (새로 추가)
+export const ResponsiveTable = ({ 
+  children, 
+  mobileScroll = true,
+  tabletScroll = false,
+  desktopScroll = false,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  const responsive = useResponsive();
+
+  const getScrollClass = () => {
+    if (responsive.isMobile && mobileScroll) return 'mobile-scroll';
+    if (responsive.isTablet && tabletScroll) return 'tablet-scroll';
+    if (responsive.isDesktop && desktopScroll) return 'desktop-scroll';
+    return '';
+  };
+
+  return (
+    <div
+      className={`responsive-table ${getScrollClass()} ${className}`}
+      style={style}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+// 성능 최적화 래퍼 (새로 추가)
+export const PerformanceOptimized = ({ 
+  children, 
+  shouldOptimize = true,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  if (!shouldOptimize) {
+    return <div className={className} style={style} {...props}>{children}</div>;
+  }
+
+  return (
+    <div
+      className={`performance-optimized ${className}`}
+      style={{
+        willChange: 'transform',
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+        ...style
       }}
       {...props}
     >
@@ -490,75 +751,80 @@ export const TouchGestureWrapper = ({
   );
 };
 
-// 모바일 최적화 컴포넌트
-export const MobileOptimized = ({ 
+// 스크롤 최적화 래퍼 (새로 추가)
+export const ScrollOptimized = ({ 
   children, 
-  fallback = null,
+  smooth = true,
+  touch = true,
+  overscroll = true,
+  className = '',
+  style = {},
   ...props 
 }) => {
-  const responsive = useResponsive();
-  
-  if (!responsive.isMobile) {
-    return fallback || children;
-  }
-  
   return (
-    <div {...props}>
-      {children}
-    </div>
-  );
-};
-
-// 데스크톱 최적화 컴포넌트
-export const DesktopOptimized = ({ 
-  children, 
-  fallback = null,
-  ...props 
-}) => {
-  const responsive = useResponsive();
-  
-  if (responsive.isMobile || responsive.isTablet) {
-    return fallback || children;
-  }
-  
-  return (
-    <div {...props}>
-      {children}
-    </div>
-  );
-};
-
-// 반응형 이미지 컴포넌트
-export const ResponsiveImage = ({ 
-  src, 
-  alt, 
-  mobileSrc,
-  tabletSrc,
-  desktopSrc,
-  largeSrc,
-  ...props 
-}) => {
-  const responsive = useResponsive();
-  
-  const getSrc = () => {
-    if (mobileSrc && responsive.isMobile) return mobileSrc;
-    if (tabletSrc && responsive.isTablet) return tabletSrc;
-    if (largeSrc && responsive.isLarge) return largeSrc;
-    if (desktopSrc && responsive.isDesktop) return desktopSrc;
-    return src;
-  };
-
-  return (
-    <img 
-      src={getSrc()} 
-      alt={alt}
+    <div
+      className={`scroll-optimized ${className}`}
       style={{
-        maxWidth: '100%',
-        height: 'auto',
-        ...props.style
+        scrollBehavior: smooth ? 'smooth' : 'auto',
+        WebkitOverflowScrolling: touch ? 'touch' : 'auto',
+        overscrollBehavior: overscroll ? 'contain' : 'auto',
+        ...style
       }}
       {...props}
-    />
+    >
+      {children}
+    </div>
+  );
+};
+
+// 터치 최적화 래퍼 (새로 추가)
+export const TouchOptimized = ({ 
+  children, 
+  manipulation = true,
+  highlight = false,
+  select = false,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  return (
+    <div
+      className={`touch-optimized ${className}`}
+      style={{
+        touchAction: manipulation ? 'manipulation' : 'auto',
+        WebkitTapHighlightColor: highlight ? 'transparent' : 'auto',
+        WebkitUserSelect: select ? 'none' : 'auto',
+        userSelect: select ? 'none' : 'auto',
+        ...style
+      }}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
+
+// 포커스 최적화 래퍼 (새로 추가)
+export const FocusOptimized = ({ 
+  children, 
+  outline = true,
+  offset = 2,
+  radius = 4,
+  className = '',
+  style = {},
+  ...props 
+}) => {
+  return (
+    <div
+      className={`focus-optimized ${className}`}
+      style={{
+        outline: outline ? 'none' : 'auto',
+        ...style
+      }}
+      {...props}
+    >
+      {children}
+    </div>
   );
 };
 

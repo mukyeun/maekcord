@@ -1,14 +1,50 @@
-# 반응형 디자인 개선 가이드
+# 반응형 디자인 가이드
 
 ## 개요
 
-이 문서는 스마트맥진 프로젝트의 반응형 디자인 개선사항과 사용법을 설명합니다.
+이 문서는 MaeKCode 프로젝트의 반응형 디자인 시스템과 구현 방법을 설명합니다.
 
-## 주요 개선사항
+## 디자인 시스템
 
-### 1. 성능 최적화된 반응형 훅
+### 브레이크포인트
 
-```javascript
+```css
+/* 모바일 */
+@media (max-width: 767px)
+
+/* 태블릿 */
+@media (min-width: 768px) and (max-width: 1023px)
+
+/* 데스크톱 */
+@media (min-width: 1024px)
+
+/* 대형 화면 */
+@media (min-width: 1440px)
+```
+
+### CSS 변수
+
+```css
+:root {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #f5222d;
+  --font-size-base: 14px;
+  --border-radius-base: 6px;
+  --box-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --transition-duration: 0.3s;
+  --mobile-breakpoint: 768px;
+  --tablet-breakpoint: 1024px;
+  --desktop-breakpoint: 1440px;
+}
+```
+
+## 컴포넌트 사용법
+
+### 1. 반응형 훅
+
+```jsx
 import { useResponsive } from '../components/Common/ResponsiveWrapper';
 
 const MyComponent = () => {
@@ -19,412 +55,421 @@ const MyComponent = () => {
       {responsive.isMobile && <MobileView />}
       {responsive.isTablet && <TabletView />}
       {responsive.isDesktop && <DesktopView />}
-      {responsive.isLarge && <LargeView />}
-      
-      <p>현재 브레이크포인트: {responsive.currentBreakpoint}</p>
     </div>
   );
 };
 ```
 
-### 2. 터치 제스처 지원
+### 2. 반응형 그리드
 
-```javascript
-import { TouchGestureWrapper, useTouchGestures } from '../components/Common/ResponsiveWrapper';
+```jsx
+import { ResponsiveGrid } from '../components/Common/ResponsiveWrapper';
 
-const SwipeableComponent = () => {
-  const handleSwipeLeft = () => console.log('왼쪽으로 스와이프');
-  const handleSwipeRight = () => console.log('오른쪽으로 스와이프');
-  
-  return (
-    <TouchGestureWrapper
-      onSwipeLeft={handleSwipeLeft}
-      onSwipeRight={handleSwipeRight}
-      threshold={50}
-    >
-      <div>스와이프 가능한 영역</div>
-    </TouchGestureWrapper>
-  );
-};
-```
-
-### 3. 반응형 레이아웃 컴포넌트
-
-```javascript
-import ResponsiveLayout, { 
-  ResponsiveDashboard, 
-  ResponsiveCardLayout, 
-  ResponsiveTableLayout 
-} from '../components/Common/ResponsiveLayout';
-
-// 기본 레이아웃
-const AppLayout = () => (
-  <ResponsiveLayout
-    header={<Header />}
-    sidebar={<Sidebar />}
-    footer={<Footer />}
+const MyGrid = () => (
+  <ResponsiveGrid
+    mobileCols={1}
+    tabletCols={2}
+    desktopCols={3}
+    largeCols={4}
+    gutter={[16, 16]}
   >
-    <MainContent />
-  </ResponsiveLayout>
-);
-
-// 대시보드 레이아웃
-const Dashboard = () => (
-  <ResponsiveDashboard
-    stats={[
-      { value: '150', label: '총 환자 수', icon: '👥' },
-      { value: '25', label: '대기 환자', icon: '⏳' },
-      { value: '8', label: '진료 중', icon: '🏥' }
-    ]}
-    actions={[
-      { label: '환자 등록', icon: '➕', onClick: handleAddPatient },
-      { label: '대기열 보기', icon: '📋', onClick: handleViewQueue }
-    ]}
-  >
-    <PatientList />
-  </ResponsiveDashboard>
-);
-
-// 카드 레이아웃
-const PatientCard = () => (
-  <ResponsiveCardLayout
-    title="환자 정보"
-    subtitle="상세 정보를 확인하세요"
-    actions={[
-      { label: '편집', icon: '✏️', onClick: handleEdit },
-      { label: '삭제', icon: '🗑️', onClick: handleDelete }
-    ]}
-    loading={loading}
-    error={error}
-  >
-    <PatientDetails />
-  </ResponsiveCardLayout>
-);
-
-// 테이블 레이아웃
-const PatientTable = () => (
-  <ResponsiveTableLayout
-    title="환자 목록"
-    search={<SearchInput />}
-    filters={[
-      <StatusFilter key="status" />,
-      <DateFilter key="date" />
-    ]}
-    pagination={<Pagination />}
-  >
-    <Table data={patients} />
-  </ResponsiveTableLayout>
+    <Card>Item 1</Card>
+    <Card>Item 2</Card>
+    <Card>Item 3</Card>
+  </ResponsiveGrid>
 );
 ```
 
-### 4. 반응형 유틸리티 컴포넌트
+### 3. 반응형 컨테이너
 
-```javascript
-import { 
-  ResponsiveContainer, 
-  ResponsiveGrid, 
-  ResponsiveText, 
-  ResponsiveButton,
-  ResponsiveImage,
-  MobileOptimized,
-  DesktopOptimized
-} from '../components/Common/ResponsiveWrapper';
+```jsx
+import { ResponsiveContainer } from '../components/Common/ResponsiveWrapper';
 
-// 반응형 컨테이너
-const Container = () => (
-  <ResponsiveContainer maxWidth="1200px" fluid={false}>
+const MyContainer = () => (
+  <ResponsiveContainer
+    maxWidth="1200px"
+    mobilePadding="8px"
+    tabletPadding="12px"
+    largePadding="24px"
+  >
     <Content />
   </ResponsiveContainer>
 );
+```
 
-// 반응형 그리드
-const Grid = () => (
-  <ResponsiveGrid 
-    mobileCols={1} 
-    tabletCols={2} 
-    desktopCols={3} 
-    largeCols={4}
-  >
-    <Card1 />
-    <Card2 />
-    <Card3 />
-  </ResponsiveGrid>
-);
+### 4. 반응형 텍스트
 
-// 반응형 텍스트
-const Text = () => (
-  <ResponsiveText 
-    mobileSize={14} 
-    tabletSize={16} 
-    desktopSize={18} 
+```jsx
+import { ResponsiveText } from '../components/Common/ResponsiveWrapper';
+
+const MyText = () => (
+  <ResponsiveText
+    mobileSize={14}
+    tabletSize={16}
+    desktopSize={18}
     largeSize={20}
   >
     반응형 텍스트
   </ResponsiveText>
 );
-
-// 반응형 버튼
-const Button = () => (
-  <ResponsiveButton 
-    mobileSize="small" 
-    tabletSize="middle" 
-    desktopSize="large"
-    mobileIcon={true}
-  >
-    버튼
-  </ResponsiveButton>
-);
-
-// 반응형 이미지
-const Image = () => (
-  <ResponsiveImage
-    src="/images/desktop.jpg"
-    mobileSrc="/images/mobile.jpg"
-    tabletSrc="/images/tablet.jpg"
-    largeSrc="/images/large.jpg"
-    alt="반응형 이미지"
-  />
-);
-
-// 디바이스별 최적화
-const OptimizedComponent = () => (
-  <>
-    <MobileOptimized>
-      <MobileView />
-    </MobileOptimized>
-    
-    <DesktopOptimized>
-      <DesktopView />
-    </DesktopOptimized>
-  </>
-);
 ```
 
-## CSS 클래스 사용법
+### 5. 접근성 래퍼
 
-### 1. 반응형 유틸리티 클래스
-
-```css
-/* 기본 반응형 컨테이너 */
-.responsive-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-/* 반응형 그리드 */
-.responsive-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-/* 모바일 최적화 */
-.mobile-optimized {
-  padding: 8px;
-  margin: 4px;
-}
-
-/* 터치 친화적 */
-.touch-friendly {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 12px;
-}
-
-/* GPU 가속 */
-.gpu-accelerated {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-/* 스켈레톤 로딩 */
-.skeleton-loading {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-}
-```
-
-### 2. 브레이크포인트별 스타일
-
-```css
-/* 모바일 (max-width: 767px) */
-@media (max-width: 767px) {
-  .mobile-text {
-    font-size: 16px;
-    line-height: 1.5;
-  }
-  
-  .mobile-button-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-}
-
-/* 태블릿 (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .tablet-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-  }
-}
-
-/* 데스크톱 (min-width: 1024px) */
-@media (min-width: 1024px) {
-  .desktop-layout {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-  
-  .desktop-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  }
-}
-
-/* 대형 화면 (min-width: 1440px) */
-@media (min-width: 1440px) {
-  .large-layout {
-    max-width: 1400px;
-    padding: 0 32px;
-  }
-  
-  .large-text {
-    font-size: 18px;
-    line-height: 1.6;
-  }
-}
-```
-
-## 접근성 개선
-
-### 1. 키보드 네비게이션
-
-```javascript
-import { KeyboardNavigationWrapper } from '../components/Common/ResponsiveWrapper';
-
-const KeyboardComponent = () => (
-  <KeyboardNavigationWrapper
-    onEnter={() => console.log('Enter pressed')}
-    onEscape={() => console.log('Escape pressed')}
-    onArrowUp={() => console.log('Arrow Up pressed')}
-    onArrowDown={() => console.log('Arrow Down pressed')}
-  >
-    <div tabIndex={0}>키보드로 접근 가능한 요소</div>
-  </KeyboardNavigationWrapper>
-);
-```
-
-### 2. 접근성 래퍼
-
-```javascript
+```jsx
 import { AccessibilityWrapper } from '../components/Common/ResponsiveWrapper';
 
-const AccessibleComponent = () => (
+const MyAccessibleComponent = () => (
   <AccessibilityWrapper
     role="button"
-    aria-label="환자 추가 버튼"
-    aria-describedby="patient-add-description"
+    aria-label="클릭 가능한 버튼"
     tabIndex={0}
   >
-    <button>환자 추가</button>
+    <Button />
   </AccessibilityWrapper>
 );
 ```
 
-## 성능 최적화
+### 6. 키보드 네비게이션
 
-### 1. 로딩 상태 최적화
+```jsx
+import { KeyboardNavigationWrapper } from '../components/Common/ResponsiveWrapper';
 
-```javascript
+const MyKeyboardComponent = () => (
+  <KeyboardNavigationWrapper
+    onEnter={() => console.log('Enter pressed')}
+    onSpace={() => console.log('Space pressed')}
+    onEscape={() => console.log('Escape pressed')}
+  >
+    <InteractiveElement />
+  </KeyboardNavigationWrapper>
+);
+```
+
+### 7. 로딩 래퍼
+
+```jsx
 import { LoadingWrapper } from '../components/Common/ResponsiveWrapper';
 
-const LoadingComponent = () => (
+const MyLoadingComponent = () => (
   <LoadingWrapper
-    loading={loading}
+    loading={isLoading}
     error={error}
     skeleton={true}
-    skeletonCount={5}
-    retry={handleRetry}
+    skeletonCount={3}
+    retry={() => retryAction()}
   >
     <Content />
   </LoadingWrapper>
 );
 ```
 
-### 2. 이미지 최적화
+### 8. 터치 제스처
 
-```javascript
-// 반응형 이미지 사용
-<ResponsiveImage
-  src="/images/patient-desktop.jpg"
-  mobileSrc="/images/patient-mobile.jpg"
-  alt="환자 이미지"
-  loading="lazy"
-/>
+```jsx
+import { TouchGestureWrapper } from '../components/Common/ResponsiveWrapper';
+
+const MyTouchComponent = () => (
+  <TouchGestureWrapper
+    onSwipeLeft={() => console.log('Swipe left')}
+    onSwipeRight={() => console.log('Swipe right')}
+    threshold={50}
+  >
+    <TouchableContent />
+  </TouchGestureWrapper>
+);
+```
+
+### 9. 반응형 이미지
+
+```jsx
+import { ResponsiveImage } from '../components/Common/ResponsiveWrapper';
+
+const MyImage = () => (
+  <ResponsiveImage
+    src="/default.jpg"
+    mobileSrc="/mobile.jpg"
+    tabletSrc="/tablet.jpg"
+    desktopSrc="/desktop.jpg"
+    largeSrc="/large.jpg"
+    alt="반응형 이미지"
+  />
+);
+```
+
+### 10. 반응형 비디오
+
+```jsx
+import { ResponsiveVideo } from '../components/Common/ResponsiveWrapper';
+
+const MyVideo = () => (
+  <ResponsiveVideo
+    src="/default.mp4"
+    mobileSrc="/mobile.mp4"
+    controls={true}
+    autoPlay={false}
+    muted={true}
+  />
+);
+```
+
+### 11. 성능 최적화 래퍼
+
+```jsx
+import { PerformanceOptimized } from '../components/Common/ResponsiveWrapper';
+
+const MyOptimizedComponent = () => (
+  <PerformanceOptimized shouldOptimize={true}>
+    <HeavyComponent />
+  </PerformanceOptimized>
+);
+```
+
+### 12. 스크롤 최적화
+
+```jsx
+import { ScrollOptimized } from '../components/Common/ResponsiveWrapper';
+
+const MyScrollComponent = () => (
+  <ScrollOptimized smooth={true} touch={true} overscroll={true}>
+    <ScrollableContent />
+  </ScrollOptimized>
+);
+```
+
+### 13. 터치 최적화
+
+```jsx
+import { TouchOptimized } from '../components/Common/ResponsiveWrapper';
+
+const MyTouchComponent = () => (
+  <TouchOptimized manipulation={true} highlight={false} select={false}>
+    <TouchableContent />
+  </TouchOptimized>
+);
+```
+
+### 14. 포커스 최적화
+
+```jsx
+import { FocusOptimized } from '../components/Common/ResponsiveWrapper';
+
+const MyFocusComponent = () => (
+  <FocusOptimized outline={true} offset={2} radius={4}>
+    <FocusableContent />
+  </FocusOptimized>
+);
+```
+
+## 접근성 지원
+
+### 1. 고대비 모드
+
+```css
+@media (prefers-contrast: high) {
+  .ant-btn-primary {
+    background: #000;
+    color: #fff;
+    border: 2px solid #000;
+  }
+}
+```
+
+### 2. 다크 모드
+
+```css
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #141414;
+    color: #fff;
+  }
+}
+```
+
+### 3. 모션 감소
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 ```
 
 ## 모바일 최적화
 
-### 1. 터치 친화적 디자인
+### 1. 터치 타겟
 
 ```css
-/* 터치 디바이스에서 최소 터치 영역 보장 */
-@media (hover: none) and (pointer: coarse) {
-  button, .ant-btn, input, .ant-input {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  .touch-friendly {
-    padding: 12px;
-    margin: 8px;
-  }
+.mobile-touch-target {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 12px 16px;
+  font-size: 16px;
+  border-radius: 8px;
 }
 ```
 
-### 2. 모바일 스크롤 최적화
+### 2. 모바일 헤더
 
 ```css
-.mobile-scroll-optimized {
+.mobile-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
+}
+```
+
+### 3. 모바일 메뉴
+
+```css
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: #fff;
+  z-index: 1001;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+}
+```
+
+## 태블릿 최적화
+
+### 1. 태블릿 사이드바
+
+```css
+.tablet-sidebar {
+  width: 250px;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 1000;
+  background: #fff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+```
+
+### 2. 태블릿 그리드
+
+```css
+.tablet-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+```
+
+## 데스크톱 최적화
+
+### 1. 데스크톱 레이아웃
+
+```css
+.desktop-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+```
+
+### 2. 데스크톱 호버 효과
+
+```css
+.desktop-hover {
+  transition: all 0.3s ease;
+}
+
+.desktop-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+```
+
+## 성능 최적화
+
+### 1. GPU 가속
+
+```css
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+```
+
+### 2. 스켈레톤 로딩
+
+```css
+.skeleton-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+```
+
+### 3. 스크롤 최적화
+
+```css
+.scroll-optimized {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  overscroll-behavior: contain;
 }
 ```
 
-## 테마 지원
+## 유틸리티 클래스
 
-### 1. 다크모드
+### 1. 반응형 숨김/표시
 
 ```css
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #1a1a1a;
-    --text-color: #ffffff;
-    --card-background: #2d2d2d;
-    --border-color: #404040;
-  }
+.hidden-mobile { display: none; }
+.responsive-hidden { display: none; }
+
+@media (min-width: 768px) {
+  .hidden-mobile { display: block; }
+  .responsive-hidden-md { display: none; }
 }
 ```
 
-### 2. 고대비 모드
+### 2. 반응형 텍스트 정렬
 
 ```css
-@media (prefers-contrast: high) {
-  .ant-card {
-    border: 2px solid #000;
-    background: #fff;
-  }
-  
-  .ant-btn {
-    border: 2px solid #000;
-    background: #fff;
-    color: #000;
-  }
+.text-center-mobile { text-align: center; }
+
+@media (min-width: 768px) {
+  .text-center-mobile { text-align: left; }
+}
+```
+
+### 3. 반응형 패딩
+
+```css
+.padding-mobile { padding: 16px; }
+
+@media (min-width: 768px) {
+  .padding-mobile { padding: 24px; }
+}
+
+@media (min-width: 1024px) {
+  .padding-mobile { padding: 32px; }
 }
 ```
 
@@ -432,151 +477,110 @@ const LoadingComponent = () => (
 
 ```css
 @media print {
-  .print-hide {
-    display: none;
-  }
+  .print-hide { display: none !important; }
   
   * {
-    background: transparent;
-    color: #000;
-    box-shadow: none;
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
   }
   
-  .page-break-before {
-    page-break-before: always;
-  }
-  
-  .page-break-inside-avoid {
-    page-break-inside: avoid;
-  }
+  .page-break-before { page-break-before: always; }
+  .page-break-after { page-break-after: always; }
+  .page-break-inside-avoid { page-break-inside: avoid; }
 }
 ```
 
 ## 모범 사례
 
-### 1. 컴포넌트 설계
+### 1. 모바일 우선 설계
 
-```javascript
-// ✅ 좋은 예시
-const PatientCard = () => {
-  const responsive = useResponsive();
-  
-  return (
-    <ResponsiveCardLayout
-      title="환자 정보"
-      actions={[
-        { label: '편집', icon: '✏️', onClick: handleEdit }
-      ]}
-    >
-      {responsive.isMobile ? (
-        <MobilePatientView />
-      ) : (
-        <DesktopPatientView />
-      )}
-    </ResponsiveCardLayout>
-  );
-};
-
-// ❌ 나쁜 예시
-const PatientCard = () => (
-  <div className="patient-card">
-    <h2>환자 정보</h2>
-    <div className="patient-content">
-      {/* 반응형 처리가 없는 하드코딩된 레이아웃 */}
-    </div>
-  </div>
-);
-```
+- 모바일부터 시작하여 점진적으로 확장
+- 터치 친화적인 인터페이스 설계
+- 적절한 터치 타겟 크기 (최소 44px)
 
 ### 2. 성능 최적화
 
-```javascript
-// ✅ 좋은 예시 - 메모이제이션 사용
-const ResponsiveComponent = React.memo(() => {
-  const responsive = useResponsive();
-  
-  const content = useMemo(() => {
-    if (responsive.isMobile) return <MobileContent />;
-    if (responsive.isTablet) return <TabletContent />;
-    return <DesktopContent />;
-  }, [responsive.isMobile, responsive.isTablet]);
-  
-  return <div>{content}</div>;
-});
+- 이미지 지연 로딩 사용
+- CSS 애니메이션 최적화
+- 불필요한 리렌더링 방지
 
-// ❌ 나쁜 예시 - 매번 재렌더링
-const ResponsiveComponent = () => {
-  const responsive = useResponsive();
-  
-  if (responsive.isMobile) return <MobileContent />;
-  if (responsive.isTablet) return <TabletContent />;
-  return <DesktopContent />;
-};
-```
+### 3. 접근성 고려
+
+- 키보드 네비게이션 지원
+- 스크린 리더 호환성
+- 색상 대비 충분히 확보
+
+### 4. 사용자 경험
+
+- 일관된 인터랙션 패턴
+- 명확한 시각적 피드백
+- 직관적인 네비게이션
 
 ## 테스트 방법
 
 ### 1. 브라우저 개발자 도구
 
-1. F12를 눌러 개발자 도구 열기
-2. 디바이스 툴바 활성화 (Ctrl+Shift+M)
-3. 다양한 디바이스 크기로 테스트
-4. 네트워크 속도 조절로 성능 테스트
+- 다양한 화면 크기로 테스트
+- 네트워크 속도 시뮬레이션
+- 디바이스 에뮬레이션
 
-### 2. 접근성 테스트
+### 2. 실제 디바이스 테스트
 
-```javascript
-// 키보드 네비게이션 테스트
-document.addEventListener('keydown', (e) => {
-  console.log('Key pressed:', e.key);
-});
+- 다양한 모바일 디바이스
+- 태블릿 디바이스
+- 데스크톱 모니터
 
-// 스크린 리더 테스트
-// NVDA, JAWS, VoiceOver 등 사용
-```
+### 3. 접근성 테스트
 
-### 3. 성능 테스트
-
-```javascript
-// 렌더링 성능 측정
-const measurePerformance = () => {
-  const start = performance.now();
-  // 컴포넌트 렌더링
-  const end = performance.now();
-  console.log(`렌더링 시간: ${end - start}ms`);
-};
-```
+- 키보드만으로 네비게이션
+- 스크린 리더 사용
+- 고대비 모드 테스트
 
 ## 문제 해결
 
-### 1. 일반적인 문제들
+### 1. 깜빡임 문제
 
-**Q: 모바일에서 터치가 잘 안 되는 경우**
-A: `touch-friendly` 클래스 추가 및 최소 터치 영역 44px 보장
-
-**Q: 반응형 이미지가 로드되지 않는 경우**
-A: 이미지 경로 확인 및 `loading="lazy"` 속성 추가
-
-**Q: 키보드 네비게이션이 작동하지 않는 경우**
-A: `tabIndex` 속성 확인 및 `KeyboardNavigationWrapper` 사용
-
-### 2. 디버깅 팁
-
-```javascript
-// 반응형 상태 디버깅
-const ResponsiveDebugger = () => {
-  const responsive = useResponsive();
-  
-  console.log('Responsive state:', responsive);
-  
-  return (
-    <div style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '4px' }}>
-      {responsive.currentBreakpoint}
-    </div>
-  );
-};
+```css
+* {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
 ```
 
-## 결론
+### 2. 터치 반응성 문제
 
-이 가이드를 통해 프로젝트의 반응형 디자인을 효과적으로 구현하고 유지보수할 수 있습니다. 모든 새로운 컴포넌트는 이 가이드의 원칙을 따라 개발하시기 바랍니다. 
+```css
+.touch-friendly {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px;
+  margin: 8px;
+  border-radius: 8px;
+}
+```
+
+### 3. 스크롤 성능 문제
+
+```css
+.scroll-optimized {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+```
+
+## 업데이트 내역
+
+### v2.0.0 (2025-01-18)
+- 접근성 훅 추가 (`useAccessibility`)
+- 새로운 반응형 컴포넌트 추가
+- 성능 최적화 래퍼 추가
+- 터치 및 스크롤 최적화 개선
+- 다크 모드 및 고대비 모드 지원 강화
+
+### v1.0.0 (2025-01-17)
+- 기본 반응형 시스템 구축
+- 모바일/태블릿/데스크톱 지원
+- 기본 유틸리티 컴포넌트 제공 
