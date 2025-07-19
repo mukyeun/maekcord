@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Typography, message, Button, Card, Row, Col, Space } from 'antd';
-import { PlayCircleOutlined, DownloadOutlined } from '@ant-design/icons';
 import * as XLSX from 'xlsx';
 import waveIcon from '../../assets/icons/wave-analysis.svg';
 import { calculatePVC, calculateBV, calculateSV } from './waveAnalysisUtils';
+import { Icons } from '../../utils/icons';
 import {
   InputGroup,
   Label,
@@ -16,6 +16,10 @@ import {
 } from './styles';
 
 const { Title, Text } = Typography;
+
+// 아이콘 컴포넌트를 메모이제이션하여 성능 최적화
+const PlayIcon = React.memo(() => <Icons.Play />);
+const DownloadIcon = React.memo(() => <Icons.Download />);
 
 // 혈관 탄성도 등급별 수치 매핑 수정 (A->0.2, E->1.0)
 const ELASTICITY_SCORES = {
@@ -365,7 +369,7 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
 
         <ControlsContainer>
           <Button 
-            icon={<PlayCircleOutlined />} 
+            icon={<PlayIcon />} 
             onClick={handleUbioMeasurement}
             disabled={fileProcessing || isMeasuring}
             loading={isMeasuring}
@@ -374,7 +378,7 @@ const WaveAnalysisSection = ({ formData, onPulseWaveChange, fileProcessing = fal
             {isMeasuring ? '측정 중...' : '유비오맥파기 실행'}
           </Button>
           <Button 
-            icon={<DownloadOutlined />} 
+            icon={<DownloadIcon />} 
             onClick={handleFetchAutoResult} 
             disabled={fileProcessing || isMeasuring || !formData?.basicInfo?.name}
           >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Layout, Button, Space, Typography, Modal, Form, Input, message, Badge, Tooltip, Card } from 'antd';
 import styled from 'styled-components';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,7 +10,8 @@ import {
   LogoutOutlined,
   TableOutlined,
   SafetyCertificateOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  LockOutlined
 } from '@ant-design/icons';
 import { loginUser, logout, checkSecurityStatus } from '../../store/slices/authSlice';
 import WebSocketStatus from './WebSocketStatus';
@@ -27,16 +28,19 @@ const Logo = styled(Title)`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  transform: translateZ(0);
 `;
 
 const ActionButton = styled(Button)`
   margin-left: 8px;
+  transform: translateZ(0);
 `;
 
 const LoginButton = styled(Button)`
   margin-left: 16px;
   background-color: #1890ff;
   border-color: #1890ff;
+  transform: translateZ(0);
   
   &:hover {
     background-color: #40a9ff;
@@ -58,6 +62,8 @@ const HeaderBar = styled.header`
   left: 0;
   z-index: 100;
   padding: 0 2rem;
+  transform: translateZ(0);
+  will-change: transform;
 `;
 
 const Nav = styled.nav`
@@ -75,10 +81,11 @@ const NavItem = styled.a`
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
-  transition: color 0.2s;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   white-space: nowrap;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   
   &:hover {
     color: ${({ theme }) => theme.primary};
@@ -90,6 +97,7 @@ const UserMenu = styled.div`
   display: flex;
   align-items: center;
   gap: 1.2rem;
+  transform: translateZ(0);
 `;
 
 const IconBtn = styled.button`
@@ -99,6 +107,9 @@ const IconBtn = styled.button`
   font-size: 1.3rem;
   cursor: pointer;
   padding: 0 0.5rem;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  
   &:hover {
     color: ${({ theme }) => theme.accent};
   }
@@ -111,6 +122,8 @@ const SecurityStatus = styled.div`
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.875rem;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   
   &.secure {
     background: #f6ffed;
@@ -137,14 +150,16 @@ export const GlassCard = styled(Card)`
   backdrop-filter: blur(8px);
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.18);
-  transition: all 0.3s;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  
   &:hover {
     box-shadow: 0 16px 48px 0 rgba(16, 185, 129, 0.18);
-    transform: translateY(-8px) scale(1.03);
+    transform: translateY(-8px) scale(1.03) translateZ(0);
   }
 `;
 
-const Header = ({ onToggle, onToggleDark, dark }) => {
+const Header = React.memo(({ onToggle, onToggleDark, dark }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user, loading, securityStatus } = useSelector((state) => state.auth);
@@ -157,7 +172,7 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
     }
   }, [dispatch, isAuthenticated]);
 
-  const handleLogin = async (values) => {
+  const handleLogin = useCallback(async (values) => {
     try {
       const result = await dispatch(loginUser(values)).unwrap();
       if (result) {
@@ -167,15 +182,19 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
     } catch (error) {
       message.error('아이디 또는 비밀번호가 잘못되었습니다.');
     }
-  };
+  }, [dispatch]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     dispatch(logout());
     message.success('로그아웃되었습니다.');
-  };
+  }, [dispatch]);
+
+  const handleLoginModalToggle = useCallback(() => {
+    setIsLoginModalVisible(prev => !prev);
+  }, []);
 
   // 보안 상태 표시
-  const renderSecurityStatus = () => {
+  const renderSecurityStatus = useMemo(() => {
     if (!isAuthenticated) return null;
 
     const { isSecure, warnings } = securityStatus;
@@ -203,104 +222,100 @@ const Header = ({ onToggle, onToggleDark, dark }) => {
     }
 
     return (
-      <Tooltip title="보안 상태 확인 중">
+      <Tooltip title="보안 상태 확인 필요">
         <SecurityStatus className="danger">
           <ExclamationCircleOutlined />
-          확인 필요
+          위험
         </SecurityStatus>
       </Tooltip>
     );
-  };
+  }, [isAuthenticated, securityStatus]);
 
   return (
     <HeaderBar>
-      <Logo>
-        <MenuOutlined style={{ marginRight: 12, fontSize: 22 }} />
-        Maekcode
-      </Logo>
-      <Nav>
-        <NavItem href="/">🏠 대시보드</NavItem>
-        <NavItem href="/patients">👥 환자관리</NavItem>
-        <NavItem href="/stats">📊 통계</NavItem>
-      </Nav>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <Logo level={1}>맥진</Logo>
+        
+        <Nav>
+          <NavItem href="/">홈</NavItem>
+          <NavItem href="/reception">접수실</NavItem>
+          <NavItem href="/doctor">진료실</NavItem>
+          <NavItem href="/queue">대기열</NavItem>
+        </Nav>
+      </div>
+
       <UserMenu>
-        <WebSocketStatus compact showDetails />
-        {renderSecurityStatus()}
-        <PerformanceMonitor showDetails={false} />
-        <IconBtn onClick={onToggleDark} title="다크모드 전환">
-          {dark ? '🌙' : '☀️'}
-        </IconBtn>
+        {renderSecurityStatus}
+        
+        <WebSocketStatus />
+        <PerformanceMonitor />
+        
         {isAuthenticated ? (
-          <>
-            <span style={{ marginRight: 8 }}>{user?.name || user?.username || '사용자'}님 환영합니다</span>
-            <IconBtn title="로그아웃" onClick={handleLogout}>
-              <LogoutOutlined />
-            </IconBtn>
-          </>
+          <Space>
+            <Badge count={user?.notifications?.length || 0}>
+              <IconBtn onClick={onToggle}>
+                <UserOutlined />
+              </IconBtn>
+            </Badge>
+            
+            <Tooltip title="로그아웃">
+              <IconBtn onClick={handleLogout}>
+                <LogoutOutlined />
+              </IconBtn>
+            </Tooltip>
+          </Space>
         ) : (
-          <Button
-            type="primary"
+          <LoginButton 
+            type="primary" 
             icon={<LoginOutlined />}
-            onClick={() => setIsLoginModalVisible(true)}
+            onClick={handleLoginModalToggle}
+            loading={loading}
           >
             로그인
-          </Button>
+          </LoginButton>
         )}
-        <Button
-          icon={<TableOutlined />}
-          onClick={() => navigate('/patient-data')}
-          style={{ marginRight: 8 }}
-        >
-          환자 데이터 테이블 보기
-        </Button>
       </UserMenu>
+
       <Modal
         title="로그인"
         open={isLoginModalVisible}
-        onCancel={() => setIsLoginModalVisible(false)}
+        onCancel={handleLoginModalToggle}
         footer={null}
+        destroyOnHidden
       >
         <Form
           name="login"
           onFinish={handleLogin}
           layout="vertical"
+          autoComplete="off"
         >
           <Form.Item
-            label="이메일"
-            name="email"
-            rules={[
-              { required: true, message: '이메일을 입력해주세요' },
-              { type: 'email', message: '올바른 이메일 형식을 입력해주세요' }
-            ]}
+            name="username"
+            label="아이디"
+            rules={[{ required: true, message: '아이디를 입력해주세요!' }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="이메일" />
+            <Input prefix={<UserOutlined />} placeholder="아이디" />
           </Form.Item>
 
           <Form.Item
-            label="비밀번호"
             name="password"
-            rules={[{ required: true, message: '비밀번호를 입력해주세요' }]}
+            label="비밀번호"
+            rules={[{ required: true, message: '비밀번호를 입력해주세요!' }]}
           >
-            <Input.Password placeholder="비밀번호" />
+            <Input.Password prefix={<LockOutlined />} placeholder="비밀번호" />
           </Form.Item>
 
           <Form.Item>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
-              style={{ width: '100%' }}
-              loading={loading}
-            >
-              {loading ? '로그인 중...' : '로그인'}
+            <Button type="primary" htmlType="submit" block loading={loading}>
+              로그인
             </Button>
           </Form.Item>
-          <div style={{ textAlign: 'center', color: '#666' }}>
-            테스트 계정: admin@test.com / 123456
-          </div>
         </Form>
       </Modal>
     </HeaderBar>
   );
-};
+});
+
+Header.displayName = 'Header';
 
 export default Header;

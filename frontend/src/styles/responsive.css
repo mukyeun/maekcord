@@ -1,0 +1,758 @@
+/* 반응형 디자인 개선 CSS */
+
+/* 화면 깜박임 방지 */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+body {
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
+  will-change: transform;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+}
+
+/* GPU 가속 활성화 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 레이아웃 안정화 */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 애니메이션 완전 비활성화 (깜빡임 방지) */
+* {
+  transition: none !important;
+  animation: none !important;
+  backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+/* 모든 요소에 GPU 가속 적용 */
+* {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 깜빡임 방지를 위한 추가 최적화 */
+.ant-layout {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.ant-layout-content {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.ant-layout-header {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* 모든 Ant Design 컴포넌트에 GPU 가속 적용 */
+.ant-* {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* 특정 컴포넌트 최적화 */
+.ant-row {
+  transform: translateZ(0);
+}
+
+.ant-col {
+  transform: translateZ(0);
+}
+
+.ant-space {
+  transform: translateZ(0);
+}
+
+.ant-typography {
+  transform: translateZ(0);
+}
+
+.ant-divider {
+  transform: translateZ(0);
+}
+
+.ant-badge {
+  transform: translateZ(0);
+}
+
+.ant-tag {
+  transform: translateZ(0);
+}
+
+.ant-progress {
+  transform: translateZ(0);
+}
+
+.ant-alert {
+  transform: translateZ(0);
+}
+
+.ant-result {
+  transform: translateZ(0);
+}
+
+.ant-empty {
+  transform: translateZ(0);
+}
+
+.ant-skeleton {
+  transform: translateZ(0);
+}
+
+.ant-timeline {
+  transform: translateZ(0);
+}
+
+.ant-steps {
+  transform: translateZ(0);
+}
+
+.ant-pagination {
+  transform: translateZ(0);
+}
+
+.ant-transfer {
+  transform: translateZ(0);
+}
+
+.ant-tree {
+  transform: translateZ(0);
+}
+
+.ant-cascader {
+  transform: translateZ(0);
+}
+
+.ant-date-picker {
+  transform: translateZ(0);
+}
+
+.ant-time-picker {
+  transform: translateZ(0);
+}
+
+.ant-rate {
+  transform: translateZ(0);
+}
+
+.ant-slider {
+  transform: translateZ(0);
+}
+
+.ant-switch {
+  transform: translateZ(0);
+}
+
+.ant-checkbox {
+  transform: translateZ(0);
+}
+
+.ant-radio {
+  transform: translateZ(0);
+}
+
+.ant-upload {
+  transform: translateZ(0);
+}
+
+.ant-mentions {
+  transform: translateZ(0);
+}
+
+.ant-auto-complete {
+  transform: translateZ(0);
+}
+
+.ant-cascader {
+  transform: translateZ(0);
+}
+
+.ant-mentions {
+  transform: translateZ(0);
+}
+
+.ant-mentions-editor {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-selected {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-active {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-disabled {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group-title {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group-list {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group-list-item {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group-list-item-selected {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group-list-item-active {
+  transform: translateZ(0);
+}
+
+.ant-mentions-dropdown-menu-item-group-list-item-disabled {
+  transform: translateZ(0);
+}
+
+/* 기본 반응형 브레이크포인트 */
+:root {
+  --mobile-max: 767px;
+  --tablet-min: 768px;
+  --tablet-max: 1023px;
+  --desktop-min: 1024px;
+  --desktop-max: 1439px;
+  --large-min: 1440px;
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  /* 터치 디바이스에서 호버 효과 비활성화 */
+  *:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* 터치 친화적인 버튼 크기 */
+  button, .ant-btn, input, .ant-input, select, .ant-select {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* 터치 친화적인 간격 */
+  .touch-friendly {
+    padding: 12px !important;
+    margin: 8px !important;
+  }
+}
+
+/* 고해상도 디스플레이 최적화 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-optimized {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .loading-spinner {
+    animation: none !important;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .ant-card {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+  }
+  
+  .ant-btn {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  
+  .ant-input {
+    border: 2px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  
+  .ant-table {
+    border: 2px solid #000 !important;
+  }
+  
+  .ant-table-thead > tr > th {
+    background: #000 !important;
+    color: #fff !important;
+    border: 2px solid #000 !important;
+  }
+}
+
+/* 다크모드 지원 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #1a1a1a;
+    --text-color: #ffffff;
+    --card-background: #2d2d2d;
+    --border-color: #404040;
+    --hover-color: #404040;
+  }
+  
+  body {
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
+  }
+  
+  .ant-card {
+    background-color: var(--card-background) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+  }
+  
+  .ant-table {
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+  }
+  
+  .ant-table-thead > tr > th {
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+  }
+  
+  .ant-table-tbody > tr > td {
+    border-color: var(--border-color) !important;
+  }
+  
+  .ant-table-tbody > tr:hover > td {
+    background-color: var(--hover-color) !important;
+  }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 767px) {
+  /* 모바일에서 스크롤 최적화 */
+  .mobile-scroll-optimized {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* 모바일에서 터치 영역 확대 */
+  .mobile-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px;
+  }
+  
+  /* 모바일에서 폰트 크기 최적화 */
+  .mobile-text {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* 모바일에서 버튼 스택 */
+  .mobile-button-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  /* 모바일에서 카드 최적화 */
+  .mobile-card {
+    margin: 8px !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+  }
+  
+  /* 모바일에서 테이블 최적화 */
+  .mobile-table {
+    font-size: 14px !important;
+    overflow-x: auto !important;
+  }
+  
+  /* 모바일에서 모달 최적화 */
+  .mobile-modal {
+    margin: 8px !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: calc(100vh - 16px) !important;
+  }
+}
+
+/* 태블릿 최적화 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* 태블릿에서 그리드 최적화 */
+  .tablet-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+    gap: 16px !important;
+  }
+  
+  /* 태블릿에서 사이드바 최적화 */
+  .tablet-sidebar {
+    width: 280px !important;
+    position: fixed !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* 태블릿에서 메인 콘텐츠 조정 */
+  .tablet-main-content {
+    margin-left: 280px !important;
+    padding: 24px !important;
+  }
+}
+
+/* 데스크톱 최적화 */
+@media (min-width: 1024px) {
+  /* 데스크톱에서 레이아웃 최적화 */
+  .desktop-layout {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 24px !important;
+  }
+  
+  /* 데스크톱에서 호버 효과 */
+  .desktop-hover {
+    transition: all 0.3s ease !important;
+  }
+  
+  .desktop-hover:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* 데스크톱에서 사이드바 */
+  .desktop-sidebar {
+    width: 320px !important;
+    position: fixed !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* 데스크톱에서 메인 콘텐츠 */
+  .desktop-main-content {
+    margin-left: 320px !important;
+    padding: 32px !important;
+  }
+}
+
+/* 대형 화면 최적화 */
+@media (min-width: 1440px) {
+  /* 대형 화면에서 레이아웃 확장 */
+  .large-layout {
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+    padding: 0 32px !important;
+  }
+  
+  /* 대형 화면에서 폰트 크기 증가 */
+  .large-text {
+    font-size: 18px !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* 대형 화면에서 간격 증가 */
+  .large-spacing {
+    padding: 32px !important;
+    margin: 24px !important;
+  }
+}
+
+/* 인쇄 최적화 */
+@media print {
+  /* 인쇄 시 불필요한 요소 숨김 */
+  .print-hide {
+    display: none !important;
+  }
+  
+  /* 인쇄 시 배경색 제거 */
+  * {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  /* 인쇄 시 페이지 나누기 최적화 */
+  .page-break-before {
+    page-break-before: always !important;
+  }
+  
+  .page-break-after {
+    page-break-after: always !important;
+  }
+  
+  .page-break-inside-avoid {
+    page-break-inside: avoid !important;
+  }
+  
+  /* 인쇄 시 링크 표시 */
+  a[href]:after {
+    content: " (" attr(href) ")" !important;
+  }
+}
+
+/* 성능 최적화 */
+/* GPU 가속 활성화 */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* 스크롤 성능 최적화 */
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 애니메이션 성능 최적화 */
+.optimized-animation {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* 로딩 상태 최적화 */
+.skeleton-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* 터치 제스처 최적화 */
+.touch-gesture-area {
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 스크롤바 스타일링 */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 포커스 표시 개선 */
+.focus-visible {
+  outline: 2px solid #1890ff !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px #bae7ff !important;
+}
+
+/* 키보드 네비게이션 지원 */
+.keyboard-navigation {
+  outline: none;
+}
+
+.keyboard-navigation:focus-visible {
+  outline: 2px solid #1890ff !important;
+  outline-offset: 2px !important;
+}
+
+/* 반응형 이미지 */
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 반응형 비디오 */
+.responsive-video {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 비율 */
+}
+
+.responsive-video iframe,
+.responsive-video video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 반응형 테이블 */
+.responsive-table {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table table {
+  min-width: 600px;
+}
+
+/* 반응형 폼 */
+.responsive-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .responsive-form {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .responsive-form .form-group {
+    flex: 1;
+    min-width: 300px;
+  }
+}
+
+/* 반응형 네비게이션 */
+.responsive-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .responsive-nav {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* 반응형 카드 그리드 */
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .responsive-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1440px) {
+  .responsive-card-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* 반응형 유틸리티 클래스 */
+.hidden-mobile {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .hidden-mobile {
+    display: block;
+  }
+  
+  .hidden-desktop {
+    display: none;
+  }
+}
+
+.text-center-mobile {
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .text-center-mobile {
+    text-align: left;
+  }
+}
+
+.padding-mobile {
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .padding-mobile {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .padding-mobile {
+    padding: 32px;
+  }
+} 

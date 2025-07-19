@@ -677,7 +677,7 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
       ]}
       width={1000}
       centered
-      destroyOnClose
+      destroyOnHidden
     >
       <div className="print-hide" style={{ marginBottom: 16, textAlign: 'right' }}>
         <Button

@@ -58,9 +58,9 @@ const stagingConfig = {
   
   // 캐싱 설정
   caching: {
-    enableServiceWorker: true,
-    cacheStrategy: 'stale-while-revalidate',
-    maxCacheAge: 24 * 60 * 60 * 1000, // 1일
+    enableServiceWorker: false, // 서비스 워커 비활성화
+    cacheStrategy: 'network-first',
+    maxCacheAge: 7 * 24 * 60 * 60 * 1000, // 7일
   },
   
   // CDN 설정

@@ -15,7 +15,7 @@ import { logout } from '../store/slices/authSlice';
 import AppointmentManagerModal from '../components/appointments/AppointmentManagerModal';
 import { searchPatient } from '../api/patientApi';
 import axiosInstance from '../api/axiosInstance';
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 const mainActions = [
   { label: '신규 환자 등록', icon: <AddCircleOutlineIcon />, to: '/patient/new', color: 'primary' },
@@ -30,6 +30,8 @@ export default function Home() {
   const [candidates, setCandidates] = React.useState([]);
   const [showCandidates, setShowCandidates] = React.useState(false);
   const [openAppointmentModal, setOpenAppointmentModal] = useState(false);
+  const searchTimeoutRef = useRef(null);
+  const isInitializedRef = useRef(false);
 
   // 대시보드 요약 상태로 변경
   const [dashboardSummary, setDashboardSummary] = React.useState([
@@ -39,20 +41,30 @@ export default function Home() {
     { label: '신규환자', value: 0, icon: <PersonAddIcon color="info" /> },
   ]);
 
-  // 대시보드 요약 API 호출
-  React.useEffect(() => {
-    // 임시로 기본값 사용 (API 구현 전까지)
-    setDashboardSummary([
-      { label: '오늘의 대기', value: 0, icon: <PeopleIcon color="primary" /> },
-      { label: '예약', value: 0, icon: <TodayIcon color="success" /> },
-      { label: '진료중', value: 0, icon: <LocalHospitalIcon color="error" /> },
-      { label: '신규환자', value: 0, icon: <PersonAddIcon color="info" /> },
-    ]);
+  // 대시보드 요약 API 호출 (한 번만 실행)
+  useEffect(() => {
+    if (!isInitializedRef.current) {
+      console.log('Home 컴포넌트 초기화...');
+      isInitializedRef.current = true;
+      
+      // 임시로 기본값 사용 (API 구현 전까지)
+      setDashboardSummary([
+        { label: '오늘의 대기', value: 0, icon: <PeopleIcon color="primary" /> },
+        { label: '예약', value: 0, icon: <TodayIcon color="success" /> },
+        { label: '진료중', value: 0, icon: <LocalHospitalIcon color="error" /> },
+        { label: '신규환자', value: 0, icon: <PersonAddIcon color="info" /> },
+      ]);
+    }
   }, []);
 
-  // 검색 로직 개선
-  React.useEffect(() => {
+  // 검색 로직 개선 (디바운스 적용)
+  useEffect(() => {
     if (search.trim()) {
+      // 이전 타이머 클리어
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
       const searchPatients = async () => {
         try {
           const result = await searchPatient({ 
@@ -78,32 +90,175 @@ export default function Home() {
         }
       };
 
-      // 디바운스 적용 (300ms)
-      const timeoutId = setTimeout(searchPatients, 300);
-      return () => clearTimeout(timeoutId);
+      // 디바운스 적용 (500ms)
+      searchTimeoutRef.current = setTimeout(searchPatients, 500);
     } else {
       setCandidates([]);
       setShowCandidates(false);
     }
+
+    // 클린업 함수
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, [search]);
 
-  const handleCandidateClick = (patient) => {
+  const handleCandidateClick = useCallback((patient) => {
     navigate(`/doctor?patientId=${patient._id}`);
     setSearch('');
     setShowCandidates(false);
-  };
+  }, [navigate]);
 
-  const handleSearch = (e) => {
+  const handleSearch = useCallback((e) => {
     e.preventDefault();
     if (search.trim()) {
       navigate(`/search?query=${encodeURIComponent(search)}`);
       setShowCandidates(false);
     }
-  };
+  }, [navigate, search]);
+
+  // 메모이제이션된 컴포넌트들
+  const searchBar = useMemo(() => (
+    <TextField
+      fullWidth
+      variant="outlined"
+      placeholder="환자 이름, 연락처, 주민번호 등으로 검색하세요"
+      value={search}
+      onChange={e => setSearch(e.target.value)}
+      onKeyDown={e => {
+        // 엔터키로 form submit 막기 (드롭다운만 동작)
+        if (e.key === 'Enter') {
+          e.preventDefault();
+        }
+      }}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <SearchIcon />
+          </InputAdornment>
+        ),
+      }}
+      autoComplete="off"
+      sx={{
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden'
+      }}
+    />
+  ), [search]);
+
+  const dashboardCards = useMemo(() => (
+    <Grid container spacing={2} mb={3}>
+      {dashboardSummary.map((item, idx) => (
+        <Grid key={item.label} item xs={12} sm={6} lg={3}>
+          <Card sx={{ 
+            p: 2, 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 2, 
+            boxShadow: 4, 
+            borderRadius: 3, 
+            bgcolor: '#fff',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
+          }}>
+            {item.icon}
+            <Box>
+              <Typography variant="h6" fontWeight={700}>{item.value}</Typography>
+              <Typography variant="body2" color="text.secondary">{item.label}</Typography>
+            </Box>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  ), [dashboardSummary]);
+
+  const actionButtons = useMemo(() => (
+    mainActions.map(action => (
+      <Button
+        key={action.label}
+        variant="contained"
+        color={action.color}
+        startIcon={action.icon}
+        sx={{ 
+          height: 56, 
+          minWidth: 160, 
+          fontWeight: 600, 
+          borderRadius: 2, 
+          boxShadow: 2,
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
+        }}
+        onClick={() => navigate(action.to)}
+      >
+        {action.label}
+      </Button>
+    ))
+  ), [navigate]);
+
+  const searchResults = useMemo(() => {
+    if (!showCandidates) return null;
+    
+    return (
+      <Box sx={{
+        position: 'absolute', 
+        left: 0, 
+        right: 0, 
+        top: 56, 
+        zIndex: 10,
+        bgcolor: '#fff', 
+        boxShadow: 3, 
+        borderRadius: 2, 
+        maxHeight: 300, 
+        overflowY: 'auto',
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden'
+      }}>
+        {candidates.length > 0 ? (
+          candidates.map(patient => (
+            <Box
+              key={patient._id}
+              sx={{ 
+                px: 2, 
+                py: 1, 
+                cursor: 'pointer', 
+                '&:hover': { bgcolor: '#f0f4ff' },
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden'
+              }}
+              onClick={() => handleCandidateClick(patient)}
+            >
+              <Typography fontWeight={700}>{patient.basicInfo?.name}</Typography>
+              <Typography variant="body2" color="text.secondary">{patient.basicInfo?.phone}</Typography>
+            </Box>
+          ))
+        ) : (
+          <Typography sx={{ px: 2, py: 2, color: 'gray' }}>
+            검색 결과가 없습니다.
+          </Typography>
+        )}
+      </Box>
+    );
+  }, [showCandidates, candidates, handleCandidateClick]);
+
+  console.log('Home 컴포넌트 렌더링...');
 
   return (
-    <Box sx={{ bgcolor: '#f5f7fa', minHeight: '100vh' }}>
-      <Box sx={{ maxWidth: 1200, mx: 'auto', pt: 4, px: 2 }}>
+    <Box sx={{ 
+      bgcolor: '#f5f7fa', 
+      minHeight: '100vh',
+      transform: 'translateZ(0)',
+      backfaceVisibility: 'hidden'
+    }}>
+      <Box sx={{ 
+        maxWidth: 1200, 
+        mx: 'auto', 
+        pt: 4, 
+        px: 2,
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden'
+      }}>
         {/* Hero Header Section */}
         <Box
           sx={{
@@ -117,6 +272,8 @@ export default function Home() {
             position: 'relative',
             overflow: 'hidden',
             borderRadius: 3,
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -129,9 +286,23 @@ export default function Home() {
             }
           }}
         >
-          <Box sx={{ maxWidth: 1200, mx: 'auto', position: 'relative', zIndex: 1 }}>
+          <Box sx={{ 
+            maxWidth: 1200, 
+            mx: 'auto', 
+            position: 'relative', 
+            zIndex: 1,
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
+          }}>
             {/* Logo and Main Title */}
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              mb: 3,
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
+            }}>
               <Box 
                 sx={{ 
                   width: 64, 
@@ -143,7 +314,9 @@ export default function Home() {
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #1976D2 0%, #42A5F5 100%)',
                   boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
-                  border: '2px solid rgba(255,255,255,0.2)'
+                  border: '2px solid rgba(255,255,255,0.2)',
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden'
                 }}
               >
                 <svg 
@@ -178,14 +351,20 @@ export default function Home() {
                   />
                 </svg>
               </Box>
-              <Box sx={{ textAlign: 'left' }}>
+              <Box sx={{ 
+                textAlign: 'left',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden'
+              }}>
                 <Typography 
                   variant="h2" 
                   fontWeight={900} 
                   sx={{ 
                     letterSpacing: 3,
                     textShadow: '0 4px 8px rgba(0,0,0,0.3)',
-                    mb: 1
+                    mb: 1,
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden'
                   }}
                 >
                   Maekcode
@@ -197,7 +376,9 @@ export default function Home() {
                     letterSpacing: 2,
                     opacity: 0.95,
                     textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                    fontFamily: 'monospace'
+                    fontFamily: 'monospace',
+                    transform: 'translateZ(0)',
+                    backfaceVisibility: 'hidden'
                   }}
                 >
                   81Pulse AI Analysis System
@@ -213,7 +394,9 @@ export default function Home() {
                 maxWidth: 600, 
                 mx: 'auto',
                 lineHeight: 1.6,
-                textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden'
               }}
             >
               전통 맥진과 현대 AI 기술의 결합으로 정확하고 빠른 진단을 제공합니다.
@@ -227,7 +410,9 @@ export default function Home() {
               justifyContent: 'center', 
               gap: 4, 
               mt: 4,
-              flexWrap: 'wrap'
+              flexWrap: 'wrap',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box sx={{ 
@@ -264,81 +449,25 @@ export default function Home() {
         </Box>
 
         {/* 대시보드 요약 카드 */}
-        <Grid container spacing={2} mb={3}>
-          {dashboardSummary.map((item, idx) => (
-            <Grid key={item.label}>
-              <Card sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2, boxShadow: 4, borderRadius: 3, bgcolor: '#fff' }}>
-                {item.icon}
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>{item.value}</Typography>
-                  <Typography variant="body2" color="text.secondary">{item.label}</Typography>
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+        {dashboardCards}
+
         {/* 검색창 + CTA */}
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 4, flexWrap: 'wrap' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          alignItems: 'center', 
+          mb: 4, 
+          flexWrap: 'wrap',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
+        }}>
           <div style={{ flex: 1, minWidth: 240, position: 'relative' }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="환자 이름, 연락처, 주민번호 등으로 검색하세요"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              onKeyDown={e => {
-                // 엔터키로 form submit 막기 (드롭다운만 동작)
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                }
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              autoComplete="off"
-            />
-            {/* 드롭다운 */}
-            {showCandidates && (
-              <Box sx={{
-                position: 'absolute', left: 0, right: 0, top: 56, zIndex: 10,
-                bgcolor: '#fff', boxShadow: 3, borderRadius: 2, maxHeight: 300, overflowY: 'auto'
-              }}>
-                {candidates.length > 0 ? (
-                  candidates.map(patient => (
-                    <Box
-                      key={patient._id}
-                      sx={{ px: 2, py: 1, cursor: 'pointer', '&:hover': { bgcolor: '#f0f4ff' } }}
-                      onClick={() => handleCandidateClick(patient)}
-                    >
-                      <Typography fontWeight={700}>{patient.basicInfo?.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">{patient.basicInfo?.phone}</Typography>
-                    </Box>
-                  ))
-                ) : (
-                  <Typography sx={{ px: 2, py: 2, color: 'gray' }}>
-                    검색 결과가 없습니다.
-                  </Typography>
-                )}
-              </Box>
-            )}
+            {searchBar}
+            {searchResults}
           </div>
-          {mainActions.map(action => (
-            <Button
-              key={action.label}
-              variant="contained"
-              color={action.color}
-              startIcon={action.icon}
-              sx={{ height: 56, minWidth: 160, fontWeight: 600, borderRadius: 2, boxShadow: 2 }}
-              onClick={() => navigate(action.to)}
-            >
-              {action.label}
-            </Button>
-          ))}
+          {actionButtons}
         </Box>
+
         {/* 주요 기능 카드 (3x2 그리드, 카드 크기 2배, 색상/순서/아이콘 변경) */}
         <Box
           sx={{
@@ -346,6 +475,8 @@ export default function Home() {
             gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
             gap: 4,
             mb: 6,
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
           }}
         >
           {/* 접수실 */}
@@ -360,8 +491,13 @@ export default function Home() {
               fontWeight: 700,
               borderRadius: 4,
               boxShadow: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
               '&:hover': { bgcolor: '#388E3C' },
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
             fullWidth
           >
@@ -380,8 +516,13 @@ export default function Home() {
               fontWeight: 700,
               borderRadius: 4,
               boxShadow: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
               '&:hover': { bgcolor: '#1565C0' },
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
             fullWidth
           >
@@ -400,8 +541,13 @@ export default function Home() {
               fontWeight: 700,
               borderRadius: 4,
               boxShadow: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
               '&:hover': { bgcolor: '#0288D1' },
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
             fullWidth
           >
@@ -420,8 +566,13 @@ export default function Home() {
               fontWeight: 700,
               borderRadius: 4,
               boxShadow: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
               '&:hover': { bgcolor: '#7B1FA2' },
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
             fullWidth
           >
@@ -440,8 +591,13 @@ export default function Home() {
               fontWeight: 700,
               borderRadius: 4,
               boxShadow: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
               '&:hover': { bgcolor: '#FF6F00' },
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
             fullWidth
           >
@@ -460,8 +616,13 @@ export default function Home() {
               fontWeight: 700,
               borderRadius: 4,
               boxShadow: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
               '&:hover': { bgcolor: '#263238' },
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
             fullWidth
           >
@@ -469,6 +630,7 @@ export default function Home() {
             환자 데이터
           </Button>
         </Box>
+
         {/* 대기/접수/진료 등 실시간 요약 대시보드 (예시) */}
         {/* 하단 정보 - 세련된 디자인 */}
         <Box sx={{ mt: 8, mb: 4 }}>
@@ -481,6 +643,8 @@ export default function Home() {
               mb: 4, 
               color: '#1976D2',
               position: 'relative',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden',
               '&::after': {
                 content: '""',
                 position: 'absolute',
@@ -504,7 +668,9 @@ export default function Home() {
               gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
               gap: 4,
               maxWidth: 1200,
-              mx: 'auto'
+              mx: 'auto',
+              transform: 'translateZ(0)',
+              backfaceVisibility: 'hidden'
             }}
           >
             {/* 진료 시간 */}
@@ -516,8 +682,10 @@ export default function Home() {
                 boxShadow: '0 8px 32px rgba(25, 118, 210, 0.1)',
                 border: '1px solid rgba(25, 118, 210, 0.1)',
                 transition: 'all 0.3s ease',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
+                  transform: 'translateY(-4px) translateZ(0)',
                   boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
                 }
               }}
@@ -567,8 +735,10 @@ export default function Home() {
                 boxShadow: '0 8px 32px rgba(25, 118, 210, 0.1)',
                 border: '1px solid rgba(25, 118, 210, 0.1)',
                 transition: 'all 0.3s ease',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
+                  transform: 'translateY(-4px) translateZ(0)',
                   boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
                 }
               }}
@@ -618,8 +788,10 @@ export default function Home() {
                 boxShadow: '0 8px 32px rgba(25, 118, 210, 0.1)',
                 border: '1px solid rgba(25, 118, 210, 0.1)',
                 transition: 'all 0.3s ease',
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden',
                 '&:hover': {
-                  transform: 'translateY(-4px)',
+                  transform: 'translateY(-4px) translateZ(0)',
                   boxShadow: '0 12px 40px rgba(25, 118, 210, 0.15)',
                 }
               }}

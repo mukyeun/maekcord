@@ -44,8 +44,8 @@ const productionConfig = {
   // 기능 플래그
   features: {
     realtimeUpdates: true,
-    offlineMode: true,
-    pushNotifications: true,
+    offlineMode: false, // 오프라인 모드 비활성화
+    pushNotifications: false, // 푸시 알림 비활성화
     analytics: true,
   },
   
@@ -58,7 +58,7 @@ const productionConfig = {
   
   // 캐싱 설정
   caching: {
-    enableServiceWorker: true,
+    enableServiceWorker: false, // 서비스 워커 비활성화
     cacheStrategy: 'network-first',
     maxCacheAge: 7 * 24 * 60 * 60 * 1000, // 7일
   },

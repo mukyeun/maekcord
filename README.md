@@ -75,6 +75,50 @@ REACT_APP_API_URL=http://localhost:5000
 - **맥진 진단**: 맥진 데이터 분석 및 진단
 - **진료 기록**: 환자별 진료 이력 관리
 
+## 🎨 반응형 디자인
+
+### 주요 개선사항
+
+- **성능 최적화된 반응형 훅**: `useResponsive` 훅으로 브레이크포인트 관리
+- **터치 제스처 지원**: 스와이프, 탭 등 모바일 제스처 지원
+- **접근성 개선**: 키보드 네비게이션, 스크린 리더 지원
+- **다크모드/고대비 모드**: 시스템 설정에 따른 자동 테마 적용
+- **모바일 최적화**: 터치 친화적 UI, 최소 44px 터치 영역
+
+### 반응형 컴포넌트
+
+```javascript
+import { useResponsive, ResponsiveContainer, ResponsiveGrid } from './components/Common/ResponsiveWrapper';
+import ResponsiveLayout from './components/Common/ResponsiveLayout';
+
+// 반응형 레이아웃 사용
+const App = () => (
+  <ResponsiveLayout
+    header={<Header />}
+    sidebar={<Sidebar />}
+  >
+    <ResponsiveContainer>
+      <ResponsiveGrid mobileCols={1} tabletCols={2} desktopCols={3}>
+        <Card1 />
+        <Card2 />
+        <Card3 />
+      </ResponsiveGrid>
+    </ResponsiveContainer>
+  </ResponsiveLayout>
+);
+```
+
+### 브레이크포인트
+
+- **모바일**: 0px - 767px
+- **태블릿**: 768px - 1023px  
+- **데스크톱**: 1024px - 1439px
+- **대형 화면**: 1440px+
+
+### 자세한 가이드
+
+반응형 디자인 사용법과 모범 사례는 [반응형 디자인 가이드](docs/RESPONSIVE_DESIGN_GUIDE.md)를 참조하세요.
+
 ## 🛠️ 개발 가이드
 
 ### 프로젝트 구조
@@ -82,7 +126,15 @@ REACT_APP_API_URL=http://localhost:5000
 maekcord/
 ├── backend/          # 백엔드 API 서버
 ├── frontend/         # React 프론트엔드
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── Common/
+│   │   │       ├── ResponsiveWrapper.jsx    # 반응형 유틸리티
+│   │   │       └── ResponsiveLayout.jsx     # 반응형 레이아웃
+│   │   └── styles/
+│   │       └── responsive.css               # 반응형 CSS
 ├── docs/            # 문서
+│   └── RESPONSIVE_DESIGN_GUIDE.md          # 반응형 디자인 가이드
 └── scripts/         # 유틸리티 스크립트
 ```
 

@@ -22,6 +22,18 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>U-Healthcare</title>
+    <!-- 서비스 워커 자동 등록 비활성화 -->
+    <script>
+      // 서비스 워커 자동 등록 방지
+      if ('serviceWorker' in navigator) {
+        // 기존 서비스 워커 제거
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+    </script>
   </head>
   <body>
     <noscript>자바스크립트를 활성화해주세요.</noscript>
