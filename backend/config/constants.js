@@ -26,6 +26,16 @@ const constants = {
     CANCELLED: 'cancelled'
   },
 
+  // 대기열 상태
+  QUEUE_STATUS: {
+    WAITING: 'waiting',
+    CALLED: 'called',
+    IN_PROGRESS: 'in-progress',
+    COMPLETED: 'completed',
+    CANCELLED: 'cancelled',
+    NO_SHOW: 'no-show'
+  },
+
   // 에러 코드
   ERROR_CODES: {
     INVALID_INPUT: 'INVALID_INPUT',

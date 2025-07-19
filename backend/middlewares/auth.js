@@ -1,39 +1,48 @@
-const jwt = require('jsonwebtoken');
-const config = require('../config');
-const { AuthenticationError } = require('../utils/errors');
+const jwtConfig = require('../config/jwtConfig');
+const logger = require('../utils/logger');
 
-/**
- * 인증 미들웨어
- * JWT 토큰을 검증하고 사용자 정보를 req.user에 추가
- */
-const authMiddleware = async (req, res, next) => {
-  try {
-    // 헤더에서 토큰 추출
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new AuthenticationError('인증 토큰이 필요합니다.');
+const authMiddleware = {
+  authenticate: (req, res, next) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res.status(401).json({ message: 'No token provided' });
+      }
+
+      const parts = authHeader.split(' ');
+      if (parts.length !== 2 || parts[0] !== 'Bearer') {
+        return res.status(401).json({ message: 'Token format invalid' });
+      }
+
+      const token = parts[1];
+      console.log('Received token:', token);
+
+      const decoded = jwtConfig.verifyToken(token);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      logger.error('Authentication error:', error);
+      return res.status(401).json({ message: 'Invalid token' });
     }
+  },
 
-    const token = authHeader.split(' ')[1];
+  authorize: (roles = []) => {
+    return (req, res, next) => {
+      try {
+        if (!req.user) {
+          return res.status(401).json({ message: 'User not authenticated' });
+        }
 
-    // 토큰 검증
-    const decoded = jwt.verify(token, config.jwt.secret);
+        if (roles.length && !roles.includes(req.user.role)) {
+          return res.status(403).json({ message: 'Unauthorized access' });
+        }
 
-    // request 객체에 사용자 정보 추가
-    req.user = {
-      id: decoded.id,
-      role: decoded.role
+        next();
+      } catch (error) {
+        logger.error('Authorization error:', error);
+        return res.status(403).json({ message: 'Authorization failed' });
+      }
     };
-
-    next();
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      next(new AuthenticationError('유효하지 않은 토큰입니다.'));
-    } else if (error.name === 'TokenExpiredError') {
-      next(new AuthenticationError('만료된 토큰입니다.'));
-    } else {
-      next(error);
-    }
   }
 };
 

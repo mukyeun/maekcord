@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const appointmentController = require('../controllers/appointmentController');
 const validateRequest = require('../middlewares/validateRequest');
-const appointmentValidation = require('../validations/appointmentValidation');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const { USER_ROLES } = require('../constants');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
+const { USER_ROLES } = require('../config/constants');
 const auth = require('../middlewares/auth');
 const { validateAppointment } = require('../middlewares/validators');
 

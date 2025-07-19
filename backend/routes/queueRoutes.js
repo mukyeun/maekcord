@@ -5,7 +5,7 @@ const Queue = require('../models/Queue');
 const Patient = require('../models/Patient');
 const generateQueueNumber = require('../utils/generateQueueNumber');
 const moment = require('moment');
-const { broadcastQueueUpdate, broadcastPatientCalled } = require('../utils/wsServer');
+const { broadcastQueueUpdate, broadcastPatientCalled } = require('../websocket/wsServer');
 const logger = require('../utils/logger');
 const QueueHistory = require('../models/QueueHistory');
 const { 
@@ -19,7 +19,7 @@ const {
   callNextPatient,
   saveQueueNote
 } = require('../controllers/queueController');
-const { validateObjectId } = require('../middleware/validation');
+const { validateObjectId } = require('../middlewares/validators');
 
 // 필요한 환자 정보 필드 정의
 const PATIENT_FIELDS = [

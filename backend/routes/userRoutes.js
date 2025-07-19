@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const { authenticateToken, authorizeRoles } = require('../middleware/auth');
-const { USER_ROLES } = require('../constants');
+const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
+const { USER_ROLES } = require('../config/constants');
 
 // 미들웨어를 라우터에 등록
 router.use(authenticateToken);

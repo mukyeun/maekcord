@@ -1,76 +1,101 @@
 {
   level: 'info',
-  message: 'Test database disconnected',
-  timestamp: '2025-07-19 11:09:34.129'
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-19 14:07:15.170'
 }
 {
-  level: 'info',
-  message: '🔬 유비오맥파기 실행 시도:',
-  timestamp: '2025-07-19 11:37:40.565'
-}
-{
-  level: 'info',
-  message: '✅ 유비오맥파기 실행 성공',
-  timestamp: '2025-07-19 11:37:50.443'
-}
-{
-  level: 'info',
-  message: "📊 '권창준' 환자의 유비오맥파 측정 결과 읽기 시도",
-  timestamp: '2025-07-19 11:37:53.028'
-}
-{
-  level: 'info',
-  message: "✅ '권창준' 환자의 맥파 데이터 추출 성공",
-  timestamp: '2025-07-19 11:37:53.280'
-}
-{
-  message: 'Patient update failed: Validation failed: records.updatedAt: Path `updatedAt` is required., records.createdAt: Path `createdAt` is required., records.visitDateTime: Path `visitDateTime` is required., records.date: Path `date` is required.',
-  name: 'ValidationError',
-  level: 'error',
-  timestamp: '2025-07-19 11:38:19.565'
-}
-{
-  requestId: '72aty',
-  method: 'POST',
-  path: '/api/queues/status',
-  body: { patientId: '685f5a2d952697a330c65b75', date: '2025-07-19' },
+  requestId: 'yhzsrt',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
   query: undefined,
   level: 'info',
   message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:38:19.577'
+  timestamp: '2025-07-19 14:15:24.300'
 }
 {
-  patientId: '685f5a2d952697a330c65b75',
-  date: '2025-07-19',
-  timestamp: '2025-07-19 11:38:19.579',
-  level: 'info',
-  message: '🔍 환자 대기상태 조회 (POST):'
-}
-{
-  exists: false,
-  status: undefined,
-  timestamp: '2025-07-19 11:38:19.592',
-  level: 'info',
-  message: '✅ 환자 대기상태 조회 완료:'
-}
-{
-  requestId: '72aty',
+  requestId: 'yhzsrt',
   statusCode: 200,
-  responseTime: '16ms',
-  timestamp: '2025-07-19 11:38:19.593',
+  responseTime: '164ms',
+  timestamp: '2025-07-19 14:15:24.463',
   level: 'info',
   message: '📤 Queue API 응답:'
 }
 {
-  requestId: '9xhxg',
+  requestId: 'tm7zed',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:20:23.073'
+}
+{
+  requestId: 'tm7zed',
+  statusCode: 200,
+  responseTime: '22ms',
+  timestamp: '2025-07-19 14:20:23.094',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'd0zq5',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:20:34.201'
+}
+{
+  requestId: 'd0zq5',
+  statusCode: 200,
+  responseTime: '30ms',
+  timestamp: '2025-07-19 14:20:34.230',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-19 14:20:39"}
+{
+  level: 'info',
+  message: '📋 환자 상세 정보 조회 요청: 685f5ab8952697a330c65bd0',
+  timestamp: '2025-07-19 14:21:34.726'
+}
+{
+  level: 'info',
+  message: '✅ 환자 상세 정보 조회 성공: 박경화',
+  timestamp: '2025-07-19 14:21:34.730'
+}
+{
+  requestId: 'hajdpr',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:21:34.740'
+}
+{
+  requestId: 'hajdpr',
+  statusCode: 200,
+  responseTime: '17ms',
+  timestamp: '2025-07-19 14:21:34.757',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'abg3eq',
   method: 'POST',
   path: '/api/queues',
   body: {
-    patientId: '685f5a2d952697a330c65b75',
+    patientId: '685f5ab8952697a330c65bd0',
     visitType: '초진',
-    symptoms: [ '요추디스크(M51.9)', '좌골신경통(M54.3)' ],
+    symptoms: [],
     status: 'waiting',
-    registeredAt: '2025-07-19T02:38:19.596Z',
+    registeredAt: '2025-07-19T05:21:34.762Z',
     date: '2025-07-19',
     priority: 0,
     memo: '',
@@ -80,248 +105,69 @@
   query: undefined,
   level: 'info',
   message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:38:19.600'
+  timestamp: '2025-07-19 14:21:34.850'
 }
 {
-  requestId: '9xhxg',
+  requestId: 'abg3eq',
   statusCode: 201,
-  responseTime: '46ms',
-  timestamp: '2025-07-19 11:38:19.646',
+  responseTime: '49ms',
+  timestamp: '2025-07-19 14:21:34.899',
   level: 'info',
   message: '📤 Queue API 응답:'
 }
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-19 14:38:52"}
 {
-  requestId: 'dehq8',
+  requestId: '1tnprm',
   method: 'GET',
   path: '/api/queues/today',
   body: undefined,
   query: undefined,
   level: 'info',
   message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:38:23.025'
+  timestamp: '2025-07-19 14:38:55.893'
 }
 {
-  requestId: 'dehq8',
+  requestId: '1tnprm',
   statusCode: 200,
-  responseTime: '36ms',
-  timestamp: '2025-07-19 11:38:23.061',
+  responseTime: '34ms',
+  timestamp: '2025-07-19 14:38:55.929',
   level: 'info',
   message: '📤 Queue API 응답:'
 }
 {
-  requestId: 'qtpr3',
-  method: 'PUT',
-  path: '/api/queues/687b051b295019407022b5f2/call',
-  body: {
-    changedBy: 'reception',
-    previousStatus: 'waiting',
-    newStatus: 'called'
-  },
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:38:27.448'
-}
-{
-  requestId: 'qtpr3',
-  statusCode: 200,
-  responseTime: '46ms',
-  timestamp: '2025-07-19 11:38:27.493',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: '9ltsm',
+  requestId: 'o2o7yb',
   method: 'GET',
   path: '/api/queues/today',
   body: undefined,
   query: undefined,
   level: 'info',
   message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:38:27.536'
+  timestamp: '2025-07-19 14:39:02.628'
 }
 {
-  requestId: '9ltsm',
+  requestId: 'o2o7yb',
   statusCode: 200,
-  responseTime: '25ms',
-  timestamp: '2025-07-19 11:38:27.561',
+  responseTime: '29ms',
+  timestamp: '2025-07-19 14:39:02.657',
   level: 'info',
   message: '📤 Queue API 응답:'
 }
 {
-  requestId: '6oc2bl',
+  requestId: 'nzeeof',
   method: 'GET',
   path: '/api/queues/today',
   body: undefined,
   query: undefined,
   level: 'info',
   message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:38:35.009'
+  timestamp: '2025-07-19 14:43:05.611'
 }
 {
-  requestId: '6oc2bl',
-  statusCode: 200,
-  responseTime: '23ms',
-  timestamp: '2025-07-19 11:38:35.032',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: '9y5f0m',
-  method: 'GET',
-  path: '/api/queues/today',
-  body: undefined,
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:39:28.826'
-}
-{
-  requestId: '9y5f0m',
-  statusCode: 200,
-  responseTime: '22ms',
-  timestamp: '2025-07-19 11:39:28.848',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: 'avikdd',
-  method: 'GET',
-  path: '/api/queues/today',
-  body: undefined,
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:43:31.967'
-}
-{
-  requestId: 'avikdd',
+  requestId: 'nzeeof',
   statusCode: 200,
   responseTime: '24ms',
-  timestamp: '2025-07-19 11:43:31.991',
+  timestamp: '2025-07-19 14:43:05.635',
   level: 'info',
   message: '📤 Queue API 응답:'
 }
-{
-  requestId: 'alla7',
-  method: 'PUT',
-  path: '/api/queues/687b051b295019407022b5f2/status',
-  body: {
-    status: 'waiting',
-    symptoms: [],
-    memo: '',
-    stress: '',
-    pulseAnalysis: ''
-  },
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:43:40.771'
-}
-{
-  level: 'error',
-  message: '❌ WebSocket 서버가 초기화되지 않았습니다.',
-  timestamp: '2025-07-19 11:43:40.792'
-}
-{
-  requestId: 'alla7',
-  statusCode: 200,
-  responseTime: '23ms',
-  timestamp: '2025-07-19 11:43:40.794',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: 'bdkhga',
-  method: 'PUT',
-  path: '/api/queues/687b051b295019407022b5f2/call',
-  body: {
-    changedBy: 'reception',
-    previousStatus: 'waiting',
-    newStatus: 'called'
-  },
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:43:44.977'
-}
-{
-  requestId: 'bdkhga',
-  statusCode: 200,
-  responseTime: '24ms',
-  timestamp: '2025-07-19 11:43:45.001',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: 'upex0l',
-  method: 'GET',
-  path: '/api/queues/today',
-  body: undefined,
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:43:45.013'
-}
-{
-  requestId: 'upex0l',
-  statusCode: 200,
-  responseTime: '19ms',
-  timestamp: '2025-07-19 11:43:45.032',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: '8s1txb',
-  method: 'GET',
-  path: '/api/queues/today',
-  body: undefined,
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:43:50.292'
-}
-{
-  requestId: '8s1txb',
-  statusCode: 200,
-  responseTime: '39ms',
-  timestamp: '2025-07-19 11:43:50.330',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: '4n8ev',
-  method: 'GET',
-  path: '/api/queues/today',
-  body: undefined,
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:44:08.703'
-}
-{
-  requestId: '4n8ev',
-  statusCode: 200,
-  responseTime: '19ms',
-  timestamp: '2025-07-19 11:44:08.723',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
-{
-  requestId: '3usqmx',
-  method: 'GET',
-  path: '/api/queues/today',
-  body: undefined,
-  query: undefined,
-  level: 'info',
-  message: '📥 Queue API 요청:',
-  timestamp: '2025-07-19 11:44:40.520'
-}
-{
-  requestId: '3usqmx',
-  statusCode: 200,
-  responseTime: '17ms',
-  timestamp: '2025-07-19 11:44:40.537',
-  level: 'info',
-  message: '📤 Queue API 응답:'
-}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-19 14:43:09"}

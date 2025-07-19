@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const medicalRecordController = require('../controllers/medicalRecordController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware = require('../middlewares/auth');
 const { USER_ROLES } = require('../config/constants');
 
 // 모든 라우트에 인증 미들웨어 적용
