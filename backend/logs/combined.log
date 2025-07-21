@@ -171,3 +171,224 @@
   message: '📤 Queue API 응답:'
 }
 {"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-19 14:43:09"}
+{
+  requestId: '0qramt',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:51:16.150'
+}
+{
+  requestId: '0qramt',
+  statusCode: 200,
+  responseTime: '25ms',
+  timestamp: '2025-07-19 14:51:16.175',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'twepv',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:51:18.613'
+}
+{
+  requestId: 'twepv',
+  statusCode: 200,
+  responseTime: '30ms',
+  timestamp: '2025-07-19 14:51:18.643',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-19 14:51:20"}
+{
+  requestId: 'b67oqu',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:56:20.410'
+}
+{
+  requestId: 'b67oqu',
+  statusCode: 200,
+  responseTime: '33ms',
+  timestamp: '2025-07-19 14:56:20.443',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 's4c2dq',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-19 14:56:23.900'
+}
+{
+  requestId: 's4c2dq',
+  statusCode: 200,
+  responseTime: '29ms',
+  timestamp: '2025-07-19 14:56:23.929',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-19 14:56:26"}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-21 09:39:13.726'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-21 10:01:03.696'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-21 10:04:02.586'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-21 10:40:40.076'
+}
+{
+  requestId: 'ozh69r',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-21 10:46:46.065'
+}
+{
+  requestId: 'ozh69r',
+  statusCode: 200,
+  responseTime: '27ms',
+  timestamp: '2025-07-21 10:46:46.090',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '50pnic',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-21 10:47:00.795'
+}
+{
+  requestId: '50pnic',
+  statusCode: 200,
+  responseTime: '7ms',
+  timestamp: '2025-07-21 10:47:00.802',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-21 10:51:45"}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-21 10:54:18.777'
+}
+{
+  level: 'info',
+  message: '📋 환자 상세 정보 조회 요청: 685f5a2d952697a330c65b75',
+  timestamp: '2025-07-21 11:03:26.494'
+}
+{
+  level: 'info',
+  message: '✅ 환자 상세 정보 조회 성공: 권창준',
+  timestamp: '2025-07-21 11:03:26.541'
+}
+{
+  requestId: 'gltoyk',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-21 11:03:26.554'
+}
+{
+  requestId: 'gltoyk',
+  statusCode: 200,
+  responseTime: '7ms',
+  timestamp: '2025-07-21 11:03:26.561',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: '1kzv2e',
+  method: 'POST',
+  path: '/api/queues',
+  body: {
+    patientId: '685f5a2d952697a330c65b75',
+    visitType: '초진',
+    symptoms: [],
+    status: 'waiting',
+    registeredAt: '2025-07-21T02:03:26.565Z',
+    date: '2025-07-21',
+    priority: 0,
+    memo: '',
+    isTest: false,
+    forceCreate: false
+  },
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-21 11:03:26.586'
+}
+{
+  requestId: '1kzv2e',
+  statusCode: 201,
+  responseTime: '40ms',
+  timestamp: '2025-07-21 11:03:26.626',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  level: 'info',
+  message: '📋 환자 상세 정보 조회 요청: 685f5a2d952697a330c65b75',
+  timestamp: '2025-07-21 11:07:47.527'
+}
+{
+  level: 'info',
+  message: '✅ 환자 상세 정보 조회 성공: 권창준',
+  timestamp: '2025-07-21 11:07:47.531'
+}
+{
+  requestId: 'mnsiks',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-21 11:07:47.538'
+}
+{
+  requestId: 'mnsiks',
+  statusCode: 200,
+  responseTime: '29ms',
+  timestamp: '2025-07-21 11:07:47.567',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}

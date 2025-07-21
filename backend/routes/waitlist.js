@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const waitlistController = require('../controllers/waitlistController');
-const auth = require('../middlewares/auth');
+const { authenticate } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -173,10 +173,10 @@ const auth = require('../middlewares/auth');
  */
 
 // 기존 라우트들
-router.post('/', auth, waitlistController.createWaitlist);
-router.get('/status', auth, waitlistController.getWaitlistStatus);
+router.post('/', authenticate, waitlistController.createWaitlist);
+router.get('/status', authenticate, waitlistController.getWaitlistStatus);
 
 // 상태 업데이트 라우트
-router.patch('/:id/status', auth, waitlistController.updateWaitlistStatus);
+router.patch('/:id/status', authenticate, waitlistController.updateWaitlistStatus);
 
 module.exports = router; 

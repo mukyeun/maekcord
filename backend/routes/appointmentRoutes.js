@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const appointmentController = require('../controllers/appointmentController');
-const validateRequest = require('../middlewares/validateRequest');
-const { authenticateToken, authorizeRoles } = require('../middlewares/auth');
-const { USER_ROLES } = require('../config/constants');
-const auth = require('../middlewares/auth');
 const { validateAppointment } = require('../middlewares/validators');
+const { authenticate } = require('../middlewares/auth');
+const { USER_ROLES } = require('../config/constants');
 
 /**
  * @swagger
@@ -51,13 +49,13 @@ const { validateAppointment } = require('../middlewares/validators');
  */
 
 // 일일 통계
-router.get('/stats/daily', authenticateToken, appointmentController.getDoctorDailyStats);
+router.get('/stats/daily', authenticate, appointmentController.getDoctorDailyStats);
 
 // 월간 통계
-router.get('/stats/monthly', authenticateToken, appointmentController.getDoctorMonthlyStats);
+router.get('/stats/monthly', authenticate, appointmentController.getDoctorMonthlyStats);
 
 // 미들웨어 등록
-router.use(authenticateToken);
+router.use(authenticate);
 
 /**
  * @swagger
@@ -150,7 +148,7 @@ router.get('/:id', appointmentController.getAppointment);
  *       409:
  *         description: 시간 중복
  */
-router.post('/', auth, validateAppointment, appointmentController.createAppointment);
+router.post('/', authenticate, validateAppointment, appointmentController.createAppointment);
 
 /**
  * @swagger
@@ -182,7 +180,7 @@ router.post('/', auth, validateAppointment, appointmentController.createAppointm
  *       409:
  *         description: 시간 중복
  */
-router.put('/:id', auth, appointmentController.updateAppointment);
+router.put('/:id', authenticate, appointmentController.updateAppointment);
 
 /**
  * @swagger
@@ -220,7 +218,7 @@ router.put('/:id', auth, appointmentController.updateAppointment);
  *       404:
  *         description: 예약을 찾을 수 없음
  */
-router.put('/:id/status', auth, appointmentController.updateAppointmentStatus);
+router.put('/:id/status', authenticate, appointmentController.updateAppointmentStatus);
 
 // 예약 취소
 router.delete('/:id', appointmentController.cancelAppointment);

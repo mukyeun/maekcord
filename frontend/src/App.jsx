@@ -13,6 +13,7 @@ import { useState, useCallback } from 'react';
 // 보안 컴포넌트들
 import TokenRefreshManager from './components/Auth/TokenRefreshManager';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // 로딩 컴포넌트
 const LoadingSpinner = React.memo(() => (
@@ -160,49 +161,51 @@ const App = () => {
                 v7_relativeSplatPath: true
               }}
             >
-              <Layout className="gpu-accelerated">
-                <Header onToggleDark={handleToggleDark} dark={dark} />
-                <Content style={{ marginTop: 64 }}>
-                  {/* 보안 관리자 컴포넌트 */}
-                  <TokenRefreshManager />
-                  
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/patient/new" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <PatientFormPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/patient/edit/:id" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <PatientFormPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/reception" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception']}>
-                          <ReceptionDashboardPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/queue" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <QueueDisplayPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/doctor" element={
-                        <ProtectedRoute requiredRoles={['admin', 'doctor']}>
-                          <DoctorViewPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/patient-data" element={
-                        <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
-                          <PatientDataTable />
-                        </ProtectedRoute>
-                      } />
-                    </Routes>
-                  </Suspense>
-                </Content>
-              </Layout>
+              <ErrorBoundary>
+                <Layout className="gpu-accelerated">
+                  <Header onToggleDark={handleToggleDark} dark={dark} />
+                  <Content style={{ marginTop: 64 }}>
+                    {/* 보안 관리자 컴포넌트 */}
+                    <TokenRefreshManager />
+                    
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/patient/new" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <PatientFormPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/patient/edit/:id" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <PatientFormPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/reception" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception']}>
+                            <ReceptionDashboardPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/queue" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <QueueDisplayPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/doctor" element={
+                          <ProtectedRoute requiredRoles={['admin', 'doctor']}>
+                            <DoctorViewPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/patient-data" element={
+                          <ProtectedRoute requiredRoles={['admin', 'reception', 'doctor']}>
+                            <PatientDataTable />
+                          </ProtectedRoute>
+                        } />
+                      </Routes>
+                    </Suspense>
+                  </Content>
+                </Layout>
+              </ErrorBoundary>
             </BrowserRouter>
           </ConfigProvider>
         </PersistGate>

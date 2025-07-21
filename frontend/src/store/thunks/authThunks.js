@@ -1,32 +1,19 @@
-import { authAPI } from '../../api/auth';
+import { login as loginApi } from '../../api/authApi';
 import { loginStart, loginSuccess, loginFailure, logout } from '../slices/authSlice';
 
 export const loginUser = (credentials) => async (dispatch) => {
   try {
     dispatch(loginStart());
     
-    // 임시 로그인 로직 (API 연동 전까지 사용)
-    await new Promise(resolve => setTimeout(resolve, 500)); // 실제 API 호출처럼 보이게 딜레이 추가
-    
-    const mockCredentials = {
-      username: 'admin',
-      password: 'admin123'
-    };
+    // 실제 API 호출 - authApi의 login 함수 사용
+    const response = await loginApi(credentials.email || credentials.username, credentials.password);
 
-    if (credentials.username === mockCredentials.username && 
-        credentials.password === mockCredentials.password) {
-      const mockUserData = {
-        id: 1,
-        username: 'admin',
-        name: '관리자',
-        role: 'doctor'
-      };
-      
-      localStorage.setItem('token', 'mock-jwt-token');
-      dispatch(loginSuccess(mockUserData));
-      return mockUserData;
+    if (response.success) {
+      localStorage.setItem('token', response.data.token);
+      dispatch(loginSuccess(response.data.user));
+      return response.data.user;
     } else {
-      throw new Error('아이디 또는 비밀번호가 올바르지 않습니다.');
+      throw new Error(response.message || '로그인에 실패했습니다.');
     }
   } catch (error) {
     dispatch(loginFailure(error.message));
@@ -36,7 +23,6 @@ export const loginUser = (credentials) => async (dispatch) => {
 
 export const logoutUser = () => async (dispatch) => {
   try {
-    await authAPI.logout();
     localStorage.removeItem('token');
     dispatch(logout());
   } catch (error) {

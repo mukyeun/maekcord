@@ -3,7 +3,12 @@ import api from './axios';
 export const authAPI = {
   // 로그인
   login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
+    // username을 email로 변환
+    const loginData = {
+      email: credentials.username,
+      password: credentials.password
+    };
+    const response = await api.post('/auth/login', loginData);
     return response.data;
   },
 

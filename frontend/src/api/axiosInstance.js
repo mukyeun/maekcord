@@ -1,34 +1,26 @@
 // src/api/axiosInstance.js
 import axios from 'axios';
-import { getSecurityHeaders, secureLogout } from '../utils/security';
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:5000/api',
   timeout: 10000,
-  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
+    'Content-Type': 'application/json'
   }
 });
 
 // 요청 인터셉터
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 보안 헤더 추가 (인증 토큰 포함)
-    const securityHeaders = getSecurityHeaders();
-    config.headers = {
-      ...config.headers,
-      ...securityHeaders,
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
-    };
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     
     console.log('📤 API 요청:', {
       method: config.method,
       url: config.url,
       data: config.data,
-      params: config.params,
       headers: config.headers
     });
     
@@ -59,8 +51,9 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 || error.response?.status === 403) {
       console.warn('🔐 인증 토큰이 만료되었습니다. 로그인 페이지로 이동합니다.');
       
-      // 보안 정리
-      secureLogout();
+      // 로컬 스토리지 정리
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       
       // 로그인 페이지로 리다이렉트 (현재 페이지가 로그인 페이지가 아닌 경우에만)
       if (window.location.pathname !== '/login' && window.location.pathname !== '/') {

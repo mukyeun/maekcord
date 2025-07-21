@@ -290,11 +290,11 @@ const Header = React.memo(({ onToggle, onToggleDark, dark }) => {
           autoComplete="off"
         >
           <Form.Item
-            name="username"
-            label="아이디"
-            rules={[{ required: true, message: '아이디를 입력해주세요!' }]}
+            name="email"
+            label="이메일"
+            rules={[{ required: true, message: '이메일을 입력해주세요!' }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="아이디" />
+            <Input prefix={<UserOutlined />} placeholder="이메일" />
           </Form.Item>
 
           <Form.Item

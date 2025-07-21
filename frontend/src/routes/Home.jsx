@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Grid, Card, TextField, InputAdornment, Avatar, Typography } from '@mui/material';
+import { Box, Button, Grid, Card, TextField, InputAdornment, Avatar, Typography, Portal } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import TodayIcon from '@mui/icons-material/Today';
@@ -32,6 +32,34 @@ export default function Home() {
   const [openAppointmentModal, setOpenAppointmentModal] = useState(false);
   const searchTimeoutRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const searchContainerRef = useRef(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
+
+  // 검색창 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setShowCandidates(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // 드롭다운 위치 계산
+  useEffect(() => {
+    if (searchContainerRef.current && search.trim()) {
+      const rect = searchContainerRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [search, showCandidates]);
 
   // 대시보드 요약 상태로 변경
   const [dashboardSummary, setDashboardSummary] = React.useState([
@@ -59,7 +87,12 @@ export default function Home() {
 
   // 검색 로직 개선 (디바운스 적용)
   useEffect(() => {
+    console.log('🔍 검색어 변경:', search);
+    
     if (search.trim()) {
+      // 검색어가 있으면 즉시 드롭다운 표시
+      setShowCandidates(true);
+      
       // 이전 타이머 클리어
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
@@ -67,31 +100,32 @@ export default function Home() {
 
       const searchPatients = async () => {
         try {
+          console.log('🔍 API 호출:', search.trim());
           const result = await searchPatient({ 
             search: search.trim(),
             limit: 10,
             page: 1
           });
           
+          console.log('🔍 API 응답:', result);
+          
           if (result.success) {
             // 백엔드 응답 구조에 맞게 수정
             const patients = result.patients || result.data?.patients || result.data || [];
             setCandidates(patients);
-            setShowCandidates(true);
+            console.log('🔍 검색 결과 설정:', patients.length);
           } else {
             console.error('검색 실패:', result.message);
             setCandidates([]);
-            setShowCandidates(true);
           }
         } catch (error) {
           console.error('환자 검색 API 오류:', error);
           setCandidates([]);
-          setShowCandidates(true);
         }
       };
 
-      // 디바운스 적용 (500ms)
-      searchTimeoutRef.current = setTimeout(searchPatients, 500);
+      // 디바운스 적용 (300ms로 단축)
+      searchTimeoutRef.current = setTimeout(searchPatients, 300);
     } else {
       setCandidates([]);
       setShowCandidates(false);
@@ -127,6 +161,11 @@ export default function Home() {
       placeholder="환자 이름, 연락처, 주민번호 등으로 검색하세요"
       value={search}
       onChange={e => setSearch(e.target.value)}
+      onFocus={() => {
+        if (search.trim()) {
+          setShowCandidates(true);
+        }
+      }}
       onKeyDown={e => {
         // 엔터키로 form submit 막기 (드롭다운만 동작)
         if (e.key === 'Enter') {
@@ -198,49 +237,72 @@ export default function Home() {
   ), [navigate]);
 
   const searchResults = useMemo(() => {
-    if (!showCandidates) return null;
+    console.log('🔍 검색 결과 렌더링:', { showCandidates, search: search.trim(), candidates: candidates.length });
+    
+    // 검색어가 있으면 항상 드롭다운 표시 (테스트용)
+    if (!search.trim()) return null;
     
     return (
-      <Box sx={{
-        position: 'absolute', 
-        left: 0, 
-        right: 0, 
-        top: 56, 
-        zIndex: 10,
-        bgcolor: '#fff', 
-        boxShadow: 3, 
-        borderRadius: 2, 
-        maxHeight: 300, 
-        overflowY: 'auto',
-        transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden'
-      }}>
-        {candidates.length > 0 ? (
-          candidates.map(patient => (
-            <Box
-              key={patient._id}
-              sx={{ 
-                px: 2, 
-                py: 1, 
-                cursor: 'pointer', 
-                '&:hover': { bgcolor: '#f0f4ff' },
-                transform: 'translateZ(0)',
-                backfaceVisibility: 'hidden'
-              }}
-              onClick={() => handleCandidateClick(patient)}
-            >
-              <Typography fontWeight={700}>{patient.basicInfo?.name}</Typography>
-              <Typography variant="body2" color="text.secondary">{patient.basicInfo?.phone}</Typography>
+      <Portal container={document.body}>
+        <Box sx={{
+          position: 'fixed', 
+          top: dropdownPosition.top,
+          left: dropdownPosition.left,
+          width: dropdownPosition.width,
+          zIndex: 999999,
+          bgcolor: '#fff', 
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)', 
+          borderRadius: 2, 
+          maxHeight: 300, 
+          overflowY: 'auto',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden',
+          border: '2px solid #e0e0e0',
+          minHeight: 50
+        }}>
+          {candidates.length > 0 ? (
+            candidates.map(patient => (
+              <Box
+                key={patient._id}
+                sx={{ 
+                  px: 2, 
+                  py: 1, 
+                  cursor: 'pointer', 
+                  '&:hover': { bgcolor: '#f0f4ff' },
+                  transform: 'translateZ(0)',
+                  backfaceVisibility: 'hidden',
+                  borderBottom: '1px solid #f0f0f0',
+                  '&:last-child': {
+                    borderBottom: 'none'
+                  }
+                }}
+                onClick={() => handleCandidateClick(patient)}
+              >
+                <Typography fontWeight={700}>{patient.basicInfo?.name}</Typography>
+                <Typography variant="body2" color="text.secondary">{patient.basicInfo?.phone}</Typography>
+              </Box>
+            ))
+          ) : (
+            <Box sx={{ 
+              px: 2, 
+              py: 3, 
+              color: 'gray', 
+              textAlign: 'center',
+              bgcolor: '#f8f9fa',
+              borderRadius: 1
+            }}>
+              <Typography variant="body2">
+                검색 중... (검색어: "{search}")
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                환자 정보를 찾는 중입니다
+              </Typography>
             </Box>
-          ))
-        ) : (
-          <Typography sx={{ px: 2, py: 2, color: 'gray' }}>
-            검색 결과가 없습니다.
-          </Typography>
-        )}
-      </Box>
+          )}
+        </Box>
+      </Portal>
     );
-  }, [showCandidates, candidates, handleCandidateClick]);
+  }, [showCandidates, candidates, handleCandidateClick, search, dropdownPosition]);
 
   console.log('Home 컴포넌트 렌더링...');
 
@@ -249,7 +311,9 @@ export default function Home() {
       bgcolor: '#f5f7fa', 
       minHeight: '100vh',
       transform: 'translateZ(0)',
-      backfaceVisibility: 'hidden'
+      backfaceVisibility: 'hidden',
+      position: 'relative',
+      zIndex: 1
     }}>
       <Box sx={{ 
         maxWidth: 1200, 
@@ -257,7 +321,9 @@ export default function Home() {
         pt: 4, 
         px: 2,
         transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden'
+        backfaceVisibility: 'hidden',
+        position: 'relative',
+        zIndex: 1
       }}>
         {/* Hero Header Section */}
         <Box
@@ -455,17 +521,30 @@ export default function Home() {
         <Box sx={{ 
           display: 'flex', 
           gap: 2, 
-          alignItems: 'center', 
+          alignItems: 'flex-start', 
           mb: 4, 
           flexWrap: 'wrap',
           transform: 'translateZ(0)',
-          backfaceVisibility: 'hidden'
+          backfaceVisibility: 'hidden',
+          position: 'relative'
         }}>
-          <div style={{ flex: 1, minWidth: 240, position: 'relative' }}>
+          <div style={{ 
+            flex: 1, 
+            minWidth: 240, 
+            position: 'relative',
+            zIndex: 100000
+          }} ref={searchContainerRef}>
             {searchBar}
-            {searchResults}
           </div>
-          {actionButtons}
+          <div style={{ 
+            display: 'flex', 
+            gap: 1, 
+            flexWrap: 'wrap',
+            zIndex: 1,
+            position: 'relative'
+          }}>
+            {actionButtons}
+          </div>
         </Box>
 
         {/* 주요 기능 카드 (3x2 그리드, 카드 크기 2배, 색상/순서/아이콘 변경) */}
@@ -476,7 +555,9 @@ export default function Home() {
             gap: 4,
             mb: 6,
             transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden'
+            backfaceVisibility: 'hidden',
+            position: 'relative',
+            zIndex: 1
           }}
         >
           {/* 접수실 */}
@@ -838,6 +919,7 @@ export default function Home() {
           </Box>
         </Box>
         <AppointmentManagerModal open={openAppointmentModal} onClose={() => setOpenAppointmentModal(false)} />
+        {searchResults}
       </Box>
     </Box>
   );
