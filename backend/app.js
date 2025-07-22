@@ -4,7 +4,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerOptions = require('./config/swagger');
 const errorHandler = require('./middlewares/errorHandler');
-const logger = require('./utils/logger');
+const { logger } = require('./utils/logger');
 const swaggerSpecs = require('./swagger/swagger');
 const queueRoutes = require('./routes/queueRoutes');
 const mongoose = require('mongoose');
@@ -13,6 +13,7 @@ const patientDataRoutes = require('./routes/patientData');
 const dataExportRoutes = require('./routes/dataExport');
 const pulseRoutes = require('./routes/pulse');
 const visitRoutes = require('./routes/visitRoutes');
+const backupRoutes = require('./routes/backupRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -28,20 +29,33 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 200
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 요청 로깅
 app.use((req, res, next) => {
-  console.log('📡 요청 수신:', {
+  const start = Date.now();
+  
+  logger.info(`📡 ${req.method} ${req.path}`, {
     method: req.method,
-    originalUrl: req.originalUrl,
     path: req.path,
-    baseUrl: req.baseUrl,
     query: req.query,
     body: ['POST', 'PUT', 'PATCH'].includes(req.method) ? req.body : undefined,
     timestamp: new Date().toISOString()
   });
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.info(`✅ ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`, {
+      method: req.method,
+      path: req.path,
+      statusCode: res.statusCode,
+      duration: `${duration}ms`,
+      timestamp: new Date().toISOString()
+    });
+  });
+  
   next();
 });
 
@@ -53,39 +67,25 @@ const patientRoutes = require('./routes/patientRoutes');
 const statisticsRoutes = require('./routes/statisticsRoutes');
 
 // 라우터 등록
-console.log('라우터 등록 시작...');
 app.use('/api/auth', authRoutes);
-console.log('✅ auth 라우터 등록 완료');
 app.use('/api/appointments', appointmentRoutes);
-console.log('✅ appointments 라우터 등록 완료');
 app.use('/api/waitlist', waitlistRoutes);
-console.log('✅ waitlist 라우터 등록 완료');
 app.use('/api/patients', patientRoutes);
-console.log('✅ patients 라우터 등록 완료');
 app.use('/api/statistics', statisticsRoutes);
-console.log('✅ statistics 라우터 등록 완료');
 app.use('/api/queues', queueRoutes);
-console.log('✅ queues 라우터 등록 완료 - 등록된 라우트:', queueRoutes.stack?.map(r => r.route?.path));
 app.use('/api/pulse-map', pulseMapRoutes);
-console.log('✅ pulse-map 라우터 등록 완료');
-console.log('pulseRoutes 등록:', pulseRoutes.stack?.map(r => r.route?.path));
+app.use('/api/patient-data', patientDataRoutes);
+app.use('/api/data-export', dataExportRoutes);
 app.use('/api/pulse', pulseRoutes);
 app.use('/api/visits', visitRoutes);
-console.log('라우터 등록 완료');
-
-// 환자 데이터 라우트 등록
-console.log('환자 데이터 라우트 등록 중...');
-app.use('/api/patient-data', patientDataRoutes);
-console.log('환자 데이터 라우트 등록 완료');
-
-app.use('/api/data-export', dataExportRoutes);
+app.use('/api/backup', backupRoutes);
 
 // Swagger UI 설정
 if (process.env.NODE_ENV === 'development') {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
     explorer: true,
     customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: "병원 예약 관리 시스템 API 문서",
+    customSiteTitle: "Maekcord API 문서",
     customfavIcon: "/assets/favicon.ico"
   }));
 }
@@ -94,6 +94,16 @@ if (process.env.NODE_ENV === 'development') {
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
+});
+
+// 헬스 체크 엔드포인트
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // 404 처리 - 모든 라우터 등록 후에 위치
@@ -165,15 +175,6 @@ app.use((err, req, res, next) => {
     message: '서버 에러가 발생했습니다.',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
-});
-
-// 이메일 서비스 에러 처리
-app.use((err, req, res, next) => {
-  if (err.code === 'EAUTH') {
-    console.log('이메일 서비스 비활성화됨 (개발 모드)');
-    return next();
-  }
-  next(err);
 });
 
 module.exports = app;

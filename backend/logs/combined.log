@@ -392,3 +392,50 @@
   level: 'info',
   message: '📤 Queue API 응답:'
 }
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-21 16:10:44.523'
+}
+{
+  level: 'info',
+  message: '개발 환경 - 이메일 서비스가 시뮬레이션 모드로 실행됩니다.',
+  timestamp: '2025-07-22 09:06:01.616'
+}
+{
+  requestId: '07ro1i',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-22 09:45:24.219'
+}
+{
+  requestId: '07ro1i',
+  statusCode: 200,
+  responseTime: '33ms',
+  timestamp: '2025-07-22 09:45:24.251',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{
+  requestId: 'rmhodh',
+  method: 'GET',
+  path: '/api/queues/today',
+  body: undefined,
+  query: undefined,
+  level: 'info',
+  message: '📥 Queue API 요청:',
+  timestamp: '2025-07-22 09:45:31.446'
+}
+{
+  requestId: 'rmhodh',
+  statusCode: 200,
+  responseTime: '8ms',
+  timestamp: '2025-07-22 09:45:31.454',
+  level: 'info',
+  message: '📤 Queue API 응답:'
+}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-22 09:45:33"}
