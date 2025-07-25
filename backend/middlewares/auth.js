@@ -1,5 +1,5 @@
 const jwtConfig = require('../config/jwtConfig');
-const logger = require('../utils/logger');
+const { logger } = require('../utils/logger');
 
 const authMiddleware = {
   authenticate: (req, res, next) => {

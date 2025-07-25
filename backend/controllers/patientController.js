@@ -1,6 +1,6 @@
 const Patient = require('../models/Patient');
 const { NotFoundError, ValidationError } = require('../utils/errors');
-const logger = require('../utils/logger');
+const { logger } = require('../utils/logger');
 
 const patientController = {
   // 환자 생성
@@ -156,50 +156,29 @@ const patientController = {
   // 환자 목록 조회
   getPatients: async (req, res, next) => {
     try {
-      const { 
-        page = 1, 
-        limit = 10, 
-        status,
-        search,
-        sortBy = 'createdAt',
-        order = 'desc'
-      } = req.query;
-
-      const query = {};
+      const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
       
-      if (status) {
-        query.status = status;
-      }
-
-      if (search) {
-        query.$or = [
-          { 'basicInfo.name': new RegExp(search, 'i') },
-          { patientId: new RegExp(search, 'i') },
-          { 'basicInfo.phone': new RegExp(search, 'i') }
-        ];
-      }
-
-      const [patients, total] = await Promise.all([
-        Patient.find(query)
-          .sort({ [sortBy]: order === 'desc' ? -1 : 1 })
-          .skip((page - 1) * limit)
-          .limit(parseInt(limit)),
-        Patient.countDocuments(query)
-      ]);
-
-      logger.info(`Retrieved ${patients.length} patients`);
-
+      const skip = (page - 1) * limit;
+      const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
+      
+      const patients = await Patient.find()
+        .sort(sort)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean();
+      
+      const total = await Patient.countDocuments();
+      
+      logger.info(`Patients retrieved: ${patients.length} of ${total}`);
+      
       res.json({
         success: true,
-        message: `${total}명의 환자가 조회되었습니다.`,
-        data: {
-          patients,
-          pagination: {
-            total,
-            page: parseInt(page),
-            limit: parseInt(limit),
-            totalPages: Math.ceil(total / limit)
-          }
+        data: patients,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
         }
       });
     } catch (error) {
@@ -209,23 +188,94 @@ const patientController = {
   },
 
   // 환자 상세 조회
-  getPatient: async (req, res, next) => {
+  getPatientById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const patient = await Patient.findById(id).populate('records');
+      const patient = await Patient.findById(id).lean();
       
       if (!patient) {
         throw new NotFoundError('환자를 찾을 수 없습니다.');
       }
-
-      logger.info(`Retrieved patient details: ${patient.patientId}`);
-
+      
+      logger.info(`Patient retrieved: ${patient.patientId}`);
+      
       res.json({
         success: true,
         data: patient
       });
     } catch (error) {
-      logger.error('Patient detail retrieval failed:', error);
+      logger.error('Patient retrieval failed:', error);
+      next(error);
+    }
+  },
+
+  // 환자 검색
+  searchPatients: async (req, res, next) => {
+    try {
+      const { q, page = 1, limit = 10 } = req.query;
+      
+      if (!q) {
+        return res.status(400).json({
+          success: false,
+          message: '검색어를 입력해주세요.'
+        });
+      }
+      
+      const skip = (page - 1) * limit;
+      
+      const searchQuery = {
+        $or: [
+          { 'basicInfo.name': { $regex: q, $options: 'i' } },
+          { 'basicInfo.phone': { $regex: q, $options: 'i' } },
+          { 'basicInfo.residentNumber': { $regex: q, $options: 'i' } },
+          { patientId: { $regex: q, $options: 'i' } }
+        ]
+      };
+      
+      const patients = await Patient.find(searchQuery)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean();
+      
+      const total = await Patient.countDocuments(searchQuery);
+      
+      logger.info(`Patient search completed: ${patients.length} results for "${q}"`);
+      
+      res.json({
+        success: true,
+        data: patients,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      });
+    } catch (error) {
+      logger.error('Patient search failed:', error);
+      next(error);
+    }
+  },
+
+  // 환자 삭제
+  deletePatient: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const patient = await Patient.findByIdAndDelete(id);
+      
+      if (!patient) {
+        throw new NotFoundError('삭제할 환자를 찾을 수 없습니다.');
+      }
+      
+      logger.info(`Patient deleted: ${patient.patientId}`);
+      
+      res.json({
+        success: true,
+        message: '환자가 삭제되었습니다.'
+      });
+    } catch (error) {
+      logger.error('Patient deletion failed:', error);
       next(error);
     }
   },

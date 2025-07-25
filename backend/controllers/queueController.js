@@ -1,7 +1,7 @@
 const Queue = require('../models/Queue');
 const Patient = require('../models/Patient');
 const generateAndSaveQueue = require('../utils/generateAndSaveQueue');
-const logger = require('../utils/logger');
+const { logger } = require('../utils/logger');
 const mongoose = require('mongoose');
 const QueueHistory = require('../models/QueueHistory');
 const asyncHandler = require('../utils/asyncHandler');

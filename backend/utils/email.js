@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const config = require('../config');
-const logger = require('./logger');
+const { logger } = require('./logger');
 
 // 개발 환경에서는 이메일 서비스 초기화를 건너뛰기
 let transporter = null;

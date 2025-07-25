@@ -6,7 +6,7 @@ const Patient = require('../models/Patient');
 const generateQueueNumber = require('../utils/generateQueueNumber');
 const moment = require('moment');
 const { broadcastQueueUpdate, broadcastPatientCalled } = require('../websocket/wsServer');
-const logger = require('../utils/logger');
+const { logger } = require('../utils/logger');
 const QueueHistory = require('../models/QueueHistory');
 const { 
   registerQueue, 

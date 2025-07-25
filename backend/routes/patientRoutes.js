@@ -609,6 +609,120 @@ router.get('/debug/park-jonghwa', async (req, res) => {
   }
 });
 
+// 환자 데이터 검색 API (프론트엔드 호환용)
+router.get('/data', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search = '', visitType = '', status = '' } = req.query;
+    
+    // 검색 조건 구성
+    const searchConditions = {};
+    
+    if (search) {
+      searchConditions.$or = [
+        { 'basicInfo.name': { $regex: search, $options: 'i' } },
+        { 'basicInfo.patientId': { $regex: search, $options: 'i' } },
+        { 'basicInfo.phone': { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (visitType) {
+      searchConditions['basicInfo.visitType'] = visitType;
+    }
+    
+    if (status) {
+      searchConditions.status = status;
+    }
+
+    // 페이지네이션 계산
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // 데이터 조회 (Patient 모델 사용)
+    const patients = await Patient.find(searchConditions)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    // 전체 레코드 수 조회
+    const totalRecords = await Patient.countDocuments(searchConditions);
+
+    // 나이 계산 추가
+    const patientsWithAge = patients.map(patient => {
+      if (patient.basicInfo?.birthDate) {
+        const birthDate = new Date(patient.basicInfo.birthDate);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          return { ...patient, age: age - 1 };
+        }
+        return { ...patient, age };
+      }
+      return patient;
+    });
+
+    res.json({
+      success: true,
+      patients: patientsWithAge,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalRecords / parseInt(limit)),
+        totalRecords,
+        limit: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('환자 데이터 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 데이터 조회 중 오류가 발생했습니다.'
+    });
+  }
+});
+
+// 환자 상세 정보 조회 API (프론트엔드 호환용)
+router.get('/data/:patientId', async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    
+    // Patient 모델에서 환자 찾기
+    const patient = await Patient.findById(patientId).lean();
+    
+    if (!patient) {
+      return res.status(404).json({
+        success: false,
+        message: '환자를 찾을 수 없습니다.'
+      });
+    }
+
+    // 나이 계산
+    if (patient.basicInfo?.birthDate) {
+      const birthDate = new Date(patient.basicInfo.birthDate);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        patient.age = age - 1;
+      } else {
+        patient.age = age;
+      }
+    }
+
+    res.json({
+      success: true,
+      patientData: patient
+    });
+  } catch (error) {
+    console.error('환자 상세 정보 조회 오류:', error);
+    res.status(500).json({
+      success: false,
+      message: '환자 상세 정보 조회 중 오류가 발생했습니다.'
+    });
+  }
+});
+
 // 기존 라우트들
 router.get('/', authenticate, patientController.getPatients);
 router.post('/', authenticate, validatePatient, patientController.createPatient);
