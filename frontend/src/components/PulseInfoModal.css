@@ -246,12 +246,18 @@
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .pulse-info-modal {
-    margin: 10px;
-    max-height: 95vh;
+    margin: 0 !important;
+    max-height: 100vh !important;
+    width: 100vw !important;
+    border-radius: 0 !important;
   }
   
   .modal-header {
     padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
   }
   
   .modal-header h2 {
@@ -260,6 +266,9 @@
   
   .modal-content {
     padding: 16px;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   
   .pulse-header h3 {
@@ -284,6 +293,20 @@
   .notes-section,
   .references-section {
     padding: 16px;
+  }
+
+  /* 모바일에서 스크롤 최적화 */
+  .modal-content::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .modal-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .modal-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
   }
 }
 

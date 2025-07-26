@@ -62,21 +62,83 @@ const PulseAnalysisCard = styled(Card)`
 const MacSangCard = styled(Card)`
   margin-bottom: 16px;
   border-radius: 16px;
-  box-shadow: 0 2 16 rgba(25 1180, 08 border: 1px solid rgba(25, 1182101 
-  .ant-card-head[object Object]background: linear-gradient(135deg, #fff0f6%, #ffe6f0100
-    border-bottom: 1px solid rgba(25, 118, 0.1);
-    border-radius: 16x 00
-    padding: 16x 24  }
+  box-shadow: 0 2px 16px rgba(25, 118, 210, 0.08);
+  border: 1px solid rgba(25, 118, 210, 0.1);
   
-  .ant-card-head-title [object Object]
-    font-weight: 700
+  .ant-card-head {
+    background: linear-gradient(135deg, #fff0f6 0%, #ffe6f0 100%);
+    border-bottom: 1px solid rgba(25, 118, 210, 0.1);
+    border-radius: 16px 16px 0 0;
+    padding: 16px 24px;
+  }
+  
+  .ant-card-head-title {
+    font-weight: 700;
     font-size: 18px;
-    color: #100000  }
+    color: #100000;
+  }
   
-  .ant-card-body[object Object]
+  .ant-card-body {
     padding: 24px;
     background: white;
-    border-radius: 0066
+    border-radius: 0 0 16px 16px;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    
+    /* 스크롤바 스타일링 */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  /* 반응형 디자인 */
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+    border-radius: 12px;
+    
+    .ant-card-head {
+      padding: 12px 16px;
+      border-radius: 12px 12px 0 0;
+      
+      .ant-card-head-title {
+        font-size: 16px;
+      }
+    }
+    
+    .ant-card-body {
+      padding: 16px;
+      max-height: calc(100vh - 200px);
+      border-radius: 0 0 12px 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ant-card-head {
+      padding: 10px 12px;
+      
+      .ant-card-head-title {
+        font-size: 14px;
+      }
+    }
+    
+    .ant-card-body {
+      padding: 12px;
+    }
+  }
 `;
 
 const HistoryButton = styled(Button)`

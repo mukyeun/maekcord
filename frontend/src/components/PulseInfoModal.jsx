@@ -4,9 +4,38 @@ import { FileTextOutlined, MedicineBoxOutlined, BulbOutlined, LineChartOutlined,
 import * as pulseApi from '../api/pulseApi';
 import html2pdf from 'html2pdf.js';
 import { useReactToPrint } from 'react-to-print';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
 const { Title, Text, Paragraph } = Typography;
+
+// 전역 스타일 추가
+const GlobalStyle = createGlobalStyle`
+  .pulse-modal-scrollable {
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #888 #f1f1f1 !important;
+    
+    &::-webkit-scrollbar {
+      width: 12px !important;
+      background-color: #f1f1f1 !important;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1 !important;
+      border-radius: 6px !important;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #888 !important;
+      border-radius: 6px !important;
+      
+      &:hover {
+        background: #555 !important;
+      }
+    }
+  }
+`;
 
 // 장부별 이모티콘+한글(영문) 매핑
 const ORGAN_LABELS = {
@@ -27,26 +56,188 @@ const ORGAN_LABELS = {
 };
 
 const StyledModal = styled(Modal)`
-  .ant-modal-content {
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  
-  .ant-modal-header {
-    background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
-    padding: 16px 24px;
-    border-bottom: none;
+  && {
+    .ant-modal {
+      width: 90vw !important;
+      max-width: 1200px !important;
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      margin: 0 !important;
+      height: 70vh !important;
+      min-height: 60vh !important;
+      max-height: 70vh !important;
+      padding: 0 !important;
+      z-index: 9999 !important;
+    }
+
+    .ant-modal-mask {
+      z-index: 9998 !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+
+    .ant-modal-wrap {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 20px !important;
+    }
+
+    .ant-modal-content {
+      border-radius: 16px !important;
+      overflow: hidden !important;
+      height: 100% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative !important;
+      margin: 0 !important;
+      width: 100% !important;
+    }
     
-    .ant-modal-title {
+    .ant-modal-header {
+      background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+      padding: 12px 24px !important;
+      border-bottom: none;
+      flex-shrink: 0 !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 10 !important;
+      
+      .ant-modal-title {
+        color: white;
+        font-size: 18px !important;
+        font-weight: 600;
+      }
+    }
+
+    .ant-modal-close {
       color: white;
-      font-size: 20px;
-      font-weight: 600;
+    }
+
+    .ant-modal-body {
+      flex: 1 !important;
+      overflow: hidden !important;
+      padding: 0 !important;
+      height: calc(70vh - 100px) !important;
+      max-height: calc(70vh - 100px) !important;
+    }
+
+    .ant-modal-footer {
+      flex-shrink: 0 !important;
+      padding: 12px 24px !important;
+      border-top: 1px solid #f0f0f0;
+      position: sticky !important;
+      bottom: 0 !important;
+      background: white !important;
+      z-index: 10 !important;
+    }
+
+    /* 반응형 디자인 개선 */
+    @media (max-width: 1200px) {
+      .ant-modal {
+        width: 95vw !important;
+        max-width: 95vw !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .ant-modal {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+      }
+      
+      .ant-modal-wrap {
+        padding: 0 !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+      }
+      
+      .ant-modal-content {
+        height: 100vh !important;
+        border-radius: 0 !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+      }
+      
+      .ant-modal-body {
+        height: calc(100vh - 100px) !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+      }
+      
+      .pulse-modal-scrollable {
+        height: calc(100vh - 120px) !important;
+        max-height: calc(100vh - 120px) !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .ant-modal-header {
+        padding: 10px 16px !important;
+        
+        .ant-modal-title {
+          font-size: 16px !important;
+        }
+      }
     }
   }
+`;
 
-  .ant-modal-close {
-    color: white;
+const ScrollableContent = styled.div`
+  height: calc(70vh - 120px) !important;
+  max-height: calc(70vh - 120px) !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  padding: 16px;
+  
+  /* 스크롤바 강제 표시 */
+  scrollbar-width: thin !important;
+  scrollbar-color: #888 #f1f1f1 !important;
+  
+  /* WebKit 스크롤바 스타일링 */
+  &::-webkit-scrollbar {
+    width: 12px !important;
+    background-color: #f1f1f1 !important;
   }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1 !important;
+    border-radius: 6px !important;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888 !important;
+    border-radius: 6px !important;
+    
+    &:hover {
+      background: #555 !important;
+    }
+  }
+  
+  /* 스크롤 강제 활성화 */
+  overflow: scroll !important;
+  
+  /* 내용이 넘칠 때 스크롤 강제 */
+  white-space: normal !important;
+  word-wrap: break-word !important;
 `;
 
 const GradientCard = styled(Card)`
@@ -55,6 +246,7 @@ const GradientCard = styled(Card)`
   transition: all 0.3s ease;
   border: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
   
   &:hover {
     transform: translateY(-2px);
@@ -62,13 +254,14 @@ const GradientCard = styled(Card)`
   }
 
   .ant-card-head {
-    background: ${props => props.gradient || 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)'};
-    border-bottom: none;
-    padding: 12px 20px;
+    background: ${props => props.gradient || 'linear-gradient(135deg, #1890ff 0%, #096dd9 100%)'} !important;
+    border-bottom: none !important;
+    padding: 12px 20px !important;
     
     .ant-card-head-title {
-      color: white;
-      font-size: 16px;
+      color: white !important;
+      font-size: 16px !important;
+      font-weight: 600 !important;
       
       .anticon {
         margin-right: 8px;
@@ -79,6 +272,21 @@ const GradientCard = styled(Card)`
   .ant-card-body {
     padding: 20px;
     background: white;
+  }
+
+  /* 반응형 디자인 */
+  @media (max-width: 768px) {
+    .ant-card-head {
+      padding: 10px 16px !important;
+      
+      .ant-card-head-title {
+        font-size: 14px !important;
+      }
+    }
+    
+    .ant-card-body {
+      padding: 16px;
+    }
   }
 `;
 
@@ -123,11 +331,13 @@ const SectionCard = ({ title, icon, children, gradient }) => (
 const ParameterBar = styled.div`
   position: relative;
   width: 100%;
-  height: 12px;
+  height: 24px;
   background: #f0f2f5;
-  border-radius: 6px;
+  border-radius: 12px;
   margin: 16px 0;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e8e8e8;
+  overflow: visible;
   
   &::before {
     content: '';
@@ -137,7 +347,7 @@ const ParameterBar = styled.div`
     height: 100%;
     background: rgba(24, 144, 255, 0.1);
     transform: translateX(-50%);
-    border-radius: 6px;
+    border-radius: 12px;
   }
 `;
 
@@ -153,24 +363,24 @@ const CenterLine = styled.div`
 
 const ValueMarker = styled.div`
   position: absolute;
-  width: 4px;
-  height: 24px;
+  width: 8px;
+  height: 32px;
   background: #1890ff;
-  top: -6px;
+  top: -4px;
   transform: translateX(-50%);
-  border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 3;
   
   &::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: -8px;
     left: 50%;
     transform: translateX(-50%);
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid currentColor;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid currentColor;
   }
 `;
 
@@ -178,47 +388,52 @@ const RangeValue = styled.div`
   position: absolute;
   font-size: 12px;
   color: #8c8c8c;
-  top: 20px;
+  top: 30px;
   transform: translateX(-50%);
   font-weight: 500;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
 `;
 
 const AverageLine = styled.div`
   position: absolute;
   left: 50%;
-  width: 2px;
-  height: 24px;
+  width: 4px;
+  height: 32px;
   background: #1890ff;
   transform: translateX(-50%);
-  top: -6px;
+  top: -4px;
   z-index: 2;
 
   &::before {
     content: '';
     position: absolute;
-    top: -4px;
+    top: -8px;
     left: 50%;
     transform: translateX(-50%);
-    width: 8px;
-    height: 8px;
+    width: 16px;
+    height: 16px;
     background: #1890ff;
     border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.4);
   }
 
   &::after {
     content: attr(data-value);
     position: absolute;
-    bottom: -24px;
+    bottom: -35px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 13px;
+    font-size: 12px;
     color: #1890ff;
     font-weight: bold;
     white-space: nowrap;
     background: rgba(24, 144, 255, 0.1);
-    padding: 2px 8px;
+    padding: 3px 8px;
     border-radius: 4px;
+    border: 1px solid rgba(24, 144, 255, 0.2);
   }
 `;
 
@@ -227,6 +442,13 @@ const ClassificationRow = styled.div`
   align-items: center;
   margin-bottom: 24px;
   position: relative;
+  gap: 16px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 `;
 
 const ParameterInfo = styled.div`
@@ -234,6 +456,12 @@ const ParameterInfo = styled.div`
   display: flex;
   flex-direction: column;
   padding-right: 16px;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    padding-right: 0;
+  }
 `;
 
 const ParameterName = styled.div`
@@ -414,19 +642,121 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
     const position = ((value - min) / (max - min)) * 100;
     
     return (
-      <ParameterBar>
-        <CenterLine />
-        <AverageLine data-value={avg.toFixed(2)} />
-        <ValueMarker 
-          style={{ 
-            left: `${position}%`,
-            background: color,
-            color: color
-          }} 
-        />
-        <RangeValue style={{ left: 0 }}>{min.toFixed(2)}</RangeValue>
-        <RangeValue style={{ right: 0 }}>{max.toFixed(2)}</RangeValue>
-      </ParameterBar>
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '40px',
+        background: '#f0f2f5',
+        borderRadius: '20px',
+        margin: '16px 0',
+        boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
+        border: '1px solid #e8e8e8',
+        overflow: 'visible'
+      }}>
+        {/* 중앙 평균선 */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          height: '100%',
+          width: '2px',
+          background: 'rgba(24, 144, 255, 0.3)',
+          transform: 'translateX(-50%)',
+          zIndex: 1
+        }} />
+        
+        {/* 평균값 표시 */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          bottom: '-25px',
+          transform: 'translateX(-50%)',
+          fontSize: '12px',
+          color: '#1890ff',
+          fontWeight: 'bold',
+          background: 'rgba(24, 144, 255, 0.1)',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          border: '1px solid rgba(24, 144, 255, 0.2)',
+          whiteSpace: 'nowrap'
+        }}>
+          {avg.toFixed(2)}
+        </div>
+        
+        {/* 현재 값 마커 */}
+        <div style={{
+          position: 'absolute',
+          width: '8px',
+          height: '36px',
+          background: color,
+          top: '-2px',
+          left: `${position}%`,
+          transform: 'translateX(-50%)',
+          borderRadius: '4px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+          zIndex: 3
+        }}>
+          {/* 삼각형 화살표 */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-8px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderTop: `8px solid ${color}`
+          }} />
+        </div>
+        
+        {/* 현재 값 표시 */}
+        <div style={{
+          position: 'absolute',
+          top: '-30px',
+          left: `${position}%`,
+          transform: 'translateX(-50%)',
+          background: color,
+          color: 'white',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          whiteSpace: 'nowrap',
+          zIndex: 4
+        }}>
+          {value.toFixed(2)}
+        </div>
+        
+        {/* 최소값 */}
+        <div style={{
+          position: 'absolute',
+          left: '0',
+          bottom: '-25px',
+          fontSize: '12px',
+          color: '#8c8c8c',
+          fontWeight: '500',
+          background: 'rgba(255, 255, 255, 0.9)',
+          padding: '2px 4px',
+          borderRadius: '3px',
+          whiteSpace: 'nowrap'
+        }}>
+          {min.toFixed(2)}
+        </div>
+        
+        {/* 최대값 */}
+        <div style={{
+          position: 'absolute',
+          right: '0',
+          bottom: '-25px',
+          fontSize: '12px',
+          color: '#8c8c8c',
+          fontWeight: '500',
+          background: 'rgba(255, 255, 255, 0.9)',
+          padding: '2px 4px',
+          borderRadius: '3px',
+          whiteSpace: 'nowrap'
+        }}>
+          {max.toFixed(2)}
+        </div>
+      </div>
     );
   };
 
@@ -510,43 +840,62 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
             icon={<FileTextOutlined />}
             gradient="linear-gradient(135deg, #40a9ff 0%, #1890ff 100%)"
           >
-            <div style={{ padding: '16px' }}>
+            <div style={{ padding: '24px' }}>
               {Object.entries(pulseValues).map(([key, value]) => {
                 const range = normalRanges[key];
                 const classification = getClassification(key, value);
                 const ratio = getBarValue(key, value);
                 const color = getBarColor(ratio);
-                const position = ((value - range.min) / (range.max - range.min)) * 100;
                 
                 return (
-                  <ClassificationRow key={key}>
-                    <ParameterInfo>
-                      <ParameterName style={{
+                  <div key={key} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '32px',
+                    gap: '20px',
+                    padding: '16px',
+                    background: '#fafafa',
+                    borderRadius: '12px',
+                    border: '1px solid #e8e8e8'
+                  }}>
+                    <div style={{ width: '200px', flexShrink: 0 }}>
+                      <div style={{
                         fontSize: '14px',
                         fontWeight: 500,
-                        color: '#333'
+                        color: '#333',
+                        marginBottom: '8px'
                       }}>{key === 'PVC' ? '말초혈관수축도' :
                         key === 'BV' ? '혈관점탄도' :
                         key === 'SV' ? '일회박출량' :
-                        '심박동수'}</ParameterName>
-                      <ParameterValue style={{
-                        fontSize: '18px',
+                        '심박동수'}</div>
+                      <div style={{
+                        fontSize: '20px',
                         fontWeight: 600,
-                        color: color
-                      }}>{value.toFixed(2)}</ParameterValue>
-                    </ParameterInfo>
-                    <PulseBar 
-                      ratio={ratio} 
-                      value={value} 
-                      color={color}
-                      min={range.min}
-                      max={range.max}
-                      avg={range.avg}
-                    />
-                    <StyledTag color={ratio > 0.3 ? 'red' : ratio < -0.3 ? 'blue' : 'green'}>
-                      {classification}맥
-                    </StyledTag>
-                  </ClassificationRow>
+                        color: color,
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        display: 'inline-block'
+                      }}>{value.toFixed(2)}</div>
+                    </div>
+                    
+                    <div style={{ flex: 1, position: 'relative', minHeight: '80px' }}>
+                      <PulseBar 
+                        ratio={ratio} 
+                        value={value} 
+                        color={color}
+                        min={range.min}
+                        max={range.max}
+                        avg={range.avg}
+                      />
+                    </div>
+                    
+                    <div style={{ flexShrink: 0 }}>
+                      <StyledTag color={ratio > 0.3 ? 'red' : ratio < -0.3 ? 'blue' : 'green'}>
+                        {classification}맥
+                      </StyledTag>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -665,7 +1014,7 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
   return (
     <StyledModal
       title="맥상 상세 정보"
-      visible={isOpen}
+      open={isOpen}
       onCancel={onClose}
       footer={[
         <Button key="close" onClick={onClose} type="primary" style={{
@@ -675,10 +1024,24 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
           닫기
         </Button>
       ]}
-      width={1000}
-      centered
+      width="90vw"
+      style={{ 
+        maxWidth: '1200px',
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        margin: '0',
+        padding: '0',
+        zIndex: 9999,
+        maxHeight: '70vh'
+      }}
+      centered={true}
       destroyOnHidden
+      maskClosable={true}
+      keyboard={true}
     >
+      <GlobalStyle />
       <div className="print-hide" style={{ marginBottom: 16, textAlign: 'right' }}>
         <Button
           type="primary"
@@ -704,9 +1067,20 @@ const PulseInfoModal = ({ isOpen, onClose, pulseType, patientPulseData }) => {
           인쇄
         </Button>
       </div>
-      <div ref={printRef}>
+      <ScrollableContent 
+        ref={printRef} 
+        className="pulse-modal-scrollable"
+        style={{
+          height: 'calc(70vh - 120px)',
+          maxHeight: 'calc(70vh - 120px)',
+          overflowY: 'scroll',
+          overflowX: 'hidden',
+          scrollbarWidth: 'thin',
+          scrollbarColor: '#888 #f1f1f1'
+        }}
+      >
         {renderContent()}
-      </div>
+      </ScrollableContent>
     </StyledModal>
   );
 };

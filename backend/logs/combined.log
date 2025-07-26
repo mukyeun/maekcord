@@ -439,3 +439,7 @@
   message: '📤 Queue API 응답:'
 }
 {"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-22 09:45:33"}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-26 10:41:04"}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-26 10:41:07"}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-26 10:41:19"}
+{"level":"info","message":"Retrieved 0 appointments","service":"maekstation-backend","timestamp":"2025-07-26 10:41:24"}
